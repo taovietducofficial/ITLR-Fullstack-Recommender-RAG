@@ -1,0 +1,1 @@
+<% if (has) { %><img class="avatar-img <%= cls || '' %>" src="/api/avatar/<%= id %>" alt="<%= name %>"><% } else { %><span class="acc-avatar <%= cls || 'sm' %>"><%= (name || '?').trim().charAt(0).toUpperCase() %></span><% } %>

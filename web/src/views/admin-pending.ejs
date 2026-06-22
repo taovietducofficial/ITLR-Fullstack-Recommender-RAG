@@ -1,0 +1,53 @@
+<%- include('partials/admin-header') %>
+
+<div class="admin-head">
+  <h1 class="page-title">⏳ Đóng góp chờ duyệt</h1>
+  <a class="btn-ghost xs" href="/admin">← Bảng quản trị</a>
+</div>
+<p class="muted small">Link YouTube và tài liệu do người dùng đóng góp. Duyệt để hiển thị công khai, hoặc từ chối để xóa.</p>
+
+<h2 class="section-title">🎬 Link YouTube bài giảng (<%= lessons.length %>)</h2>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Bài học</th><th>Khóa học</th><th>Người gửi</th><th>Video</th><th></th></tr></thead>
+  <tbody>
+    <% lessons.forEach(function(l){ %>
+      <tr>
+        <td><%= l.title %></td>
+        <td class="muted small"><a href="/admin/courses/<%= l.course_id %>">#<%= l.course_id %> <%= l.course_title %></a></td>
+        <td class="muted small"><%= l.uploader || '?' %></td>
+        <td class="muted small"><a href="https://youtu.be/<%= l.youtube_id %>" target="_blank" rel="noopener">▶ xem</a></td>
+        <td class="row-actions">
+          <form action="/admin/lessons/<%= l.id %>/approve" method="post"><%- include('partials/csrf') %><button class="btn-primary-sm">Duyệt</button></form>
+          <form action="/admin/lessons/<%= l.id %>/delete" method="post" onsubmit="return confirm('Từ chối & xóa?')"><%- include('partials/csrf') %><button class="btn-ghost xs danger">Từ chối</button></form>
+        </td>
+      </tr>
+    <% }); %>
+    <% if (!lessons.length) { %><tr><td colspan="5" class="muted">Không có link nào chờ duyệt.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">📚 Tài liệu (<%= attachments.length %>)</h2>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Tên file</th><th>Mục</th><th>Người gửi</th><th>KB</th><th></th></tr></thead>
+  <tbody>
+    <% attachments.forEach(function(a){ %>
+      <tr>
+        <td><a href="/admin/file/attachment/<%= a.id %>/download"><%= a.filename %></a></td>
+        <td class="muted small"><a href="/admin/docs/<%= a.course_id %>">#<%= a.course_id %> <%= a.course_title %></a></td>
+        <td class="muted small"><%= a.uploader || '?' %></td>
+        <td class="muted small"><%= Math.max(1, Math.round((a.size||0)/1024)) %></td>
+        <td class="row-actions">
+          <form action="/admin/attachments/<%= a.id %>/approve" method="post"><%- include('partials/csrf') %><button class="btn-primary-sm">Duyệt</button></form>
+          <form action="/admin/attachments/<%= a.id %>/delete" method="post" onsubmit="return confirm('Từ chối & xóa?')"><%- include('partials/csrf') %><button class="btn-ghost xs danger">Từ chối</button></form>
+        </td>
+      </tr>
+    <% }); %>
+    <% if (!attachments.length) { %><tr><td colspan="5" class="muted">Không có tài liệu nào chờ duyệt.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+
+<%- include('partials/admin-footer') %>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hệ thống gợi ý tài liệu & khóa học CNTT</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root { --blue:#2563eb; --green:#059669; --ink:#111827; --muted:#6b7280; --line:#e5e7eb; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         color: var(--ink); background:#f7f7f8; }
+  header { text-align:center; padding:22px 16px 6px; }
+  header h1 { margin:0; font-size:1.5rem; color:#1e3a5f; }
+  header p { margin:4px 0 0; color:var(--muted); font-size:.9rem; }
+  .tabs { display:flex; justify-content:center; gap:6px; margin:16px 0; flex-wrap:wrap; }
+  .tabs button { border:1px solid var(--line); background:#fff; padding:8px 18px; border-radius:24px;
+                 cursor:pointer; font-size:.95rem; color:#374151; transition:.15s; }
+  .tabs button.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+  main { max-width: 1080px; margin:0 auto; padding:0 16px 60px; }
+  .panel { display:none; }
+  .panel.active { display:block; }
+  /* form controls */
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  input[type=text], select { padding:10px 12px; border:1px solid #d9d9d9; border-radius:8px; font-size:.95rem; }
+  input[type=text] { flex:1; min-width:240px; }
+  button.primary { background:var(--blue); color:#fff; border:none; padding:10px 22px; border-radius:8px;
+                   cursor:pointer; font-size:.95rem; }
+  button.primary:hover { filter:brightness(.95); }
+  button.ghost { background:#fff; border:1px solid var(--line); padding:8px 14px; border-radius:8px; cursor:pointer; }
+  .hint { color:var(--muted); font-size:.82rem; margin:8px 0; }
+  /* cards grid */
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:14px; margin-top:16px; }
+  .card { border:1px solid var(--line); border-radius:12px; padding:16px; background:#fafafa; display:flex; flex-direction:column; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; color:#fff; }
+  .badge.course { background:var(--blue); } .badge.doc { background:var(--green); }
+  .badge.level { background:#e0e7ff; color:#3730a3; margin-left:6px; }
+  .card h4 { margin:12px 0 8px; }
+  .card .cat { color:var(--muted); font-size:13px; margin:0 0 8px; }
+  .card .desc { color:#374151; font-size:13px; line-height:1.5; margin:0 0 8px; flex:1; }
+  .card .meta { color:var(--muted); font-size:12px; }
+  .card .score { color:var(--blue); font-size:12px; margin-top:8px; }
+  .card a.link, .card button.like { margin-top:10px; text-align:center; text-decoration:none; padding:8px;
+        border-radius:8px; border:1px solid var(--line); background:#fff; color:#374151; cursor:pointer; font-size:.9rem; }
+  /* chatbot */
+  #chatlog { max-width:768px; margin:0 auto; }
+  .msg { display:flex; gap:10px; margin:14px 0; }
+  .msg .avatar { font-size:1.3rem; }
+  .msg .bubble { background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 16px; line-height:1.55; overflow-wrap:anywhere; }
+  .msg.user { flex-direction:row-reverse; }
+  .msg.user .bubble { background:#eef2ff; }
+  .msg .bubble h2 { font-size:1.05rem; margin:.4rem 0; }
+  .msg .bubble h3 { font-size:1rem; margin:.4rem 0; }
+  .msg .bubble pre { background:#f3f4f6; padding:10px; border-radius:8px; overflow:auto; }
+  .msg .bubble hr { border:none; border-top:1px solid var(--line); margin:10px 0; }
+  details.recs { max-width:768px; margin:6px auto; }
+  details.recs summary { cursor:pointer; color:var(--blue); font-size:.9rem; }
+  .welcome { text-align:center; padding:32px 16px; }
+  .prompts { display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:720px; margin:18px auto; }
+  .prompts button { text-align:left; padding:12px 14px; border:1px solid var(--line); background:#fff; border-radius:10px; cursor:pointer; }
+  .prompts button:hover { background:#f3f4f6; }
+  .chatbar { max-width:768px; margin:14px auto 0; display:flex; gap:8px; }
+  .chatbar input { flex:1; border-radius:24px; padding:12px 18px; }
+  .footer { text-align:center; color:#9ca3af; font-size:12px; padding:16px; }
+  .empty { color:var(--muted); padding:18px; text-align:center; }
+  .roadmap-intro { text-align:center; color:var(--muted); margin:0 0 14px; }
+</style>
+<link rel="stylesheet" href="/static/orbital-timeline.css">
+</head>
+<body>
+<header>
+  <h1>Hệ thống gợi ý tài liệu & khóa học CNTT</h1>
+  <p>Tìm kiếm ngữ nghĩa · Gợi ý cá nhân hóa · Chatbot RAG — <b>không cần Streamlit</b></p>
+</header>
+
+<div class="tabs">
+  <button data-tab="search" class="active">🔍 Tìm kiếm</button>
+  <button data-tab="foryou">✨ Dành cho bạn</button>
+  <button data-tab="roadmap">🗺️ Lộ trình</button>
+  <button data-tab="chat">🤖 Chatbot AI</button>
+</div>
+
+<main>
+  <!-- ───────── TAB TÌM KIẾM ───────── -->
+  <section id="search" class="panel active">
+    <div class="row">
+      <input id="q" type="text" placeholder="Nhập từ khóa: machine learning, lập trình web, bảo mật...">
+      <select id="qtype">
+        <option value="">Tất cả</option>
+        <option>Khóa học</option>
+        <option>Tài liệu</option>
+      </select>
+      <button class="primary" onclick="doSearch()">Tìm kiếm</button>
+    </div>
+    <div class="hint">
+      Ngưỡng độ phù hợp tối thiểu:
+      <input id="minpct" type="range" min="85" max="100" value="90" oninput="pctlbl.textContent=this.value">
+      <b id="pctlbl">90</b>% — các mục thực sự liên quan luôn đạt 90–100%.
+    </div>
+    <div id="searchnote" class="hint"></div>
+    <div id="searchresults" class="grid"></div>
+  </section>
+
+  <!-- ───────── TAB DÀNH CHO BẠN ───────── -->
+  <section id="foryou" class="panel">
+    <div class="row">
+      <select id="persona" style="flex:1;min-width:260px;"></select>
+      <button class="primary" onclick="loadForYou()">Xem gợi ý</button>
+      <button class="ghost" onclick="clearInterested()">🗑️ Xóa lựa chọn phiên</button>
+    </div>
+    <div id="fyhint" class="hint">Dựa trên hành vi của những người dùng tương tự — Collaborative Filtering (item-based).</div>
+    <div id="fyresults" class="grid"></div>
+  </section>
+
+  <!-- ───────── TAB LỘ TRÌNH (orbital timeline) ───────── -->
+  <section id="roadmap" class="panel">
+    <p class="roadmap-intro">Lộ trình học CNTT tổng quát theo giai đoạn — bấm vào một nút trên quỹ đạo để xem chi tiết &amp; hỏi chatbot.</p>
+    <div id="orbital"></div>
+  </section>
+
+  <!-- ───────── TAB CHATBOT ───────── -->
+  <section id="chat" class="panel">
+    <div id="chatlog"></div>
+    <div class="chatbar">
+      <input id="chatinput" type="text" placeholder="Nhắn tin cho IT Learning Assistant..."
+             onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="primary" onclick="sendChat()">Gửi</button>
+    </div>
+    <div class="footer">IT Learning Assistant có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng.</div>
+  </section>
+</main>
+
+<script>
+const md = (t) => (window.marked ? marked.parse(t) : (t||"").replace(/\n/g,"<br>"));
+const api = (path, body) => fetch(path, {
+  method: body ? "POST" : "GET",
+  headers: {"Content-Type":"application/json"},
+  body: body ? JSON.stringify(body) : undefined,
+}).then(r => { if(!r.ok) throw new Error(r.status); return r.json(); });
+
+/* ── Tabs ── */
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  document.getElementById(b.dataset.tab).classList.add("active");
+  if (b.dataset.tab === "foryou" && !personasLoaded) initPersonas();
+  if (b.dataset.tab === "chat" && !chatInited) initChat();
+  if (b.dataset.tab === "roadmap" && !roadmapInited) initRoadmap();
+});
+
+/* ── Card render (dùng chung cho Tìm kiếm & Dành cho bạn) ── */
+function cardHtml(it, likeBtn=false) {
+  const badge = it.type === "Tài liệu" ? "doc" : "course";
+  const level = it.level ? `<span class="badge level">${it.level}</span>` : "";
+  const score = ("score" in it) ? `<div class="score">Độ tương đồng: ${it.score}%${("tfidf_score" in it)?` (TF-IDF: ${it.tfidf_score}%)`:""}</div>` : "";
+  const link = it.link ? `<a class="link" href="${it.link}" target="_blank" rel="noopener">Xem chi tiết →</a>` : "";
+  const like = likeBtn ? `<button class="like" onclick="markInterested(${it.item_id})">👍 Quan tâm</button>` : "";
+  const desc = (it.description||"").slice(0,140) + ((it.description||"").length>140?"...":"");
+  return `<div class="card">
+    <div><span class="badge ${badge}">${it.type}</span>${level}</div>
+    <h4>${it.title}</h4>
+    <p class="cat"><b>Chuyên mục:</b> ${it.category}</p>
+    <p class="desc">${desc}</p>
+    <p class="meta">👤 ${it.instructor||""} · 🌐 ${it.platform||""}</p>
+    ${score}${link}${like}
+  </div>`;
+}
+
+/* ── Tìm kiếm ── */
+async function doSearch() {
+  const q = document.getElementById("q").value.trim();
+  const note = document.getElementById("searchnote");
+  const box = document.getElementById("searchresults");
+  if (!q) { note.textContent = "Vui lòng nhập từ khóa tìm kiếm."; box.innerHTML=""; return; }
+  note.textContent = "Đang tìm...";
+  box.innerHTML = "";
+  try {
+    const data = await api("/api/search", {
+      query: q,
+      type: document.getElementById("qtype").value || null,
+      min_pct: parseInt(document.getElementById("minpct").value),
+    });
+    note.innerHTML = data.corrected ? `🔎 Đang tìm theo: <b>${data.display}</b>${data.note?` (${data.note})`:""}` : "";
+    if (!data.results.length) {
+      box.innerHTML = `<div class="empty">Không có kết quả phù hợp cho "${q}". Từ khóa có thể nằm ngoài lĩnh vực CNTT, hoặc thử từ khóa khác / hạ ngưỡng.</div>`;
+      return;
+    }
+    box.innerHTML = data.results.slice(0,100).map(it => cardHtml(it)).join("");
+  } catch(e) { note.textContent = "Lỗi tải kết quả: " + e.message; }
+}
+
+/* ── Dành cho bạn ── */
+let personasLoaded = false;
+let interested = new Set();
+async function initPersonas() {
+  const sel = document.getElementById("persona");
+  try {
+    const list = await api("/api/personas");
+    sel.innerHTML = list.map(p => `<option value="${p.uid}">Người dùng #${p.uid} · quan tâm ${p.label}</option>`).join("");
+    personasLoaded = true;
+    loadForYou();
+  } catch(e) { document.getElementById("fyhint").textContent = "Lỗi tải personas: " + e.message; }
+}
+function markInterested(id) { interested.add(id); loadForYou(); }
+function clearInterested() { interested.clear(); loadForYou(); }
+async function loadForYou() {
+  const box = document.getElementById("fyresults");
+  const hint = document.getElementById("fyhint");
+  box.innerHTML = "";
+  try {
+    const data = await api("/api/for-you", {
+      persona: parseInt(document.getElementById("persona").value),
+      interested: [...interested],
+    });
+    hint.textContent = `✨ Gợi ý dành cho bạn — Collaborative Filtering (item-based). Đã chọn ${interested.size} mục "Quan tâm" trong phiên.`;
+    box.innerHTML = data.recs.map(it => cardHtml(it, true)).join("");
+  } catch(e) { hint.textContent = "Lỗi tải gợi ý: " + e.message; }
+}
+
+/* ── Chatbot ── */
+let chatInited = false;
+let chatHistory = [];   // [{role, content}]
+async function initChat() {
+  chatInited = true;
+  const log = document.getElementById("chatlog");
+  try {
+    const s = await api("/api/suggested");
+    const chips = s.prompts.map(p => `<button onclick="usePrompt(this)">${p}</button>`).join("");
+    log.innerHTML = `<div class="welcome">
+        <h2>IT Learning Assistant</h2>
+        <p>Trợ lý học tập CNTT — RAG + Gợi ý cá nhân hóa</p>
+        <div class="prompts">${chips}</div>
+      </div>`;
+  } catch(e) { log.innerHTML = `<div class="empty">Lỗi khởi tạo chatbot: ${e.message}</div>`; }
+}
+function usePrompt(btn) { document.getElementById("chatinput").value = btn.textContent; sendChat(); }
+
+function appendMsg(role, html, recs) {
+  // Xóa màn hình chào nếu còn
+  const wel = document.querySelector("#chatlog .welcome"); if (wel) wel.remove();
+  const log = document.getElementById("chatlog");
+  const wrap = document.createElement("div");
+  wrap.className = "msg " + role;
+  wrap.innerHTML = `<div class="avatar">${role==="user"?"🧑":"🤖"}</div><div class="bubble">${html}</div>`;
+  log.appendChild(wrap);
+  if (recs && recs.length) {
+    const d = document.createElement("details");
+    d.className = "recs";
+    d.innerHTML = `<summary>📚 ${recs.length} tài nguyên liên quan</summary>
+      <div class="grid">${recs.slice(0,4).map(it=>cardHtml(it)).join("")}</div>`;
+    log.appendChild(d);
+  }
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+async function sendChat() {
+  const input = document.getElementById("chatinput");
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  appendMsg("user", md(text));
+  chatHistory.push({role:"user", content:text});
+
+  const log = document.getElementById("chatlog");
+  const thinking = document.createElement("div");
+  thinking.className = "msg assistant";
+  thinking.innerHTML = `<div class="avatar">🤖</div><div class="bubble">▌</div>`;
+  log.appendChild(thinking);
+  window.scrollTo(0, document.body.scrollHeight);
+
+  try {
+    const data = await api("/api/chat", { message: text, history: chatHistory.slice(0,-1) });
+    thinking.remove();
+    appendMsg("assistant", md(data.response), data.recommendations);
+    chatHistory.push({role:"assistant", content:data.response});
+  } catch(e) {
+    thinking.remove();
+    appendMsg("assistant", "Xin lỗi, có lỗi khi xử lý: " + e.message);
+  }
+}
+
+/* ── Lộ trình (orbital timeline) ── */
+let roadmapInited = false;
+const ROADMAP = [
+  { id:1, title:"Nền tảng máy tính", date:"Giai đoạn 1", level:"Cơ bản", icon:"cpu", energy:100, relatedIds:[2],
+    content:"Kiến thức gốc: cách máy tính hoạt động, hệ điều hành, mạng cơ bản, dòng lệnh. Nền móng cho mọi hướng đi CNTT." },
+  { id:2, title:"Lập trình", date:"Giai đoạn 2", level:"Cơ bản", icon:"code", energy:85, relatedIds:[1,3],
+    content:"Thành thạo một ngôn ngữ (Python/JavaScript), tư duy giải quyết vấn đề, Git và viết code sạch." },
+  { id:3, title:"Giải thuật & CTDL", date:"Giai đoạn 3", level:"Trung cấp", icon:"sigma", energy:70, relatedIds:[2,4],
+    content:"Cấu trúc dữ liệu, độ phức tạp, các thuật toán cốt lõi — nền tảng để code hiệu quả và qua phỏng vấn." },
+  { id:4, title:"Web & Backend", date:"Giai đoạn 4", level:"Trung cấp", icon:"globe", energy:60, relatedIds:[3,5],
+    content:"HTTP, REST API, frontend/backend, framework. Xây dựng ứng dụng web hoàn chỉnh." },
+  { id:5, title:"Cơ sở dữ liệu", date:"Giai đoạn 5", level:"Trung cấp", icon:"database", energy:50, relatedIds:[4,6],
+    content:"SQL/NoSQL, thiết kế schema, tối ưu truy vấn — lưu trữ và quản lý dữ liệu cho ứng dụng thật." },
+  { id:6, title:"AI/ML & Triển khai", date:"Giai đoạn 6", level:"Nâng cao", icon:"sparkles", energy:35, relatedIds:[5],
+    content:"Machine learning, mô hình hóa, MLOps, đưa sản phẩm lên cloud/CI-CD. Hướng chuyên sâu & thực chiến." }
+];
+function goAskChat(text) {
+  document.querySelector('.tabs button[data-tab="chat"]').click();
+  setTimeout(function () {
+    const inp = document.getElementById("chatinput");
+    inp.value = text;
+    sendChat();
+  }, 60);
+}
+function initRoadmap() {
+  roadmapInited = true;
+  if (!window.initOrbitalTimeline) return;
+  initOrbitalTimeline(document.getElementById("orbital"), ROADMAP, {
+    onAsk: function (it) { goAskChat("Lộ trình học " + it.title + " từ cơ bản đến nâng cao"); }
+  });
+}
+</script>
+<script src="/static/orbital-timeline.js"></script>
+</body>
+</html>

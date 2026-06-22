@@ -1,0 +1,118 @@
+/* Orbital timeline — bản port vanilla (không React/Tailwind). Mọi class prefix orb-* để
+   không đụng style trang chính. Panel tối khép kín, nhúng trong trang sáng. */
+
+.orb-stage{
+  position:relative; width:100%; height:600px;
+  background:radial-gradient(circle at 50% 45%, #0c1226 0%, #070a16 60%, #03040b 100%);
+  border-radius:16px; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid rgba(255,255,255,.06);
+}
+.orb-field{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+
+/* Tâm phát sáng */
+.orb-center{
+  position:absolute; width:64px; height:64px; border-radius:50%;
+  background:linear-gradient(135deg,#7c3aed,#2563eb,#059669);
+  display:flex; align-items:center; justify-content:center; z-index:5;
+  box-shadow:0 0 50px rgba(37,99,235,.45);
+}
+.orb-center-core{ width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.85); }
+.orb-ping{
+  position:absolute; border-radius:50%; border:1px solid rgba(255,255,255,.18);
+  animation:orb-ping 2.4s cubic-bezier(0,0,.2,1) infinite;
+}
+.orb-ring{ position:absolute; border-radius:50%; border:1px solid rgba(255,255,255,.08); }
+
+/* Node (button -> bàn phím + focus được) */
+.orb-node{
+  position:absolute; left:50%; top:50%;
+  min-width:44px; min-height:44px;            /* tap target >=44px */
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .7s cubic-bezier(.4,0,.2,1), opacity .7s;
+  cursor:pointer; background:transparent; border:0; padding:0; color:inherit;
+}
+.orb-dot{
+  width:40px; height:40px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#070a16; color:#fff; border:2px solid rgba(255,255,255,.4);
+  transition:transform .3s, background .3s, border-color .3s, box-shadow .3s;
+}
+.orb-dot svg{ width:18px; height:18px; }
+.orb-node.is-related .orb-dot{ background:rgba(255,255,255,.55); color:#070a16; border-color:#fff; }
+.orb-node[aria-expanded="true"] .orb-dot{
+  background:#fff; color:#070a16; border-color:#fff;
+  transform:scale(1.4); box-shadow:0 0 22px rgba(255,255,255,.45);
+}
+.orb-node:focus-visible{ outline:none; }
+.orb-node:focus-visible .orb-dot{ box-shadow:0 0 0 3px #0b1226, 0 0 0 5px #60a5fa; }
+
+.orb-glow{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 70%);
+}
+.orb-node.is-related .orb-glow{ animation:orb-pulse 1.4s ease-in-out infinite; }
+
+.orb-label{
+  position:absolute; top:48px; left:50%; transform:translateX(-50%);
+  white-space:nowrap; font-size:12px; font-weight:600; letter-spacing:.04em;
+  color:rgba(255,255,255,.72); transition:color .3s, transform .3s; pointer-events:none;
+}
+.orb-node[aria-expanded="true"] .orb-label{ color:#fff; transform:translateX(-50%) scale(1.1); }
+
+/* Thẻ chi tiết */
+.orb-card{
+  position:absolute; top:56px; left:50%; transform:translateX(-50%);
+  width:270px; z-index:400; text-align:left;
+  background:rgba(7,10,22,.94); backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:14px 16px;
+  color:#fff; box-shadow:0 16px 50px rgba(0,0,0,.55);
+}
+.orb-card-stem{ position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:1px; height:12px; background:rgba(255,255,255,.4); }
+.orb-card-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.orb-badge{ font-size:11px; font-weight:700; letter-spacing:.04em; padding:2px 8px; border-radius:999px; border:1px solid; }
+.orb-badge.lv0{ color:#052e16; background:#4ade80; border-color:#4ade80; }
+.orb-badge.lv1{ color:#0b1226; background:#fff; border-color:#fff; }
+.orb-badge.lv2{ color:#fff; background:rgba(124,58,237,.4); border-color:rgba(167,139,250,.85); }
+.orb-date{ font-size:11px; font-family:ui-monospace,SFMono-Regular,monospace; color:rgba(255,255,255,.5); }
+.orb-card h4{ margin:8px 0 6px; font-size:14px; font-weight:600; }
+.orb-card p{ margin:0; font-size:12px; line-height:1.55; color:rgba(255,255,255,.82); }
+
+.orb-meter{ margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,.1); }
+.orb-meter-row{ display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,.85); margin-bottom:5px; }
+.orb-meter-track{ height:5px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden; }
+.orb-meter-fill{ height:100%; border-radius:999px; background:linear-gradient(90deg,#2563eb,#7c3aed); }
+
+.orb-rel{ margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,.1); }
+.orb-rel-h{ font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.6); margin:0 0 8px; }
+.orb-rel-btns{ display:flex; flex-wrap:wrap; gap:6px; }
+.orb-chip{ font-size:11px; color:rgba(255,255,255,.85); background:transparent; border:1px solid rgba(255,255,255,.2);
+  border-radius:6px; padding:5px 8px; min-height:28px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;
+  transition:background .2s,color .2s; }
+.orb-chip:hover{ background:rgba(255,255,255,.12); color:#fff; }
+.orb-chip:focus-visible{ outline:2px solid #60a5fa; outline-offset:2px; }
+
+.orb-cta{ margin-top:12px; width:100%; border:0; border-radius:8px; padding:10px; font-size:12px; font-weight:600;
+  cursor:pointer; color:#fff; background:linear-gradient(90deg,#2563eb,#7c3aed); }
+.orb-cta:hover{ filter:brightness(1.08); }
+.orb-cta:focus-visible{ outline:2px solid #93c5fd; outline-offset:2px; }
+
+.orb-hint{ position:absolute; bottom:12px; left:0; right:0; text-align:center; color:rgba(255,255,255,.4); font-size:11px; pointer-events:none; }
+
+@keyframes orb-ping{ 0%{ transform:scale(1); opacity:.6 } 75%,100%{ transform:scale(2); opacity:0 } }
+@keyframes orb-pulse{ 0%,100%{ opacity:.9 } 50%{ opacity:.4 } }
+
+/* Mobile: thẻ thành "bottom sheet" trong panel -> không bị cắt mép */
+@media (max-width:640px){
+  .orb-stage{ height:520px; }
+  .orb-card{ top:auto; bottom:12px; left:12px; right:12px; width:auto; transform:none; }
+  .orb-card-stem{ display:none; }
+}
+
+/* Tôn trọng prefers-reduced-motion: tắt mọi chuyển động lặp */
+@media (prefers-reduced-motion: reduce){
+  .orb-node, .orb-dot{ transition:none; }
+  .orb-ping{ animation:none; }
+  .orb-node.is-related .orb-glow{ animation:none; }
+}

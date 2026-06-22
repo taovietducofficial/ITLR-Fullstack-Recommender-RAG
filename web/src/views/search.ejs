@@ -1,0 +1,47 @@
+<%- include('partials/header') %>
+
+<h1 class="page-title">Tìm kiếm khóa học &amp; tài liệu</h1>
+
+<form class="search-bar" action="/search" method="get">
+  <input type="text" name="q" value="<%= q %>" placeholder="Nhập từ khóa CNTT...">
+  <select name="type">
+    <option value="" <%= type===''?'selected':'' %>>Mọi loại</option>
+    <option value="Khóa học" <%= type==='Khóa học'?'selected':'' %>>Khóa học</option>
+    <option value="Tài liệu" <%= type==='Tài liệu'?'selected':'' %>>Tài liệu</option>
+  </select>
+  <select name="level">
+    <option value="" <%= level===''?'selected':'' %>>Mọi cấp độ</option>
+    <% levels.forEach(function(lv){ %>
+      <option value="<%= lv %>" <%= level===lv?'selected':'' %>><%= lv %></option>
+    <% }); %>
+  </select>
+  <button class="btn-primary" type="submit">Tìm</button>
+  <div class="sim-row">
+    <label>Mức độ tương đồng tối thiểu: <b id="simval"><%= minPct %></b>%</label>
+    <input type="range" name="min_pct" min="85" max="100" value="<%= minPct %>"
+           oninput="document.getElementById('simval').textContent=this.value">
+    <span class="muted small">Các mục thực sự liên quan luôn đạt 90–100%.</span>
+  </div>
+</form>
+
+<% if (recError) { %>
+  <div class="alert">Không kết nối được dịch vụ gợi ý (recommender). Hãy chắc nó đang chạy ở cổng 8000.</div>
+<% } else if (data) { %>
+  <% if (data.corrected && (data.display || data.note)) { %>
+    <p class="muted">🔎 Đang tìm theo: <b><%= data.display %></b><% if (data.note) { %> (<%= data.note %>)<% } %></p>
+  <% } %>
+  <% if (!data.results.length) { %>
+    <div class="empty">Không có kết quả phù hợp cho "<%= q %>". Từ khóa có thể nằm ngoài lĩnh vực CNTT, hãy thử từ khác.</div>
+  <% } else { %>
+    <p class="muted"><%= data.results.length %> kết quả</p>
+    <div class="grid">
+      <% data.results.slice(0,60).forEach(function(r){ %>
+        <%- include('partials/course-card', { it: r, isSaved: savedIds.has(r.item_id) }) %>
+      <% }); %>
+    </div>
+  <% } %>
+<% } else { %>
+  <div class="empty">Nhập từ khóa để bắt đầu tìm kiếm.</div>
+<% } %>
+
+<%- include('partials/footer') %>

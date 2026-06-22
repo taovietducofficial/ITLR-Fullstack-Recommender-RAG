@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# IT Learning — triển khai 3 dịch vụ: PostgreSQL + Recommender (Python) + Web (Express)
+#
+#   docker compose up -d --build        # khởi chạy
+#   docker compose logs -f web          # xem log web (migrate/seed/server)
+#   docker compose down                 # dừng (giữ dữ liệu)
+#   docker compose down -v              # dừng + XÓA dữ liệu (pg + cache model)
+#
+# Biến môi trường lấy từ file .env cùng thư mục (xem .env.docker.example).
+# YÊU CẦU: thư mục ./artifacts phải có model artifacts (chạy `python scripts/build_all.py`
+# trước, hoặc copy artifacts vào) — recommender mount read-only từ đó.
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-it_learning}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      # postgres:18 đổi quy ước: mount ở /var/lib/postgresql (data nằm trong subdir theo major version).
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-it_learning}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    # Mở cổng ra host nếu muốn dùng psql từ ngoài (tùy chọn):
+    # ports: ["5432:5432"]
+
+  recommender:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # Cho phép tải model HuggingFace ở lần chạy đầu (server tự setdefault =1).
+      HF_HUB_OFFLINE: "0"
+      TRANSFORMERS_OFFLINE: "0"
+      # LLM cho chatbot (tùy chọn) — bỏ trống thì chạy tổng hợp cục bộ offline:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - ./artifacts:/app/artifacts:ro      # model artifacts (~550MB) — không bake vào image
+      - ./data:/app/data:ro                # catalog/CSV (recommender chỉ đọc khi cần)
+      - hf-cache:/root/.cache/huggingface  # cache model -> không tải lại sau restart
+    expose:
+      - "8000"
+    # Mở cổng recommender ra host để gỡ lỗi (tùy chọn):
+    # ports: ["8000:8000"]
+
+  web:
+    build:
+      context: ./web
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      recommender:
+        condition: service_started
+    environment:
+      PORT: "3000"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-it_learning}
+      RECOMMENDER_URL: http://recommender:8000
+      JWT_SECRET: ${JWT_SECRET:-doi-thanh-chuoi-bi-mat-that-dai}
+      ITEMS_CSV: /data/it_learning_items.csv
+      ADMIN_PASSCODE: ${ADMIN_PASSCODE:-1}  # passcode vào trang /admin
+      # Email quên mật khẩu (tùy chọn): App Password Gmail
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      # Bật khi chạy sau HTTPS/reverse-proxy (cookie secure). Để trống nếu chạy HTTP thuần:
+      # NODE_ENV: production
+    volumes:
+      - ./data:/data                       # CSV: seed 50k + GHI cộng dồn file upload (cần quyền ghi)
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+
+volumes:
+  pgdata:
+  hf-cache:

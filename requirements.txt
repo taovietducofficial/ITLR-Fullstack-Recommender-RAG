@@ -1,0 +1,25 @@
+# Web API (FastAPI) — GIAO DIỆN CHÍNH, không cần streamlit.
+#   Chạy:  uvicorn itlr.api.server:app   (hoặc: python -m itlr.api)
+fastapi
+uvicorn[standard]
+
+pandas
+# pyarrow: cần để unpickle item_list.pkl (DataFrame dùng dtype Arrow-backed).
+# Có sẵn trong venv host nên local chạy được, nhưng phải khai báo cho image Docker.
+pyarrow
+numpy
+scikit-learn
+nltk
+ipykernel
+jupyter
+
+# Truy hồi ngữ nghĩa + reranker (Sentence-Transformers / CrossEncoder)
+sentence-transformers
+
+# LLM cho Chatbot (đều tùy chọn — chỉ cần khi cấu hình API key tương ứng)
+anthropic
+openai
+
+# Chỉ mục vector ANN (tùy chọn). Nếu môi trường chưa có wheel phù hợp,
+# app tự fallback brute-force; có thể thay bằng `hnswlib`.
+faiss-cpu

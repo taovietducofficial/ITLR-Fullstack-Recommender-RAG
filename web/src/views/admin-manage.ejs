@@ -1,0 +1,74 @@
+<%- include('partials/admin-header') %>
+
+<div class="admin-head">
+  <h1 class="page-title"><%= kind === 'course' ? '🎬' : '📚' %> <%= course.title %></h1>
+  <a class="btn-ghost xs" href="<%= kind === 'course' ? '/admin/courses' : '/admin/docs' %>">← Danh sách</a>
+</div>
+<p class="muted small">
+  #<%= course.item_id %> · <%= course.type %> · <%= course.category || '' %><%= course.level ? ' · ' + course.level : '' %>
+  · <a href="/courses/<%= course.item_id %>" target="_blank" rel="noopener">Xem trang người dùng ↗</a>
+</p>
+
+<% if (kind === 'course') { %>
+  <h2 class="section-title">➕ Dán link YouTube bài giảng</h2>
+  <form class="admin-addform" action="/admin/courses/<%= course.item_id %>/lessons" method="post">
+    <%- include('partials/csrf') %>
+    <input type="text" name="title" placeholder="Tên bài học (tùy chọn)">
+    <input type="url" name="url" placeholder="https://youtu.be/... hoặc link YouTube" required>
+    <button class="btn-primary" type="submit">Thêm bài học</button>
+  </form>
+
+  <h2 class="section-title">Bài học hiện có (<%= lessons.length %>)</h2>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>#</th><th>Tên</th><th>YouTube ID</th><th>Trạng thái</th><th></th></tr></thead>
+    <tbody>
+      <% lessons.forEach(function(l, i){ %>
+        <tr>
+          <td class="muted small"><%= i+1 %></td>
+          <td><%= l.title %></td>
+          <td class="muted small"><a href="https://youtu.be/<%= l.youtube_id %>" target="_blank" rel="noopener"><%= l.youtube_id %></a></td>
+          <td><% if (l.approved) { %><span class="badge badge-course">đã đăng</span><% } else { %><span class="badge badge-warn">chờ duyệt (đóng góp)</span><% } %></td>
+          <td class="row-actions">
+            <% if (!l.approved) { %><form action="/admin/lessons/<%= l.id %>/approve" method="post"><%- include('partials/csrf') %><button class="btn-primary-sm">Duyệt</button></form><% } %>
+            <form action="/admin/lessons/<%= l.id %>/delete" method="post" onsubmit="return confirm('Xóa bài học này?')"><%- include('partials/csrf') %><button class="btn-ghost xs danger"><%= l.approved ? 'Xóa' : 'Từ chối' %></button></form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!lessons.length) { %><tr><td colspan="5" class="muted">Chưa có bài học nào.</td></tr><% } %>
+    </tbody>
+  </table>
+  </div>
+<% } else { %>
+  <h2 class="section-title">⬆️ Tải lên tài liệu</h2>
+  <form class="admin-addform" action="/admin/docs/<%= course.item_id %>/attachments" method="post" enctype="multipart/form-data">
+    <%- include('partials/csrf') %>
+    <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
+    <button class="btn-primary" type="submit">Tải lên</button>
+  </form>
+  <p class="muted small">Hỗ trợ PDF · DOCX · XLS/XLSX — tối đa 20MB.</p>
+
+  <h2 class="section-title">Tài liệu hiện có (<%= attachments.length %>)</h2>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Tên</th><th>KB</th><th>Người tải</th><th>Trạng thái</th><th></th></tr></thead>
+    <tbody>
+      <% attachments.forEach(function(a){ %>
+        <tr>
+          <td><a href="/admin/file/attachment/<%= a.id %>/download"><%= a.filename %></a></td>
+          <td class="muted small"><%= Math.max(1, Math.round((a.size||0)/1024)) %></td>
+          <td class="muted small"><%= a.uploader || 'Admin' %></td>
+          <td><% if (a.approved) { %><span class="badge badge-course">đã đăng</span><% } else { %><span class="badge badge-warn">chờ duyệt (đóng góp)</span><% } %></td>
+          <td class="row-actions">
+            <% if (!a.approved) { %><form action="/admin/attachments/<%= a.id %>/approve" method="post"><%- include('partials/csrf') %><button class="btn-primary-sm">Duyệt</button></form><% } %>
+            <form action="/admin/attachments/<%= a.id %>/delete" method="post" onsubmit="return confirm('Xóa tài liệu này?')"><%- include('partials/csrf') %><button class="btn-ghost xs danger"><%= a.approved ? 'Xóa' : 'Từ chối' %></button></form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!attachments.length) { %><tr><td colspan="5" class="muted">Chưa có tài liệu nào.</td></tr><% } %>
+    </tbody>
+  </table>
+  </div>
+<% } %>
+
+<%- include('partials/admin-footer') %>

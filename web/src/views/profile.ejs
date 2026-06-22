@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<div class="profile-card card">
+  <div class="profile-cover"></div>
+  <div class="profile-body">
+    <div class="profile-avatar-wrap">
+      <%- include('partials/avatar', { id: profile.id, name: profile.name, has: profile.has_avatar, cls: 'lg' }) %>
+    </div>
+    <div class="profile-main">
+      <div class="profile-id">
+        <h1><%= profile.name %></h1>
+        <% if (profile.role === 'admin') { %>
+          <span class="badge badge-course">🛡️ Quản trị viên</span>
+        <% } else { %>
+          <span class="badge badge-level">🎓 Thành viên</span>
+        <% } %>
+        <% if (status === 'friends') { %><span class="profile-rel">✓ Bạn bè</span><% } %>
+      </div>
+
+      <div class="profile-stats">
+        <span class="pstat"><b><%= friendCount %></b> bạn bè</span>
+        <span class="pstat"><b><%= posts.length %></b> bài viết</span>
+        <span class="pstat muted">Tham gia <%= new Date(profile.created_at).toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' }) %></span>
+      </div>
+
+      <div class="profile-actions" data-user="<%= profile.id %>">
+        <% if (status === 'self') { %>
+          <a class="btn-pill primary" href="/account">✏️ Chỉnh sửa hồ sơ</a>
+        <% } else if (status === 'friends') { %>
+          <a class="btn-pill primary" href="/messages?u=<%= profile.id %>">💬 Nhắn tin</a>
+          <button class="btn-pill ghost friend-act" data-act="remove" data-user="<%= profile.id %>">Hủy kết bạn</button>
+        <% } else if (status === 'pending_out') { %>
+          <button class="btn-pill ghost friend-act" data-act="remove" data-user="<%= profile.id %>">↩️ Hủy lời mời đã gửi</button>
+        <% } else if (status === 'pending_in') { %>
+          <button class="btn-pill primary friend-act" data-act="accept" data-user="<%= profile.id %>">✓ Chấp nhận kết bạn</button>
+          <button class="btn-pill ghost friend-act" data-act="remove" data-user="<%= profile.id %>">Từ chối</button>
+        <% } else { %>
+          <button class="btn-pill primary friend-act" data-act="request" data-user="<%= profile.id %>">+ Kết bạn</button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="section-title">📝 Bài viết của <%= profile.name %></h2>
+<div class="feed" id="post-list">
+  <% posts.forEach(function(p){ %><%- include('partials/post', { p: p }) %><% }); %>
+  <% if (!posts.length) { %><div class="empty">Chưa có bài viết nào.</div><% } %>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+
+<h1 class="page-title">🤝 Bạn bè</h1>
+
+<h2 class="section-title">Lời mời kết bạn (<%= incoming.length %>)</h2>
+<div class="friend-grid">
+  <% incoming.forEach(function(u){ %>
+    <div class="friend-card card" data-user="<%= u.id %>">
+      <a href="/u/<%= u.id %>"><%- include('partials/avatar', { id: u.id, name: u.name, has: u.has_avatar, cls: 'md' }) %></a>
+      <a href="/u/<%= u.id %>" class="friend-name"><b><%= u.name %></b></a>
+      <% if (u.intro) { %>
+        <p class="friend-intro">“<%= u.intro %>”</p>
+      <% } else { %>
+        <p class="friend-intro muted">Muốn kết bạn với bạn.</p>
+      <% } %>
+      <div class="friend-card-actions">
+        <button class="btn-pill primary friend-act" data-act="accept" data-user="<%= u.id %>">✓ Chấp nhận</button>
+        <button class="btn-pill ghost friend-act" data-act="remove" data-user="<%= u.id %>">✕ Từ chối</button>
+      </div>
+    </div>
+  <% }); %>
+  <% if (!incoming.length) { %><div class="empty">Không có lời mời nào.</div><% } %>
+</div>
+
+<h2 class="section-title">Bạn bè của bạn (<%= friends.length %>)</h2>
+<div class="friend-grid">
+  <% friends.forEach(function(u){ %>
+    <div class="friend-card card">
+      <a href="/u/<%= u.id %>"><%- include('partials/avatar', { id: u.id, name: u.name, has: u.has_avatar, cls: 'md' }) %></a>
+      <a href="/u/<%= u.id %>" class="friend-name"><b><%= u.name %></b></a>
+      <div class="friend-card-actions">
+        <a class="btn-pill primary" href="/messages?u=<%= u.id %>">💬 Nhắn tin</a>
+        <button class="btn-pill ghost friend-act" data-act="remove" data-user="<%= u.id %>" title="Hủy kết bạn">Hủy</button>
+      </div>
+    </div>
+  <% }); %>
+  <% if (!friends.length) { %><div class="empty">Chưa có bạn bè. Vào <a href="/blog">Cộng đồng</a>, bấm tên người dùng để kết bạn.</div><% } %>
+</div>
+
+<%- include('partials/footer') %>

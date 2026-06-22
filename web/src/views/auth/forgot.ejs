@@ -1,0 +1,31 @@
+<%- include('../partials/header') %>
+
+<div class="auth-split">
+  <div class="auth-box">
+    <h1>Quên mật khẩu</h1>
+    <% if (error) { %><div class="alert"><%= error %></div><% } %>
+    <% if (done) { %>
+      <div class="ok-box">
+        ✅ Mật khẩu mới đã được tạo<% if (!devPassword) { %> và gửi tới email <b><%= email %></b><% } %>.
+        <% if (devPassword) { %>
+          <div class="dev-pass">
+            <p class="muted small">(Chưa cấu hình SMTP — hiện mật khẩu để bạn thử ngay; cấu hình SMTP_USER/SMTP_PASS để gửi qua Gmail.)</p>
+            Mật khẩu mới: <code><%= devPassword %></code>
+          </div>
+        <% } %>
+        <a class="btn-primary block" href="/login" style="margin-top:14px">Đến trang đăng nhập</a>
+      </div>
+    <% } else { %>
+      <p class="muted">Nhập email đã đăng ký, hệ thống sẽ tạo mật khẩu mới và gửi cho bạn.</p>
+      <form action="/forgot" method="post">
+        <%- include('../partials/csrf') %>
+        <label>Email<input type="email" name="email" value="<%= email || '' %>" required></label>
+        <button class="btn-primary block" type="submit">Gửi mật khẩu mới</button>
+      </form>
+      <p class="muted"><a href="/login">← Quay lại đăng nhập</a></p>
+    <% } %>
+  </div>
+  <%- include('../partials/auth-aside') %>
+</div>
+
+<%- include('../partials/footer') %>

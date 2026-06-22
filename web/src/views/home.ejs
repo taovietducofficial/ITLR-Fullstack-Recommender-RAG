@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+<section class="hero">
+  <h1>Học CNTT đúng hướng, đúng tài nguyên</h1>
+  <p>Tìm kiếm ngữ nghĩa hơn 50.000 khóa học &amp; tài liệu, gợi ý cá nhân hóa và trợ lý AI giải đáp lộ trình học.</p>
+  <form class="hero-search" action="/search" method="get">
+    <input type="text" name="q" placeholder="Bạn muốn học gì? VD: machine learning, lập trình web, an ninh mạng..." autofocus>
+    <button class="btn-primary" type="submit">Tìm kiếm</button>
+  </form>
+  <% if (prompts && prompts.length) { %>
+    <div class="chips">
+      <% prompts.slice(0,4).forEach(function(p){ %>
+        <a class="chip" href="/search?q=<%= encodeURIComponent(p) %>"><%= p %></a>
+      <% }); %>
+    </div>
+  <% } %>
+</section>
+
+<section>
+  <h2 class="section-title">Lĩnh vực phổ biến</h2>
+  <div class="cat-grid">
+    <% categories.forEach(function(c){ %>
+      <a class="cat-card" href="/search?q=<%= encodeURIComponent(c.category) %>">
+        <span class="cat-name"><%= c.category %></span>
+        <span class="cat-count"><%= c.n.toLocaleString('vi-VN') %> tài nguyên</span>
+      </a>
+    <% }); %>
+  </div>
+</section>
+
+<section class="cta-row">
+  <a class="cta" href="/chat">🤖 Hỏi trợ lý CNTT về lộ trình học</a>
+  <% if (!user) { %><a class="cta cta-alt" href="/register">✨ Tạo tài khoản để lưu khóa học &amp; nhận gợi ý</a><% } %>
+</section>
+
+<%- include('partials/footer') %>

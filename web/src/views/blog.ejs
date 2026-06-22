@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+<% var isSingle = (typeof single !== 'undefined' && single); %>
+<header class="community-hero">
+  <span class="community-badge">✨ Cộng đồng 2026</span>
+  <h1 class="community-title">👥 Cộng đồng IT</h1>
+  <% if (isSingle) { %>
+    <p class="community-sub">Bài viết được chia sẻ · <a href="/blog">← Về Cộng đồng</a></p>
+  <% } else { %>
+    <p class="community-sub">Chia sẻ status, hình ảnh, video, tài liệu và hỏi đáp cùng cộng đồng học sinh – sinh viên IT.</p>
+  <% } %>
+</header>
+
+<div class="feed">
+  <% if (!isSingle) { %>
+  <form id="post-form" class="post-create card">
+    <textarea id="post-content" rows="3" placeholder="Bạn đang nghĩ gì? Chia sẻ cảm xúc, đặt câu hỏi, hay đính kèm ảnh/video/tài liệu..."></textarea>
+    <div class="post-create-bar">
+      <label class="pc-attach">🖼️ Ảnh<input type="file" id="post-image" accept="image/*" hidden></label>
+      <label class="pc-attach">🎬 Video<input type="file" id="post-video" accept="video/*" hidden></label>
+      <label class="pc-attach">📎 Tài liệu<input type="file" id="post-doc" accept=".pdf,.doc,.docx,.xls,.xlsx" hidden></label>
+      <span id="post-files" class="muted small"></span>
+      <button class="btn-primary" type="submit" style="margin-left:auto">Đăng bài</button>
+    </div>
+  </form>
+  <% } %>
+
+  <div id="post-list">
+    <% posts.forEach(function(p){ %>
+      <%- include('partials/post', { p: p }) %>
+    <% }); %>
+    <% if (!posts.length) { %><div class="empty">Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ!</div><% } %>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

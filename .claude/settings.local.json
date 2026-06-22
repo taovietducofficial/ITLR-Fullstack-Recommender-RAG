@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/KLTN/**)",
+      "Bash(python \"C:/Users/Admin/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/15a30d6e-d8cf-4ad2-8c1a-08e633c2e852/55f01597-8e38-4d19-b3f3-638e872af95b/skills/docx/scripts/office/unpack.py\" \"KLTN HTTT 21110169.docx\" \"C:/IT-Learning-Recommender-System/__thesis_unpacked/\")",
+      "Bash(python -)"
+    ]
+  }
+}

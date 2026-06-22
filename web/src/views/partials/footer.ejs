@@ -1,0 +1,23 @@
+</main>
+
+<% if (user) { %>
+  <nav class="bottom-nav">
+    <a href="/" class="<%= (typeof path!=='undefined'&&path==='/')?'active':'' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Trang chủ</a>
+    <a href="/search" class="<%= (typeof path!=='undefined'&&path.startsWith('/search'))?'active':'' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Tìm kiếm</a>
+    <a href="/chat" class="<%= (typeof path!=='undefined'&&path.startsWith('/chat'))?'active':'' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Trợ lý</a>
+    <a href="/blog" class="<%= (typeof path!=='undefined'&&path.startsWith('/blog'))?'active':'' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 3.5a3 3 0 0 1 0 6"/><path d="M22 21v-1a6 6 0 0 0-4-5.6"/></svg>Cộng đồng</a>
+    <a href="/dashboard" class="<%= (typeof path!=='undefined'&&path.startsWith('/dashboard'))?'active':'' %>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Của tôi</a>
+  </nav>
+<% } %>
+
+<footer class="footer">
+  Nền tảng học tập CNTT · Express + TypeScript + PostgreSQL · tích hợp Recommender (Python/FastAPI)
+</footer>
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<%- include('partials/header') %>
+
+<div class="msg-shell">
+  <aside class="msg-side">
+    <h3 class="msg-side-h">💬 Bạn bè</h3>
+    <div class="conv-list">
+      <% friends.forEach(function(u){ %>
+        <a class="conv-item <%= (active && active.id===u.id) ? 'active' : '' %>" data-uid="<%= u.id %>" href="/messages?u=<%= u.id %>">
+          <span class="conv-ava">
+            <%- include('partials/avatar', { id: u.id, name: u.name, has: u.has_avatar, cls: 'sm' }) %>
+            <span class="pdot <%= u.online ? 'on' : '' %>" data-uid="<%= u.id %>"></span>
+          </span>
+          <span class="conv-title"><%= u.name %></span>
+        </a>
+      <% }); %>
+      <% if (!friends.length) { %><p class="muted small" style="padding:8px">Chưa có bạn bè để nhắn tin. Hãy kết bạn trước.</p><% } %>
+    </div>
+  </aside>
+
+  <section class="msg-main card">
+    <% if (active) { %>
+      <div class="msg-header">
+        <a href="/u/<%= active.id %>" class="conv-ava">
+          <%- include('partials/avatar', { id: active.id, name: active.name, has: active.has_avatar, cls: 'sm' }) %>
+          <span class="pdot <%= active.online ? 'on' : '' %>" data-uid="<%= active.id %>"></span>
+        </a>
+        <a href="/u/<%= active.id %>" class="msg-header-name">
+          <b><%= active.name %></b>
+          <span class="msg-presence <%= active.online ? 'on' : '' %>" id="hdr-presence"
+                data-uid="<%= active.id %>" data-online="<%= active.online ? '1' : '0' %>"
+                data-last="<%= active.last_seen ? new Date(active.last_seen).toISOString() : '' %>"></span>
+        </a>
+        <div class="msg-menu">
+          <button type="button" class="msg-menu-btn" id="msg-menu-btn" aria-label="Tùy chọn" aria-haspopup="true" aria-expanded="false">⋮</button>
+          <div class="msg-menu-pop" id="msg-menu-pop" hidden>
+            <a href="/api/messages/<%= active.id %>/export">⬇️ Tải lịch sử trò chuyện (.html)</a>
+          </div>
+        </div>
+      </div>
+      <div id="dm-log" class="dm-log" data-user="<%= active.id %>">
+        <% messages.forEach(function(m){ var mine = m.sender_id === me; %>
+          <div class="dm <%= mine ? 'me' : 'them' %>" data-id="<%= m.id %>">
+            <div class="dm-bubble">
+              <% if (m.has_image) { %><a href="/api/messages/media/<%= m.id %>/image" target="_blank" rel="noopener"><img class="dm-media-img" src="/api/messages/media/<%= m.id %>/image" alt="ảnh" loading="lazy"></a><% } %>
+              <% if (m.has_video) { %><video class="dm-media-video" src="/api/messages/media/<%= m.id %>/video" controls preload="metadata"></video><% } %>
+              <% if (m.has_doc) { %><a class="dm-doc" href="/api/messages/media/<%= m.id %>/doc">📄 <%= m.doc_original || 'Tài liệu' %></a><% } %>
+              <% if (m.post) { %>
+                <a class="dm-share post" href="/blog/<%= m.post.id %>">
+                  <div class="dm-share-h">↪ Bài viết của <b><%= m.post.author %></b></div>
+                  <% if (m.post.content) { %><div class="dm-share-body"><%= m.post.content %><%= m.post.content.length >= 160 ? '…' : '' %></div><% } %>
+                  <% if (m.post.has_image || m.post.has_video || m.post.has_doc) { %><div class="dm-share-tag">📎 có đính kèm</div><% } %>
+                </a>
+              <% } %>
+              <% if (m.course) { %>
+                <a class="dm-share course" href="/courses/<%= m.course.item_id %>">
+                  <div class="dm-share-h">📚 Khóa học / Tài liệu</div>
+                  <div class="dm-share-title"><%= m.course.title %></div>
+                  <div class="dm-share-tag"><%= m.course.type %> · <%= m.course.category %></div>
+                </a>
+              <% } %>
+              <% if (m.content) { %><span class="dm-text"><%= m.content %></span><% } %>
+            </div>
+            <time class="dm-time" datetime="<%= new Date(m.created_at).toISOString() %>"></time>
+          </div>
+        <% }); %>
+      </div>
+      <% var lastMine = null; messages.forEach(function(m){ if (m.sender_id === me) lastMine = m; }); %>
+      <div id="dm-seen" class="dm-seen"><%= (lastMine && lastMine.read_at) ? '✓ Đã xem' : '' %></div>
+      <div id="dm-typing" class="dm-typing" hidden>
+        <span class="dm-typing-name"><%= active.name %></span> đang soạn tin
+        <span class="dm-typing-dots"><i></i><i></i><i></i></span>
+      </div>
+      <div class="dm-composer">
+        <div id="dm-files" class="dm-files"></div>
+        <form id="dm-form" class="chatbar" data-user="<%= active.id %>" enctype="multipart/form-data">
+          <label class="dm-attach" title="Gửi ảnh">🖼️<input type="file" id="dm-image" accept="image/*" hidden></label>
+          <label class="dm-attach" title="Gửi video">🎬<input type="file" id="dm-video" accept="video/*" hidden></label>
+          <label class="dm-attach" title="Gửi tài liệu (PDF/DOCX/Excel)">📎<input type="file" id="dm-doc" accept=".pdf,.doc,.docx,.xls,.xlsx" hidden></label>
+          <input id="dm-input" type="text" placeholder="Nhắn tin tới <%= active.name %>..." autocomplete="off">
+          <button class="btn-primary" type="submit">Gửi</button>
+        </form>
+      </div>
+    <% } else { %>
+      <div class="empty" style="margin:auto;border:0">Chọn một người bạn bên trái để bắt đầu trò chuyện.</div>
+    <% } %>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

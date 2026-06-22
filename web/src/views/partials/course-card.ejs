@@ -1,0 +1,19 @@
+<article class="card">
+  <div class="card-badges">
+    <span class="badge <%= it.type==='Tài liệu' ? 'badge-doc' : 'badge-course' %>"><%= it.type %></span>
+    <% if (it.level) { %><span class="badge badge-level"><%= it.level %></span><% } %>
+    <% if (typeof it.score !== 'undefined' && it.score != null) { %><span class="score"><%= it.score %>% phù hợp</span><% } %>
+  </div>
+  <h3 class="card-title"><a href="/courses/<%= it.item_id %>"><%= it.title %></a></h3>
+  <p class="muted"><%= it.category %></p>
+  <p class="desc"><%= (it.description || '').slice(0,140) %><%= (it.description || '').length > 140 ? '…' : '' %></p>
+  <p class="meta">👤 <%= it.instructor %> · 🌐 <%= it.platform %></p>
+  <% if (typeof user !== 'undefined' && user) { var _s = (typeof isSaved !== 'undefined') && isSaved; %>
+    <div class="card-actions-row">
+      <button type="button" class="card-save<%= _s ? ' is-saved' : '' %>" data-save="<%= it.item_id %>">
+        <%= _s ? '✓ Đã lưu' : '+ Lưu' %>
+      </button>
+      <button type="button" class="card-share" data-share-course="<%= it.item_id %>" title="Chia sẻ vào tin nhắn">✉️ Chia sẻ</button>
+    </div>
+  <% } %>
+</article>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title><%= title %> · Quản trị</title>
+  <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-vietnamese.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="admin-shell page-admin">
+<nav class="admin-nav">
+  <span class="admin-brand">🔧 Quản trị</span>
+  <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+    <a href="/admin">Tổng quan</a>
+    <a href="/admin/courses">Khóa học</a>
+    <a href="/admin/docs">Tài liệu</a>
+    <a href="/admin/pending">Chờ duyệt</a>
+    <form action="/admin/logout" method="post" class="inline" style="margin-left:auto">
+      <%- include('csrf') %>
+      <button class="btn-ghost xs">Thoát quản trị</button>
+    </form>
+  <% } %>
+</nav>
+<main class="admin-main">

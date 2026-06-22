@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+src = {file = ".", editable = true}
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+nltk = "*"
+scikit-learn = "*"
+sentence-transformers = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

@@ -1,0 +1,14 @@
+# Không đưa vào image recommender (giảm dung lượng / tránh lộ secret)
+.git
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+artifacts            # nạp qua volume
+data                 # nạp qua volume
+notebooks
+web                  # web có image riêng
+*.md
+.claude
+__thesis*
+.env

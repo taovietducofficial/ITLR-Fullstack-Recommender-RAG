@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "itlr"
+version = "1.0.0"
+description = "Hệ thống gợi ý tài liệu & khóa học CNTT + chatbot định hướng học tập (RAG đa intent)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "TÀO VIỆT ĐỨC", email = "taovietduc.work@gmail.com" }]
+keywords = ["recommender-system", "rag", "chatbot", "fastapi", "vietnamese-nlp"]
+dynamic = ["dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/taovietduc/IT-Learning-Recommender-System"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+include = ["itlr*"]
+
+[tool.setuptools.package-data]
+"itlr.chatbot" = ["data/*.json"]
+"itlr.api" = ["static/*.html", "static/*.css", "static/*.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

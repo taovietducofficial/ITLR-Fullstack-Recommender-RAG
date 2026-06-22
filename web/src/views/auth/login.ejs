@@ -1,0 +1,22 @@
+<%- include('../partials/header') %>
+
+<div class="auth-split">
+  <div class="auth-box">
+    <h1>Đăng nhập</h1>
+    <% if (errors && errors.length) { %>
+      <div class="alert"><% errors.forEach(function(e){ %><div><%= e %></div><% }); %></div>
+    <% } %>
+    <form action="/login" method="post">
+      <%- include('../partials/csrf') %>
+      <input type="hidden" name="next" value="<%= next %>">
+      <label>Email<input type="email" name="email" value="<%= values.email || '' %>" required></label>
+      <label>Mật khẩu<input type="password" name="password" required></label>
+      <button class="btn-primary block" type="submit">Đăng nhập</button>
+    </form>
+    <p class="muted"><a href="/forgot">Quên mật khẩu?</a></p>
+    <p class="muted">Chưa có tài khoản? <a href="/register">Đăng ký</a></p>
+  </div>
+  <%- include('../partials/auth-aside') %>
+</div>
+
+<%- include('../partials/footer') %>

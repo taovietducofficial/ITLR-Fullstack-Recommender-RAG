@@ -1,0 +1,28 @@
+<%- include('../partials/header') %>
+
+<div class="auth-split">
+  <div class="auth-box">
+    <h1>Đăng ký</h1>
+    <% if (errors && errors.length) { %>
+      <div class="alert"><% errors.forEach(function(e){ %><div><%= e %></div><% }); %></div>
+    <% } %>
+    <form action="/register" method="post">
+      <%- include('../partials/csrf') %>
+      <label>Họ tên<input type="text" name="name" value="<%= values.name || '' %>" required></label>
+      <label>Email<input type="email" name="email" value="<%= values.email || '' %>" required></label>
+      <label>Mật khẩu
+        <div class="pw-row">
+          <input id="reg-password" type="password" name="password" required>
+          <button type="button" class="btn-ghost pw-gen" id="genpass" title="Tạo mật khẩu mạnh">Tạo</button>
+          <button type="button" class="btn-ghost pw-eye" id="togglepw" title="Hiện/ẩn" aria-label="Hiện/ẩn mật khẩu">👁</button>
+        </div>
+      </label>
+      <p class="muted small">Tối thiểu 8 ký tự, có chữ HOA, chữ thường và ký tự đặc biệt.</p>
+      <button class="btn-primary block" type="submit">Tạo tài khoản</button>
+    </form>
+    <p class="muted">Đã có tài khoản? <a href="/login">Đăng nhập</a></p>
+  </div>
+  <%- include('../partials/auth-aside') %>
+</div>
+
+<%- include('../partials/footer') %>

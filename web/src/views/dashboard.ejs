@@ -1,0 +1,45 @@
+<%- include('partials/header') %>
+
+<h1 class="page-title">Xin chào, <%= user.name %> 👋</h1>
+
+<section>
+  <h2 class="section-title">Khóa học của bạn (<%= saved.length %>)</h2>
+  <% if (!saved.length) { %>
+    <div class="empty">Bạn chưa lưu khóa học nào. <a href="/search">Tìm kiếm</a> và bấm "Lưu khóa học" để bắt đầu.</div>
+  <% } else { %>
+    <div class="grid">
+      <% saved.forEach(function(c){ %>
+        <article class="card">
+          <div class="card-badges">
+            <span class="badge <%= c.type==='Tài liệu' ? 'badge-doc' : 'badge-course' %>"><%= c.type %></span>
+            <span class="badge badge-status status-<%= c.status %>">
+              <%= c.status==='completed' ? 'Hoàn thành' : c.status==='in_progress' ? 'Đang học' : 'Đã lưu' %>
+            </span>
+          </div>
+          <h3 class="card-title"><a href="/courses/<%= c.item_id %>"><%= c.title %></a></h3>
+          <p class="muted"><%= c.category %></p>
+          <div class="progress"><div class="progress-fill" style="width: <%= c.progress %>%"></div></div>
+          <p class="meta"><%= c.progress %>% hoàn thành</p>
+          <button type="button" class="card-del" data-remove="<%= c.item_id %>">🗑 Xóa khỏi danh sách</button>
+        </article>
+      <% }); %>
+    </div>
+  <% } %>
+</section>
+
+<section>
+  <h2 class="section-title">✨ Dành cho bạn</h2>
+  <% if (recError) { %>
+    <div class="alert">Chưa lấy được gợi ý (recommender :8000 chưa chạy?).</div>
+  <% } else if (!forYou.length) { %>
+    <div class="empty">Lưu vài khóa học để nhận gợi ý cá nhân hóa tốt hơn.</div>
+  <% } else { %>
+    <div class="grid">
+      <% forYou.forEach(function(r){ %>
+        <%- include('partials/course-card', { it: r, isSaved: savedIds.has(r.item_id) }) %>
+      <% }); %>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>

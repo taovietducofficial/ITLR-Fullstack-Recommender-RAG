@@ -1,0 +1,28 @@
+# ── Dữ liệu & artifacts (nặng, không commit) ── (neo về GỐC để không nuốt
+#    itlr/chatbot/data/ chứa glossary nguồn cần commit)
+/artifacts/
+/data/
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ── Môi trường ảo ──
+.venv*/
+venv/
+env/
+
+# ── IDE / OS ──
+.vscode/
+.idea/
+.DS_Store
+
+# ── Tài liệu nội bộ (giữ ngoài VCS theo cấu hình hiện có) ──
+CLAUDE.md
+structure.md
+progress.md

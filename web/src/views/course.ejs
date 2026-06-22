@@ -1,0 +1,136 @@
+<%- include('partials/header') %>
+
+<a class="back" href="javascript:history.back()">← Quay lại</a>
+
+<article class="course-detail">
+  <div class="card-badges">
+    <span class="badge <%= course.type==='Tài liệu' ? 'badge-doc' : 'badge-course' %>"><%= course.type %></span>
+    <% if (course.level) { %><span class="badge badge-level"><%= course.level %></span><% } %>
+    <span class="badge badge-cat"><%= course.category %></span>
+  </div>
+  <h1><%= course.title %></h1>
+  <p class="meta">👤 <%= course.instructor %> · 🌐 <%= course.platform %></p>
+  <p class="course-desc"><%= course.description %></p>
+
+  <% if (course.topics) { %>
+    <div class="topics">
+      <% course.topics.split(',').map(function(t){return t.trim();}).filter(Boolean).forEach(function(t){ %>
+        <span class="topic"><%= t %></span>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <div class="course-actions">
+    <% if (course.link) { %>
+      <a class="btn-primary" href="<%= course.link %>" target="_blank" rel="noopener">Mở tài nguyên này →</a>
+    <% } %>
+    <a class="btn-ghost" target="_blank" rel="noopener"
+       href="https://www.google.com/search?q=<%= encodeURIComponent(course.title + ' ' + course.category) %>">🔎 Tìm thêm trên Google</a>
+    <a class="btn-ghost" target="_blank" rel="noopener"
+       href="https://www.youtube.com/results?search_query=<%= encodeURIComponent(course.title) %>">▶️ Tìm trên YouTube</a>
+  </div>
+
+  <% if (user) { %>
+    <div class="enroll-box" data-course="<%= course.item_id %>">
+      <h3>Theo dõi học tập</h3>
+      <div class="enroll-row">
+        <label>Trạng thái
+          <select id="enroll-status">
+            <option value="saved" <%= (enrollment&&enrollment.status==='saved')?'selected':'' %>>Đã lưu</option>
+            <option value="in_progress" <%= (enrollment&&enrollment.status==='in_progress')?'selected':'' %>>Đang học</option>
+            <option value="completed" <%= (enrollment&&enrollment.status==='completed')?'selected':'' %>>Hoàn thành</option>
+          </select>
+        </label>
+        <label>Tiến độ: <b id="enroll-prog-val"><%= enrollment ? enrollment.progress : 0 %></b>%</label>
+      </div>
+      <div class="progress"><div class="progress-fill" id="enroll-bar" style="width: <%= enrollment ? enrollment.progress : 0 %>%"></div></div>
+      <p class="muted small">Tiến độ tự tính theo số bài học video đã xem xong.</p>
+      <% var isDone = !!(enrollment && (enrollment.status === 'completed' || enrollment.progress >= 100)); %>
+      <div class="enroll-actions">
+        <button class="btn-primary" id="enroll-save"><%= enrollment ? 'Cập nhật' : 'Lưu khóa học' %></button>
+        <button class="btn-ghost <%= isDone ? 'is-done' : '' %>" id="enroll-complete" <%= isDone ? 'disabled' : '' %>><%= isDone ? '✓ Đã hoàn thành khóa học' : '✓ Đánh dấu hoàn thành' %></button>
+        <% if (enrollment) { %><button class="btn-ghost" id="enroll-remove">Bỏ lưu</button><% } %>
+        <span id="enroll-msg" class="muted"></span>
+      </div>
+    </div>
+  <% } else { %>
+    <p class="muted"><a href="/login?next=/courses/<%= course.item_id %>">Đăng nhập</a> để lưu khóa học và theo dõi tiến độ.</p>
+  <% } %>
+</article>
+
+<section class="lessons">
+  <h2 class="section-title">🎬 Bài học video</h2>
+  <% if (lessons.length) { %>
+    <p class="muted small">Xem xong mỗi video rồi bấm "Đã xem xong" — thanh tiến độ ở trên tự cập nhật.</p>
+    <div class="lesson-list">
+      <% lessons.forEach(function(l, i){ %>
+        <div class="lesson <%= l.done ? 'done' : '' %>" data-lesson="<%= l.id %>" data-course="<%= course.item_id %>">
+          <div class="lesson-head">
+            <b><%= i+1 %>. <%= l.title %></b>
+            <% if (user && (l.added_by === user.id || isAdmin)) { %><button class="lesson-del" type="button" data-lesson="<%= l.id %>" title="Xóa bài học">×</button><% } %>
+          </div>
+          <div class="lesson-embed"><iframe src="https://www.youtube.com/embed/<%= l.youtube_id %>" title="<%= l.title %>" allowfullscreen loading="lazy"></iframe></div>
+          <button class="lesson-done btn-ghost" type="button" data-lesson="<%= l.id %>" data-done="<%= l.done %>"><%= l.done ? '✓ Đã xem xong' : 'Đánh dấu đã xem xong' %></button>
+        </div>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <p class="muted">Chưa có bài học video nào. Dán link YouTube bên dưới để thêm.</p>
+  <% } %>
+  <% if (user) { %>
+    <form id="lesson-form" class="attach-form" data-course="<%= course.item_id %>" data-admin="<%= isAdmin ? '1' : '0' %>">
+      <input type="text" id="lesson-title" placeholder="Tên bài học (tùy chọn)">
+      <input type="url" id="lesson-url" placeholder="Dán link YouTube (vd https://youtu.be/...)" required style="flex:2;min-width:220px">
+      <button class="btn-primary" type="submit"><%= isAdmin ? 'Thêm bài học' : 'Đóng góp link (chờ duyệt)' %></button>
+    </form>
+    <p class="muted small">
+      <% if (isAdmin) { %>Bạn là quản trị viên — link được đăng ngay.
+      <% } else { %>🙌 Đóng góp link bài giảng — sẽ hiển thị sau khi quản trị viên phê duyệt.<% } %>
+    </p>
+  <% } else { %>
+    <p class="muted"><a href="/login?next=/courses/<%= course.item_id %>">Đăng nhập</a> để đóng góp link bài giảng.</p>
+  <% } %>
+</section>
+
+<section class="attach">
+  <h2 class="section-title">📎 Tài liệu đính kèm</h2>
+  <ul class="attach-list" id="attach-list">
+    <% attachments.forEach(function(a){ %>
+      <li data-att="<%= a.id %>">
+        <span class="att-ic">📄</span>
+        <a href="/api/download/<%= a.id %>" class="att-name"><%= a.filename %></a>
+        <span class="muted att-size"><%= Math.max(1, Math.round((a.size||0)/1024)) %> KB</span>
+        <button class="att-view" type="button" data-att="<%= a.id %>"
+                data-mime="<%= a.mime || '' %>" data-name="<%= a.filename %>">👁 Xem nội dung</button>
+        <% if (user) { %><button class="att-del" type="button" data-att="<%= a.id %>" title="Xóa">×</button><% } %>
+      </li>
+    <% }); %>
+  </ul>
+  <p class="muted" id="attach-empty" <%= attachments.length ? 'style="display:none"' : '' %>>Chưa có tài liệu đính kèm.</p>
+  <% if (user) { %>
+    <form id="attach-form" class="attach-form" data-course="<%= course.item_id %>" data-admin="<%= isAdmin ? '1' : '0' %>">
+      <input type="file" id="attach-file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
+      <button class="btn-primary" type="submit"><%= isAdmin ? 'Tải lên' : 'Đóng góp tài liệu (chờ duyệt)' %></button>
+      <span class="muted" id="attach-msg"></span>
+    </form>
+    <p class="muted small">
+      Hỗ trợ PDF · DOCX · XLS/XLSX — tối đa 10MB.
+      <% if (isAdmin) { %>Bạn là quản trị viên — tài liệu đăng ngay.
+      <% } else { %>🙌 Tài liệu đóng góp sẽ hiển thị sau khi quản trị viên phê duyệt.<% } %>
+    </p>
+  <% } else { %>
+    <p class="muted"><a href="/login?next=/courses/<%= course.item_id %>">Đăng nhập</a> để đóng góp tài liệu.</p>
+  <% } %>
+  <div id="att-viewer" class="att-viewer" hidden></div>
+</section>
+
+<% if (related && related.length) { %>
+  <h2 class="section-title">Khóa học liên quan</h2>
+  <div class="grid">
+    <% related.forEach(function(r){ %>
+      <%- include('partials/course-card', { it: r, isSaved: savedIds.has(r.item_id) }) %>
+    <% }); %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

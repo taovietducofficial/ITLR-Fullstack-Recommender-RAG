@@ -1,0 +1,5905 @@
+{
+  "_meta": {
+    "title": "Từ điển khái niệm CNTT (tiếng Việt) — giáo dục",
+    "description": "Nguồn dữ liệu giải thích khái niệm cho chatbot. Mỗi mục: name, aliases (đã/chưa dấu, viết tắt), category, level, definition, topics (chủ đề catalog để kéo tài nguyên), related, example.",
+    "version": "1.0",
+    "fields": [
+      "name",
+      "aliases",
+      "category",
+      "level",
+      "definition",
+      "topics",
+      "related",
+      "example"
+    ]
+  },
+  "concepts": {
+    "programming": {
+      "name": "Lập trình",
+      "aliases": [
+        "lap trinh",
+        "programming",
+        "coding",
+        "viet code"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "Lập trình là việc viết các chỉ thị (code) để ra lệnh cho máy tính thực hiện một tác vụ. Lập trình viên dùng ngôn ngữ lập trình để biến ý tưởng/giải thuật thành chương trình chạy được.",
+      "topics": [
+        "Lập trình",
+        "Python",
+        "OOP"
+      ],
+      "related": [
+        "algorithm",
+        "variable",
+        "function"
+      ],
+      "example": "Viết một chương trình in ra 'Xin chào' là ví dụ lập trình đơn giản nhất."
+    },
+    "variable": {
+      "name": "Biến (Variable)",
+      "aliases": [
+        "bien",
+        "variable"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "Biến là một 'ô nhớ' có tên dùng để lưu trữ dữ liệu trong chương trình. Giá trị của biến có thể thay đổi trong quá trình chạy.",
+      "topics": [
+        "Lập trình",
+        "Python"
+      ],
+      "related": [
+        "data_type",
+        "function"
+      ],
+      "example": "`age = 20` tạo biến tên age lưu giá trị 20."
+    },
+    "data_type": {
+      "name": "Kiểu dữ liệu (Data Type)",
+      "aliases": [
+        "kieu du lieu",
+        "data type",
+        "datatype"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "Kiểu dữ liệu xác định loại giá trị một biến có thể giữ và các phép toán hợp lệ với nó: số nguyên, số thực, chuỗi, boolean, danh sách... Ngôn ngữ tĩnh kiểu kiểm tra lúc biên dịch, ngôn ngữ động kiểm tra lúc chạy.",
+      "topics": [
+        "Lập trình",
+        "Python"
+      ],
+      "related": [
+        "variable",
+        "oop"
+      ]
+    },
+    "function": {
+      "name": "Hàm (Function)",
+      "aliases": [
+        "ham",
+        "function",
+        "method"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "Hàm là một khối code có tên, nhận đầu vào (tham số) và trả về kết quả, dùng để tái sử dụng logic và chia nhỏ chương trình. Giúp code gọn, dễ đọc và dễ bảo trì.",
+      "topics": [
+        "Lập trình",
+        "OOP"
+      ],
+      "related": [
+        "variable",
+        "oop",
+        "recursion"
+      ]
+    },
+    "oop": {
+      "name": "OOP (Lập trình hướng đối tượng)",
+      "aliases": [
+        "oop",
+        "lap trinh huong doi tuong",
+        "object oriented",
+        "huong doi tuong"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "OOP tổ chức code quanh các đối tượng gói dữ liệu + hành vi, với 4 trụ cột: đóng gói, kế thừa, đa hình, trừu tượng. Giúp mô hình hóa thế giới thực, tái sử dụng và bảo trì code dễ hơn.",
+      "topics": [
+        "OOP",
+        "Design Pattern"
+      ],
+      "related": [
+        "function",
+        "design_pattern",
+        "solid"
+      ]
+    },
+    "functional_programming": {
+      "name": "Lập trình hàm (Functional Programming)",
+      "aliases": [
+        "functional programming",
+        "lap trinh ham",
+        "fp"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Trung cấp",
+      "definition": "Lập trình hàm xem tính toán như việc đánh giá các hàm thuần (không tác dụng phụ), ưu tiên dữ liệu bất biến và hàm bậc cao. Giúp code dễ suy luận, dễ song song hóa.",
+      "topics": [
+        "Lập trình"
+      ],
+      "related": [
+        "oop",
+        "function"
+      ]
+    },
+    "recursion": {
+      "name": "Đệ quy (Recursion)",
+      "aliases": [
+        "de quy",
+        "recursion",
+        "recursive"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Trung cấp",
+      "definition": "Đệ quy là kỹ thuật một hàm tự gọi lại chính nó để giải bài toán bằng cách chia thành các bài toán con nhỏ hơn, có điều kiện dừng. Phù hợp với cây, đồ thị, quy hoạch động.",
+      "topics": [
+        "Algorithms",
+        "Data Structures",
+        "Dynamic Programming"
+      ],
+      "related": [
+        "algorithm",
+        "dynamic_programming",
+        "tree"
+      ]
+    },
+    "algorithm": {
+      "name": "Giải thuật (Algorithm)",
+      "aliases": [
+        "giai thuat",
+        "thuat toan",
+        "algorithm"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Cơ bản",
+      "definition": "Giải thuật là chuỗi bước hữu hạn, rõ ràng để giải một bài toán. Chất lượng giải thuật đo bằng độ phức tạp thời gian/bộ nhớ — quyết định hiệu năng chương trình.",
+      "topics": [
+        "Algorithms",
+        "Data Structures"
+      ],
+      "related": [
+        "big_o",
+        "data_structure",
+        "sorting"
+      ]
+    },
+    "big_o": {
+      "name": "Độ phức tạp Big-O",
+      "aliases": [
+        "big o",
+        "do phuc tap",
+        "complexity"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Trung cấp",
+      "definition": "Big-O mô tả tốc độ tăng của thời gian/bộ nhớ theo kích thước đầu vào n (vd O(1), O(log n), O(n), O(n²)). Dùng để so sánh hiệu quả các giải thuật khi dữ liệu lớn.",
+      "topics": [
+        "Algorithms",
+        "Data Structures"
+      ],
+      "related": [
+        "algorithm",
+        "sorting"
+      ]
+    },
+    "compiler": {
+      "name": "Trình biên dịch (Compiler)",
+      "aliases": [
+        "compiler",
+        "trinh bien dich",
+        "bien dich"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Trình biên dịch dịch toàn bộ mã nguồn sang mã máy/bytecode trước khi chạy (vd C, Java). Khác với trình thông dịch chạy từng dòng. Biên dịch thường nhanh khi chạy nhưng cần bước build.",
+      "topics": [
+        "Compiler",
+        "Computer Architecture"
+      ],
+      "related": [
+        "interpreter",
+        "programming"
+      ]
+    },
+    "interpreter": {
+      "name": "Trình thông dịch (Interpreter)",
+      "aliases": [
+        "interpreter",
+        "trinh thong dich",
+        "thong dich"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Trình thông dịch thực thi mã nguồn trực tiếp từng dòng mà không cần biên dịch trước (vd Python). Linh hoạt, dễ debug nhưng thường chậm hơn mã đã biên dịch.",
+      "topics": [
+        "Compiler",
+        "Python"
+      ],
+      "related": [
+        "compiler",
+        "programming"
+      ]
+    },
+    "ide": {
+      "name": "IDE (Môi trường phát triển tích hợp)",
+      "aliases": [
+        "ide",
+        "integrated development environment"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "IDE là phần mềm gộp trình soạn code, biên dịch/chạy, gỡ lỗi và tự động hoàn thành vào một nơi (vd VS Code, IntelliJ). Tăng năng suất lập trình đáng kể.",
+      "topics": [
+        "Lập trình"
+      ],
+      "related": [
+        "debugging",
+        "git"
+      ]
+    },
+    "debugging": {
+      "name": "Gỡ lỗi (Debugging)",
+      "aliases": [
+        "debugging",
+        "go loi",
+        "debug"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Cơ bản",
+      "definition": "Gỡ lỗi là quá trình tìm và sửa lỗi (bug) trong chương trình bằng cách quan sát trạng thái, đặt breakpoint, in log, kiểm thử. Kỹ năng cốt lõi của mọi lập trình viên.",
+      "topics": [
+        "Lập trình",
+        "Testing"
+      ],
+      "related": [
+        "unit_test",
+        "ide"
+      ]
+    },
+    "api": {
+      "name": "API",
+      "aliases": [
+        "api",
+        "application programming interface"
+      ],
+      "category": "Lập trình Web",
+      "level": "Cơ bản",
+      "definition": "API là 'hợp đồng' cho phép hai phần mềm giao tiếp với nhau. Web API (thường REST) dùng HTTP để client và server trao đổi dữ liệu, phổ biến ở định dạng JSON.",
+      "topics": [
+        "REST API",
+        "Backend",
+        "HTTP"
+      ],
+      "related": [
+        "rest_api",
+        "graphql",
+        "backend"
+      ]
+    },
+    "sdk": {
+      "name": "SDK (Bộ công cụ phát triển)",
+      "aliases": [
+        "sdk",
+        "software development kit"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "SDK là bộ thư viện, công cụ, tài liệu và mẫu code giúp lập trình viên xây ứng dụng cho một nền tảng cụ thể (vd Android SDK). Khác với API (giao diện gọi hàm), SDK là cả 'bộ đồ nghề'.",
+      "topics": [
+        "Lập trình",
+        "Android"
+      ],
+      "related": [
+        "api",
+        "library_framework"
+      ]
+    },
+    "library_framework": {
+      "name": "Thư viện & Framework",
+      "aliases": [
+        "thu vien",
+        "library",
+        "framework"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "Thư viện là tập hàm bạn gọi khi cần; framework là khung sườn gọi ngược lại code của bạn (đảo ngược điều khiển). Cả hai giúp tránh viết lại từ đầu (vd React là thư viện, Angular là framework).",
+      "topics": [
+        "Framework",
+        "Lập trình Web"
+      ],
+      "related": [
+        "react",
+        "angular",
+        "sdk"
+      ]
+    },
+    "python": {
+      "name": "Python",
+      "aliases": [
+        "python",
+        "py"
+      ],
+      "category": "Lập trình",
+      "level": "Cơ bản",
+      "definition": "Python là ngôn ngữ lập trình bậc cao, cú pháp ngắn gọn, dễ học, đa dụng. Là lựa chọn số một cho AI/Machine Learning, khoa học dữ liệu, tự động hóa và web backend.",
+      "topics": [
+        "Python",
+        "Lập trình",
+        "Machine Learning"
+      ],
+      "related": [
+        "java",
+        "machine_learning"
+      ]
+    },
+    "java": {
+      "name": "Java",
+      "aliases": [
+        "java"
+      ],
+      "category": "Lập trình",
+      "level": "Cơ bản",
+      "definition": "Java là ngôn ngữ hướng đối tượng, tĩnh kiểu, chạy trên máy ảo JVM ('viết một lần, chạy mọi nơi'). Mạnh ở hệ thống doanh nghiệp lớn, backend và phát triển Android.",
+      "topics": [
+        "Java",
+        "OOP",
+        "Lập trình"
+      ],
+      "related": [
+        "python",
+        "oop"
+      ]
+    },
+    "javascript": {
+      "name": "JavaScript",
+      "aliases": [
+        "javascript",
+        "js"
+      ],
+      "category": "Lập trình Web",
+      "level": "Cơ bản",
+      "definition": "JavaScript là ngôn ngữ của web, chạy trong trình duyệt để tạo trang tương tác, và chạy server qua Node.js. Là ngôn ngữ bắt buộc của lập trình frontend.",
+      "topics": [
+        "JavaScript",
+        "Lập trình Web"
+      ],
+      "related": [
+        "typescript",
+        "react",
+        "nodejs"
+      ]
+    },
+    "typescript": {
+      "name": "TypeScript",
+      "aliases": [
+        "typescript",
+        "ts"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "TypeScript là JavaScript có thêm hệ thống kiểu tĩnh, giúp bắt lỗi sớm và bảo trì dự án lớn dễ hơn. Biên dịch ra JavaScript thuần để chạy ở mọi nơi.",
+      "topics": [
+        "TypeScript",
+        "JavaScript",
+        "Lập trình Web"
+      ],
+      "related": [
+        "javascript",
+        "react"
+      ]
+    },
+    "c_language": {
+      "name": "Ngôn ngữ C",
+      "aliases": [
+        "ngon ngu c",
+        "c language",
+        "c"
+      ],
+      "category": "Lập trình",
+      "level": "Trung cấp",
+      "definition": "C là ngôn ngữ bậc thấp, gần phần cứng, hiệu năng cao, là nền tảng của hệ điều hành và nhiều ngôn ngữ khác. Dạy tư duy quản lý bộ nhớ và con trỏ.",
+      "topics": [
+        "Lập trình",
+        "Memory Management"
+      ],
+      "related": [
+        "cpp",
+        "memory_management"
+      ]
+    },
+    "cpp": {
+      "name": "C++",
+      "aliases": [
+        "cpp",
+        "c plus plus"
+      ],
+      "category": "Lập trình",
+      "level": "Nâng cao",
+      "definition": "C++ mở rộng C với lập trình hướng đối tượng và thư viện chuẩn mạnh, hiệu năng cao. Dùng trong game, hệ thống thời gian thực, ứng dụng cần tối ưu tốc độ.",
+      "topics": [
+        "Lập trình",
+        "OOP"
+      ],
+      "related": [
+        "c_language",
+        "oop"
+      ]
+    },
+    "csharp": {
+      "name": "C#",
+      "aliases": [
+        "csharp",
+        "c sharp"
+      ],
+      "category": "Lập trình",
+      "level": "Trung cấp",
+      "definition": "C# là ngôn ngữ hướng đối tượng của Microsoft, chạy trên nền .NET. Phổ biến cho ứng dụng Windows, web ASP.NET và game Unity.",
+      "topics": [
+        "Lập trình",
+        "OOP"
+      ],
+      "related": [
+        "java",
+        "game_engine"
+      ]
+    },
+    "go_language": {
+      "name": "Go (Golang)",
+      "aliases": [
+        "golang",
+        "go language"
+      ],
+      "category": "Lập trình",
+      "level": "Trung cấp",
+      "definition": "Go là ngôn ngữ của Google, cú pháp đơn giản, biên dịch nhanh, hỗ trợ song song (goroutine) mạnh. Ưa chuộng cho dịch vụ backend, công cụ hạ tầng và microservices.",
+      "topics": [
+        "Lập trình",
+        "Microservices"
+      ],
+      "related": [
+        "rust",
+        "microservices"
+      ]
+    },
+    "rust": {
+      "name": "Rust",
+      "aliases": [
+        "rust"
+      ],
+      "category": "Lập trình",
+      "level": "Nâng cao",
+      "definition": "Rust là ngôn ngữ hệ thống chú trọng an toàn bộ nhớ mà không cần garbage collector, nhờ cơ chế ownership. Hiệu năng ngang C/C++ nhưng an toàn hơn.",
+      "topics": [
+        "Lập trình",
+        "Memory Management"
+      ],
+      "related": [
+        "cpp",
+        "go_language"
+      ]
+    },
+    "data_structure": {
+      "name": "Cấu trúc dữ liệu (Data Structure)",
+      "aliases": [
+        "cau truc du lieu",
+        "data structure"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Cơ bản",
+      "definition": "Cấu trúc dữ liệu là cách tổ chức và lưu trữ dữ liệu để truy cập/xử lý hiệu quả: mảng, danh sách liên kết, ngăn xếp, hàng đợi, cây, đồ thị, bảng băm. Chọn đúng cấu trúc quyết định hiệu năng.",
+      "topics": [
+        "Data Structures",
+        "Algorithms"
+      ],
+      "related": [
+        "algorithm",
+        "array",
+        "tree"
+      ]
+    },
+    "array": {
+      "name": "Mảng (Array)",
+      "aliases": [
+        "mang",
+        "array"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Cơ bản",
+      "definition": "Mảng lưu các phần tử cùng kiểu ở vùng nhớ liên tiếp, truy cập theo chỉ số trong O(1). Đơn giản và nhanh khi đọc, nhưng chèn/xóa giữa mảng tốn kém.",
+      "topics": [
+        "Data Structures",
+        "Algorithms"
+      ],
+      "related": [
+        "data_structure",
+        "linked_list"
+      ]
+    },
+    "linked_list": {
+      "name": "Danh sách liên kết (Linked List)",
+      "aliases": [
+        "danh sach lien ket",
+        "linked list"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Trung cấp",
+      "definition": "Danh sách liên kết gồm các nút chứa dữ liệu và con trỏ tới nút kế tiếp. Chèn/xóa nhanh nhưng truy cập ngẫu nhiên chậm (O(n)) so với mảng.",
+      "topics": [
+        "Data Structures",
+        "Algorithms"
+      ],
+      "related": [
+        "array",
+        "stack_queue"
+      ]
+    },
+    "stack_queue": {
+      "name": "Ngăn xếp & Hàng đợi (Stack & Queue)",
+      "aliases": [
+        "ngan xep",
+        "hang doi",
+        "stack",
+        "queue"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Trung cấp",
+      "definition": "Ngăn xếp (Stack) hoạt động LIFO (vào sau ra trước); Hàng đợi (Queue) hoạt động FIFO (vào trước ra trước). Dùng nhiều trong duyệt cây/đồ thị, undo, lập lịch.",
+      "topics": [
+        "Data Structures",
+        "Algorithms"
+      ],
+      "related": [
+        "linked_list",
+        "tree"
+      ]
+    },
+    "hash_table": {
+      "name": "Bảng băm (Hash Table)",
+      "aliases": [
+        "bang bam",
+        "hash table",
+        "hashmap",
+        "hash map"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Trung cấp",
+      "definition": "Bảng băm ánh xạ khóa sang giá trị qua hàm băm, cho truy cập trung bình O(1). Là nền tảng của dictionary/map trong hầu hết ngôn ngữ.",
+      "topics": [
+        "Data Structures",
+        "Algorithms"
+      ],
+      "related": [
+        "array",
+        "data_structure"
+      ]
+    },
+    "tree": {
+      "name": "Cây (Tree)",
+      "aliases": [
+        "cay",
+        "tree",
+        "binary tree",
+        "cay nhi phan"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Trung cấp",
+      "definition": "Cây là cấu trúc phân cấp gồm nút gốc và các nút con. Cây nhị phân tìm kiếm (BST) cho tra cứu/chèn O(log n). Dùng trong cơ sở dữ liệu, hệ thống file, biểu thức.",
+      "topics": [
+        "Data Structures",
+        "Algorithms"
+      ],
+      "related": [
+        "graph",
+        "data_structure",
+        "recursion"
+      ]
+    },
+    "graph": {
+      "name": "Đồ thị (Graph)",
+      "aliases": [
+        "do thi",
+        "graph"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Nâng cao",
+      "definition": "Đồ thị gồm các đỉnh nối bởi cạnh, mô hình hóa mạng xã hội, bản đồ, phụ thuộc. Các thuật toán quan trọng: BFS, DFS, Dijkstra (đường đi ngắn nhất).",
+      "topics": [
+        "Data Structures",
+        "Algorithms"
+      ],
+      "related": [
+        "tree",
+        "algorithm"
+      ]
+    },
+    "sorting": {
+      "name": "Sắp xếp (Sorting)",
+      "aliases": [
+        "sap xep",
+        "sorting",
+        "sort"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Trung cấp",
+      "definition": "Sắp xếp là sắp lại dữ liệu theo thứ tự. Các thuật toán kinh điển: Quick Sort, Merge Sort (O(n log n)), Bubble/Insertion (O(n²)). Nền tảng cho tìm kiếm hiệu quả.",
+      "topics": [
+        "Algorithms",
+        "Data Structures"
+      ],
+      "related": [
+        "algorithm",
+        "big_o"
+      ]
+    },
+    "dynamic_programming": {
+      "name": "Quy hoạch động (Dynamic Programming)",
+      "aliases": [
+        "quy hoach dong",
+        "dynamic programming",
+        "dp"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Nâng cao",
+      "definition": "Quy hoạch động giải bài toán bằng cách chia thành bài toán con chồng lấn, lưu kết quả để tránh tính lại. Áp dụng cho tối ưu (balô, đường đi, chuỗi con chung dài nhất).",
+      "topics": [
+        "Dynamic Programming",
+        "Algorithms"
+      ],
+      "related": [
+        "recursion",
+        "greedy",
+        "algorithm"
+      ]
+    },
+    "greedy": {
+      "name": "Tham lam (Greedy)",
+      "aliases": [
+        "tham lam",
+        "greedy"
+      ],
+      "category": "Cấu trúc dữ liệu & Giải thuật",
+      "level": "Nâng cao",
+      "definition": "Giải thuật tham lam chọn lựa chọn tốt nhất cục bộ ở mỗi bước với hy vọng đạt tối ưu toàn cục. Nhanh và đơn giản nhưng không phải lúc nào cũng cho lời giải tối ưu.",
+      "topics": [
+        "Algorithms",
+        "Dynamic Programming"
+      ],
+      "related": [
+        "dynamic_programming",
+        "algorithm"
+      ]
+    },
+    "html": {
+      "name": "HTML",
+      "aliases": [
+        "html"
+      ],
+      "category": "Lập trình Web",
+      "level": "Cơ bản",
+      "definition": "HTML là ngôn ngữ đánh dấu định nghĩa cấu trúc và nội dung trang web (tiêu đề, đoạn văn, ảnh, liên kết). Là bộ khung mọi trang web đứng trên.",
+      "topics": [
+        "Lập trình Web",
+        "Frontend"
+      ],
+      "related": [
+        "css",
+        "javascript"
+      ]
+    },
+    "css": {
+      "name": "CSS",
+      "aliases": [
+        "css"
+      ],
+      "category": "Lập trình Web",
+      "level": "Cơ bản",
+      "definition": "CSS quy định cách trình bày trang web: màu sắc, bố cục, phông chữ, responsive. Tách phần 'nhìn' khỏi phần 'nội dung' (HTML).",
+      "topics": [
+        "Lập trình Web",
+        "Frontend"
+      ],
+      "related": [
+        "html",
+        "responsive_design"
+      ]
+    },
+    "http": {
+      "name": "HTTP / HTTPS",
+      "aliases": [
+        "http",
+        "https"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Cơ bản",
+      "definition": "HTTP là giao thức truyền siêu văn bản giữa trình duyệt và server (GET/POST/PUT/DELETE). HTTPS là HTTP mã hóa bằng TLS để bảo mật dữ liệu truyền đi.",
+      "topics": [
+        "HTTP",
+        "REST API",
+        "Mạng máy tính"
+      ],
+      "related": [
+        "rest_api",
+        "ssl_tls",
+        "tcp_ip"
+      ]
+    },
+    "rest_api": {
+      "name": "REST API",
+      "aliases": [
+        "rest api",
+        "rest",
+        "restful"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "REST là phong cách thiết kế API dùng HTTP với các tài nguyên có URL rõ ràng và phương thức chuẩn (GET/POST/PUT/DELETE). Đơn giản, phổ biến, không trạng thái.",
+      "topics": [
+        "REST API",
+        "Backend",
+        "HTTP"
+      ],
+      "related": [
+        "api",
+        "graphql",
+        "http"
+      ]
+    },
+    "graphql": {
+      "name": "GraphQL",
+      "aliases": [
+        "graphql"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "GraphQL là ngôn ngữ truy vấn API cho phép client lấy đúng dữ liệu cần trong một request qua một endpoint duy nhất, tránh over/under-fetching của REST.",
+      "topics": [
+        "REST API",
+        "Backend",
+        "API"
+      ],
+      "related": [
+        "rest_api",
+        "api"
+      ]
+    },
+    "frontend": {
+      "name": "Frontend",
+      "aliases": [
+        "frontend",
+        "front end",
+        "fe"
+      ],
+      "category": "Lập trình Web",
+      "level": "Cơ bản",
+      "definition": "Frontend là phần giao diện người dùng nhìn thấy và tương tác trực tiếp trong trình duyệt, xây bằng HTML/CSS/JavaScript và các framework như React/Vue/Angular.",
+      "topics": [
+        "Frontend",
+        "Lập trình Web",
+        "JavaScript"
+      ],
+      "related": [
+        "backend",
+        "react",
+        "css"
+      ]
+    },
+    "backend": {
+      "name": "Backend",
+      "aliases": [
+        "backend",
+        "back end",
+        "be"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Backend là phần xử lý phía máy chủ: logic nghiệp vụ, cơ sở dữ liệu, xác thực, API. Người dùng không thấy trực tiếp nhưng là 'bộ não' của ứng dụng.",
+      "topics": [
+        "Backend",
+        "REST API",
+        "Database"
+      ],
+      "related": [
+        "frontend",
+        "api",
+        "database"
+      ]
+    },
+    "fullstack": {
+      "name": "Fullstack",
+      "aliases": [
+        "fullstack",
+        "full stack"
+      ],
+      "category": "Lập trình Web",
+      "level": "Nâng cao",
+      "definition": "Fullstack là khả năng làm cả frontend lẫn backend, hiểu toàn bộ luồng từ giao diện tới cơ sở dữ liệu. Linh hoạt, phù hợp đội nhỏ và startup.",
+      "topics": [
+        "Lập trình Web",
+        "Backend",
+        "Frontend"
+      ],
+      "related": [
+        "frontend",
+        "backend"
+      ]
+    },
+    "react": {
+      "name": "React",
+      "aliases": [
+        "react",
+        "reactjs"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "React là thư viện JavaScript của Meta để xây giao diện theo component, dùng Virtual DOM để cập nhật hiệu quả. Hệ sinh thái lớn, phổ biến nhất cho frontend hiện đại.",
+      "topics": [
+        "React",
+        "JavaScript",
+        "Frontend"
+      ],
+      "related": [
+        "angular",
+        "vue",
+        "javascript"
+      ]
+    },
+    "angular": {
+      "name": "Angular",
+      "aliases": [
+        "angular",
+        "angularjs"
+      ],
+      "category": "Lập trình Web",
+      "level": "Nâng cao",
+      "definition": "Angular là framework frontend đầy đủ của Google (TypeScript, dependency injection, router, form). Hợp dự án lớn cần cấu trúc chặt chẽ và chuẩn hóa.",
+      "topics": [
+        "Frontend",
+        "TypeScript",
+        "Lập trình Web"
+      ],
+      "related": [
+        "react",
+        "vue",
+        "typescript"
+      ]
+    },
+    "vue": {
+      "name": "Vue.js",
+      "aliases": [
+        "vue",
+        "vuejs"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Vue.js là framework frontend tiến hóa dần, dễ học, cú pháp gọn. Cân bằng giữa sự linh hoạt của React và cấu trúc của Angular.",
+      "topics": [
+        "Frontend",
+        "JavaScript",
+        "Lập trình Web"
+      ],
+      "related": [
+        "react",
+        "angular"
+      ]
+    },
+    "nodejs": {
+      "name": "Node.js",
+      "aliases": [
+        "nodejs",
+        "node js",
+        "node"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Node.js là môi trường chạy JavaScript phía server, mô hình bất đồng bộ hướng sự kiện, hiệu quả cho ứng dụng I/O nhiều (API, realtime). Cho phép dùng JS cả front lẫn back.",
+      "topics": [
+        "Backend",
+        "JavaScript",
+        "REST API"
+      ],
+      "related": [
+        "javascript",
+        "backend"
+      ]
+    },
+    "dom": {
+      "name": "DOM (Document Object Model)",
+      "aliases": [
+        "dom",
+        "document object model"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "DOM là cây đối tượng biểu diễn cấu trúc trang HTML mà JavaScript có thể đọc và thay đổi để cập nhật giao diện động. Là cầu nối giữa HTML và JavaScript.",
+      "topics": [
+        "JavaScript",
+        "Frontend"
+      ],
+      "related": [
+        "html",
+        "javascript"
+      ]
+    },
+    "cors": {
+      "name": "CORS",
+      "aliases": [
+        "cors",
+        "cross origin"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "CORS là cơ chế bảo mật của trình duyệt kiểm soát việc một trang web gọi tài nguyên từ tên miền khác. Server phải khai báo header cho phép thì request mới thành công.",
+      "topics": [
+        "Backend",
+        "Security",
+        "HTTP"
+      ],
+      "related": [
+        "http",
+        "rest_api"
+      ]
+    },
+    "websocket": {
+      "name": "WebSocket",
+      "aliases": [
+        "websocket",
+        "web socket"
+      ],
+      "category": "Lập trình Web",
+      "level": "Nâng cao",
+      "definition": "WebSocket mở kết nối hai chiều, liên tục giữa client và server, cho phép đẩy dữ liệu thời gian thực (chat, thông báo, game) mà không cần hỏi-đáp liên tục như HTTP.",
+      "topics": [
+        "Backend",
+        "Mạng máy tính"
+      ],
+      "related": [
+        "http",
+        "backend"
+      ]
+    },
+    "database": {
+      "name": "Cơ sở dữ liệu (Database)",
+      "aliases": [
+        "co so du lieu",
+        "database",
+        "db"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Cơ bản",
+      "definition": "Cơ sở dữ liệu là hệ thống lưu trữ, tổ chức và truy xuất dữ liệu có cấu trúc một cách hiệu quả và an toàn. Chia hai nhóm chính: quan hệ (SQL) và phi quan hệ (NoSQL).",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": [
+        "sql",
+        "nosql",
+        "mysql"
+      ]
+    },
+    "sql": {
+      "name": "SQL",
+      "aliases": [
+        "sql"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Cơ bản",
+      "definition": "SQL là ngôn ngữ chuẩn để truy vấn và thao tác dữ liệu trong cơ sở dữ liệu quan hệ (SELECT, INSERT, UPDATE, DELETE, JOIN). Kỹ năng bắt buộc với dữ liệu.",
+      "topics": [
+        "SQL",
+        "Database"
+      ],
+      "related": [
+        "database",
+        "nosql",
+        "mysql"
+      ]
+    },
+    "nosql": {
+      "name": "NoSQL",
+      "aliases": [
+        "nosql"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "NoSQL là nhóm cơ sở dữ liệu phi quan hệ (document, key-value, cột, đồ thị), schema linh hoạt, mở rộng ngang tốt. Hợp dữ liệu lớn, phi cấu trúc, thay đổi nhanh.",
+      "topics": [
+        "NoSQL",
+        "MongoDB",
+        "Database"
+      ],
+      "related": [
+        "sql",
+        "mongodb",
+        "redis"
+      ]
+    },
+    "mysql": {
+      "name": "MySQL",
+      "aliases": [
+        "mysql"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Cơ bản",
+      "definition": "MySQL là cơ sở dữ liệu quan hệ mã nguồn mở phổ biến: dữ liệu dạng bảng có schema chặt, hỗ trợ giao dịch ACID. Hợp dữ liệu có cấu trúc, cần nhất quán.",
+      "topics": [
+        "MySQL",
+        "SQL",
+        "Database"
+      ],
+      "related": [
+        "postgresql",
+        "sql"
+      ]
+    },
+    "postgresql": {
+      "name": "PostgreSQL",
+      "aliases": [
+        "postgresql",
+        "postgres"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "PostgreSQL là cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ, hỗ trợ ACID, kiểu dữ liệu phong phú (JSONB, mảng) và mở rộng tốt. Được ưa chuộng cho ứng dụng nghiêm túc.",
+      "topics": [
+        "PostgreSQL",
+        "SQL",
+        "Database"
+      ],
+      "related": [
+        "mysql",
+        "mongodb"
+      ]
+    },
+    "mongodb": {
+      "name": "MongoDB",
+      "aliases": [
+        "mongodb",
+        "mongo"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "MongoDB là cơ sở dữ liệu NoSQL dạng document (lưu JSON/BSON), schema linh hoạt, mở rộng ngang dễ. Hợp dữ liệu phi cấu trúc, thay đổi nhanh.",
+      "topics": [
+        "MongoDB",
+        "NoSQL",
+        "Database"
+      ],
+      "related": [
+        "postgresql",
+        "nosql"
+      ]
+    },
+    "redis": {
+      "name": "Redis",
+      "aliases": [
+        "redis"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Redis là kho dữ liệu in-memory cực nhanh, thường dùng làm cache, hàng đợi hoặc lưu phiên. Dùng khi cần tốc độ mili-giây và giảm tải cho database chính.",
+      "topics": [
+        "Redis",
+        "Caching",
+        "Database"
+      ],
+      "related": [
+        "database",
+        "cache"
+      ]
+    },
+    "acid": {
+      "name": "ACID",
+      "aliases": [
+        "acid"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Nâng cao",
+      "definition": "ACID là 4 tính chất đảm bảo giao dịch CSDL đáng tin cậy: Atomicity (nguyên tử), Consistency (nhất quán), Isolation (cô lập), Durability (bền vững). Cốt lõi của database quan hệ.",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": [
+        "transaction",
+        "sql"
+      ]
+    },
+    "transaction": {
+      "name": "Giao dịch (Transaction)",
+      "aliases": [
+        "giao dich",
+        "transaction"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Giao dịch là một nhóm thao tác CSDL được thực hiện trọn vẹn 'tất cả hoặc không gì' — nếu một bước lỗi thì hủy toàn bộ (rollback). Bảo vệ tính toàn vẹn dữ liệu.",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": [
+        "acid",
+        "sql"
+      ]
+    },
+    "indexing_db": {
+      "name": "Chỉ mục CSDL (Index)",
+      "aliases": [
+        "chi muc",
+        "index",
+        "indexing"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Nâng cao",
+      "definition": "Chỉ mục là cấu trúc dữ liệu phụ giúp truy vấn nhanh hơn (như mục lục sách), đánh đổi bằng tốn bộ nhớ và làm chậm ghi. Thiết kế index đúng là chìa khóa tối ưu CSDL.",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": [
+        "sql",
+        "normalization"
+      ]
+    },
+    "normalization": {
+      "name": "Chuẩn hóa CSDL (Normalization)",
+      "aliases": [
+        "chuan hoa",
+        "normalization"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Nâng cao",
+      "definition": "Chuẩn hóa là quá trình tổ chức bảng để giảm trùng lặp dữ liệu và tránh bất thường khi cập nhật, qua các dạng chuẩn (1NF, 2NF, 3NF). Đánh đổi với tốc độ đọc.",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": [
+        "indexing_db",
+        "data_modeling"
+      ]
+    },
+    "orm": {
+      "name": "ORM",
+      "aliases": [
+        "orm",
+        "object relational mapping"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "ORM ánh xạ bảng CSDL sang đối tượng trong code, cho phép thao tác dữ liệu bằng ngôn ngữ lập trình thay vì viết SQL thủ công (vd Hibernate, SQLAlchemy, Prisma).",
+      "topics": [
+        "Backend",
+        "Database"
+      ],
+      "related": [
+        "sql",
+        "backend"
+      ]
+    },
+    "data_modeling": {
+      "name": "Mô hình hóa dữ liệu (Data Modeling)",
+      "aliases": [
+        "mo hinh hoa du lieu",
+        "data modeling"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Nâng cao",
+      "definition": "Mô hình hóa dữ liệu là thiết kế cấu trúc dữ liệu (bảng, quan hệ, khóa) phản ánh đúng nghiệp vụ trước khi xây hệ thống. Quyết định khả năng mở rộng và bảo trì.",
+      "topics": [
+        "Database",
+        "Business Analysis"
+      ],
+      "related": [
+        "normalization",
+        "database"
+      ]
+    },
+    "ai": {
+      "name": "AI (Trí tuệ nhân tạo)",
+      "aliases": [
+        "ai",
+        "artificial intelligence",
+        "tri tue nhan tao"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Cơ bản",
+      "definition": "AI là lĩnh vực giúp máy tính thực hiện các tác vụ vốn cần trí thông minh con người: nhận thức, suy luận, ra quyết định, hiểu ngôn ngữ. Machine Learning là nhánh phổ biến nhất.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning",
+        "AI Basic"
+      ],
+      "related": [
+        "machine_learning",
+        "deep_learning"
+      ]
+    },
+    "machine_learning": {
+      "name": "Machine Learning (Học máy)",
+      "aliases": [
+        "machine learning",
+        "ml",
+        "hoc may"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Cơ bản",
+      "definition": "Machine Learning cho phép máy tự rút ra quy luật từ dữ liệu thay vì lập trình thủ công từng luật. Gồm ba nhóm: học có giám sát, không giám sát và tăng cường.",
+      "topics": [
+        "Machine Learning",
+        "Scikit-learn",
+        "Regression"
+      ],
+      "related": [
+        "deep_learning",
+        "supervised_learning",
+        "ai"
+      ]
+    },
+    "deep_learning": {
+      "name": "Deep Learning (Học sâu)",
+      "aliases": [
+        "deep learning",
+        "dl",
+        "hoc sau"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Trung cấp",
+      "definition": "Deep Learning dùng mạng neural nhiều tầng để tự học đặc trưng phức tạp từ dữ liệu lớn (ảnh, âm thanh, văn bản). Là nền tảng của thị giác máy tính và NLP hiện đại.",
+      "topics": [
+        "Deep Learning",
+        "Neural Network",
+        "PyTorch"
+      ],
+      "related": [
+        "neural_network",
+        "machine_learning",
+        "cnn"
+      ]
+    },
+    "neural_network": {
+      "name": "Mạng nơ-ron (Neural Network)",
+      "aliases": [
+        "mang no ron",
+        "neural network",
+        "mang neuron"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Trung cấp",
+      "definition": "Mạng nơ-ron lấy cảm hứng từ não người, gồm các nơ-ron nối nhau qua trọng số; học bằng cách điều chỉnh trọng số để giảm sai số. Là khối xây dựng của Deep Learning.",
+      "topics": [
+        "Neural Network",
+        "Deep Learning"
+      ],
+      "related": [
+        "deep_learning",
+        "gradient_descent"
+      ]
+    },
+    "nlp": {
+      "name": "NLP (Xử lý ngôn ngữ tự nhiên)",
+      "aliases": [
+        "nlp",
+        "natural language processing",
+        "xu ly ngon ngu"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "NLP giúp máy hiểu và sinh ngôn ngữ con người: phân loại văn bản, dịch máy, tóm tắt, chatbot. Các mô hình Transformer (BERT, GPT) là chuẩn hiện nay.",
+      "topics": [
+        "NLP",
+        "Transformer",
+        "Deep Learning"
+      ],
+      "related": [
+        "transformer",
+        "llm",
+        "deep_learning"
+      ]
+    },
+    "computer_vision": {
+      "name": "Computer Vision (Thị giác máy tính)",
+      "aliases": [
+        "computer vision",
+        "cv",
+        "thi giac may tinh"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Computer Vision giúp máy 'nhìn' và hiểu hình ảnh/video: phân loại ảnh, phát hiện đối tượng, nhận diện khuôn mặt. Dựa nhiều vào mạng tích chập (CNN).",
+      "topics": [
+        "Computer Vision",
+        "Deep Learning",
+        "Neural Network"
+      ],
+      "related": [
+        "cnn",
+        "deep_learning"
+      ]
+    },
+    "supervised_learning": {
+      "name": "Học có giám sát (Supervised Learning)",
+      "aliases": [
+        "hoc co giam sat",
+        "supervised learning"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Trung cấp",
+      "definition": "Học có giám sát huấn luyện mô hình trên dữ liệu đã gán nhãn để dự đoán đầu ra cho dữ liệu mới (phân loại, hồi quy). Là dạng ML phổ biến nhất.",
+      "topics": [
+        "Machine Learning",
+        "Classification",
+        "Regression"
+      ],
+      "related": [
+        "machine_learning",
+        "unsupervised_learning"
+      ]
+    },
+    "unsupervised_learning": {
+      "name": "Học không giám sát (Unsupervised Learning)",
+      "aliases": [
+        "hoc khong giam sat",
+        "unsupervised learning"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Học không giám sát tìm cấu trúc ẩn trong dữ liệu chưa gán nhãn: phân cụm (clustering), giảm chiều. Dùng để khám phá nhóm khách hàng, nén dữ liệu.",
+      "topics": [
+        "Machine Learning"
+      ],
+      "related": [
+        "supervised_learning",
+        "machine_learning"
+      ]
+    },
+    "reinforcement_learning": {
+      "name": "Học tăng cường (Reinforcement Learning)",
+      "aliases": [
+        "hoc tang cuong",
+        "reinforcement learning",
+        "rl"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Học tăng cường huấn luyện tác tử ra quyết định qua thử-sai, nhận thưởng/phạt để tối đa hóa phần thưởng dài hạn. Nền tảng của AI chơi game và robot.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": [
+        "machine_learning",
+        "ai_agent"
+      ]
+    },
+    "overfitting": {
+      "name": "Quá khớp (Overfitting)",
+      "aliases": [
+        "qua khop",
+        "overfitting"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Trung cấp",
+      "definition": "Quá khớp xảy ra khi mô hình học thuộc lòng dữ liệu huấn luyện (kể cả nhiễu) nên kém trên dữ liệu mới. Chống bằng dữ liệu nhiều hơn, regularization, dropout, cross-validation.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": [
+        "machine_learning",
+        "feature_engineering"
+      ]
+    },
+    "gradient_descent": {
+      "name": "Gradient Descent",
+      "aliases": [
+        "gradient descent",
+        "ha gradient"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Gradient Descent là thuật toán tối ưu tìm cực tiểu hàm mất mát bằng cách đi ngược hướng đạo hàm từng bước. Là cơ chế 'học' của hầu hết mô hình ML/DL.",
+      "topics": [
+        "Deep Learning",
+        "Neural Network",
+        "Machine Learning"
+      ],
+      "related": [
+        "neural_network",
+        "deep_learning"
+      ]
+    },
+    "feature_engineering": {
+      "name": "Feature Engineering",
+      "aliases": [
+        "feature engineering",
+        "ky thuat dac trung"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Trung cấp",
+      "definition": "Feature Engineering là quá trình tạo và chọn các đặc trưng (feature) tốt từ dữ liệu thô để mô hình học hiệu quả hơn. Thường quyết định thành công của một dự án ML.",
+      "topics": [
+        "Machine Learning",
+        "Data Analysis"
+      ],
+      "related": [
+        "machine_learning",
+        "overfitting"
+      ]
+    },
+    "transformer": {
+      "name": "Transformer",
+      "aliases": [
+        "transformer"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Transformer là kiến trúc mạng dùng cơ chế attention để xử lý chuỗi song song, nền tảng của các mô hình ngôn ngữ lớn (BERT, GPT). Cách mạng hóa NLP từ 2017.",
+      "topics": [
+        "Transformer",
+        "NLP",
+        "Deep Learning"
+      ],
+      "related": [
+        "nlp",
+        "llm",
+        "deep_learning"
+      ]
+    },
+    "llm": {
+      "name": "LLM (Mô hình ngôn ngữ lớn)",
+      "aliases": [
+        "llm",
+        "large language model",
+        "mo hinh ngon ngu lon"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "LLM là mô hình Transformer khổng lồ huấn luyện trên lượng văn bản lớn, có thể hiểu và sinh ngôn ngữ tự nhiên (vd GPT, Claude). Nền tảng của chatbot và trợ lý AI hiện đại.",
+      "topics": [
+        "NLP",
+        "Transformer",
+        "Deep Learning"
+      ],
+      "related": [
+        "transformer",
+        "rag",
+        "prompt_engineering"
+      ]
+    },
+    "embedding": {
+      "name": "Embedding (Vector nhúng)",
+      "aliases": [
+        "embedding",
+        "vector nhung"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Embedding biểu diễn văn bản/ảnh thành vector số sao cho các mục có ý nghĩa gần nhau nằm gần nhau trong không gian. Là lõi của tìm kiếm ngữ nghĩa và RAG (chính hệ thống này dùng).",
+      "topics": [
+        "NLP",
+        "Machine Learning"
+      ],
+      "related": [
+        "rag",
+        "nlp",
+        "transformer"
+      ]
+    },
+    "fine_tuning": {
+      "name": "Fine-tuning",
+      "aliases": [
+        "fine tuning",
+        "tinh chinh"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Fine-tuning là huấn luyện thêm một mô hình đã có sẵn trên dữ liệu chuyên biệt để nó giỏi hơn cho tác vụ/lĩnh vực cụ thể. Rẻ hơn nhiều so với huấn luyện từ đầu.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning",
+        "NLP"
+      ],
+      "related": [
+        "llm",
+        "transformer"
+      ]
+    },
+    "prompt_engineering": {
+      "name": "Prompt Engineering",
+      "aliases": [
+        "prompt engineering",
+        "thiet ke prompt"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Trung cấp",
+      "definition": "Prompt Engineering là nghệ thuật viết câu lệnh (prompt) rõ ràng, có ngữ cảnh và ví dụ để LLM trả lời chính xác và hữu ích hơn, mà không cần huấn luyện lại mô hình.",
+      "topics": [
+        "NLP",
+        "AI Basic"
+      ],
+      "related": [
+        "llm",
+        "rag"
+      ]
+    },
+    "rag": {
+      "name": "RAG (Retrieval-Augmented Generation)",
+      "aliases": [
+        "rag",
+        "retrieval augmented"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "RAG kết hợp truy hồi tài liệu với mô hình ngôn ngữ: trước khi trả lời, hệ thống tìm các đoạn liên quan từ kho dữ liệu rồi đưa vào ngữ cảnh cho LLM — nhờ đó bám dữ liệu thật, giảm 'bịa'. (Chính kiến trúc chatbot này.)",
+      "topics": [
+        "NLP",
+        "Machine Learning",
+        "Transformer"
+      ],
+      "related": [
+        "embedding",
+        "llm",
+        "langchain"
+      ]
+    },
+    "ai_agent": {
+      "name": "AI Agent",
+      "aliases": [
+        "ai agent",
+        "agent",
+        "tac tu ai"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "AI Agent dùng LLM để tự lập kế hoạch và hành động qua nhiều bước: gọi công cụ, quan sát kết quả, lặp lại đến khi hoàn thành mục tiêu — thay vì chỉ trả lời một lượt.",
+      "topics": [
+        "NLP",
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": [
+        "llm",
+        "mcp",
+        "langchain"
+      ]
+    },
+    "langchain": {
+      "name": "LangChain",
+      "aliases": [
+        "langchain"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "LangChain là framework xây ứng dụng LLM: nối mô hình với công cụ, bộ nhớ, truy hồi (RAG) và tác tử qua các 'chain'. Giúp dựng pipeline AI nhanh.",
+      "topics": [
+        "NLP",
+        "Machine Learning",
+        "AI Basic"
+      ],
+      "related": [
+        "rag",
+        "ai_agent",
+        "llamaindex"
+      ]
+    },
+    "llamaindex": {
+      "name": "LlamaIndex",
+      "aliases": [
+        "llamaindex",
+        "llama index"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "LlamaIndex chuyên lập chỉ mục và truy hồi dữ liệu cho LLM: nạp tài liệu, cắt đoạn, tạo embedding và phục vụ RAG. Mạnh ở khâu kết nối dữ liệu riêng vào mô hình.",
+      "topics": [
+        "NLP",
+        "Machine Learning",
+        "AI Basic"
+      ],
+      "related": [
+        "rag",
+        "langchain",
+        "embedding"
+      ]
+    },
+    "mcp": {
+      "name": "MCP (Model Context Protocol)",
+      "aliases": [
+        "mcp",
+        "model context protocol"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "MCP là giao thức chuẩn để mô hình AI kết nối an toàn với công cụ và nguồn dữ liệu bên ngoài (file, API, database) qua một interface thống nhất — như 'cổng USB' cho LLM.",
+      "topics": [
+        "NLP",
+        "Machine Learning",
+        "AI Basic"
+      ],
+      "related": [
+        "ai_agent",
+        "llm"
+      ]
+    },
+    "generative_ai": {
+      "name": "Generative AI (AI tạo sinh)",
+      "aliases": [
+        "generative ai",
+        "genai",
+        "ai tao sinh"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Trung cấp",
+      "definition": "Generative AI là nhóm mô hình tạo ra nội dung mới (văn bản, ảnh, code, nhạc) thay vì chỉ phân loại/dự đoán. Gồm LLM, mô hình khuếch tán (diffusion) cho ảnh.",
+      "topics": [
+        "Deep Learning",
+        "NLP",
+        "Machine Learning"
+      ],
+      "related": [
+        "llm",
+        "deep_learning"
+      ]
+    },
+    "cnn": {
+      "name": "CNN (Mạng tích chập)",
+      "aliases": [
+        "cnn",
+        "convolutional neural network",
+        "mang tich chap"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "CNN là mạng neural chuyên xử lý dữ liệu dạng lưới (ảnh) bằng các bộ lọc tích chập học đặc trưng không gian. Là kiến trúc chủ lực của thị giác máy tính.",
+      "topics": [
+        "Computer Vision",
+        "Deep Learning",
+        "Neural Network"
+      ],
+      "related": [
+        "computer_vision",
+        "deep_learning"
+      ]
+    },
+    "etl": {
+      "name": "ETL",
+      "aliases": [
+        "etl"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Trung cấp",
+      "definition": "ETL (Extract–Transform–Load) là quy trình rút trích – biến đổi – nạp dữ liệu từ nhiều nguồn về kho phân tích. Nền tảng công việc của Data Engineer.",
+      "topics": [
+        "ETL",
+        "Data Pipeline",
+        "Data Warehouse"
+      ],
+      "related": [
+        "data_warehouse",
+        "data_pipeline",
+        "spark"
+      ]
+    },
+    "data_warehouse": {
+      "name": "Data Warehouse (Kho dữ liệu)",
+      "aliases": [
+        "data warehouse",
+        "kho du lieu",
+        "dw"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Nâng cao",
+      "definition": "Data Warehouse là kho dữ liệu tập trung, tối ưu cho phân tích (OLAP) thay vì giao dịch. Tổng hợp dữ liệu lịch sử từ nhiều nguồn để báo cáo và ra quyết định.",
+      "topics": [
+        "Data Warehouse",
+        "ETL",
+        "Big Data"
+      ],
+      "related": [
+        "etl",
+        "data_lake",
+        "big_data"
+      ]
+    },
+    "data_lake": {
+      "name": "Data Lake (Hồ dữ liệu)",
+      "aliases": [
+        "data lake",
+        "ho du lieu"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Nâng cao",
+      "definition": "Data Lake lưu dữ liệu thô ở mọi định dạng (có/không cấu trúc) tại quy mô lớn, xử lý sau khi cần. Linh hoạt hơn Data Warehouse nhưng dễ thành 'đầm lầy dữ liệu' nếu không quản trị.",
+      "topics": [
+        "Data Lake",
+        "Big Data",
+        "Data Warehouse"
+      ],
+      "related": [
+        "data_warehouse",
+        "big_data"
+      ]
+    },
+    "big_data": {
+      "name": "Big Data (Dữ liệu lớn)",
+      "aliases": [
+        "big data",
+        "du lieu lon"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Nâng cao",
+      "definition": "Big Data chỉ tập dữ liệu quá lớn/nhanh/đa dạng để công cụ truyền thống xử lý (5V: Volume, Velocity, Variety, Veracity, Value). Cần công cụ phân tán như Spark, Hadoop.",
+      "topics": [
+        "Big Data",
+        "Spark",
+        "Distributed System"
+      ],
+      "related": [
+        "spark",
+        "hadoop",
+        "data_warehouse"
+      ]
+    },
+    "spark": {
+      "name": "Apache Spark",
+      "aliases": [
+        "spark",
+        "apache spark"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Nâng cao",
+      "definition": "Apache Spark là engine xử lý dữ liệu lớn phân tán trong bộ nhớ, nhanh hơn nhiều Hadoop MapReduce. Dùng cho ETL quy mô lớn, phân tích và ML trên tập dữ liệu khổng lồ.",
+      "topics": [
+        "Spark",
+        "Big Data",
+        "Data Pipeline"
+      ],
+      "related": [
+        "hadoop",
+        "kafka",
+        "big_data"
+      ]
+    },
+    "hadoop": {
+      "name": "Apache Hadoop",
+      "aliases": [
+        "hadoop",
+        "apache hadoop"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Nâng cao",
+      "definition": "Hadoop là hệ sinh thái lưu trữ (HDFS) và xử lý (MapReduce) dữ liệu lớn phân tán trên cụm máy thường. Tiền thân của các nền tảng big data hiện đại.",
+      "topics": [
+        "Big Data",
+        "Distributed System"
+      ],
+      "related": [
+        "spark",
+        "big_data"
+      ]
+    },
+    "kafka": {
+      "name": "Apache Kafka",
+      "aliases": [
+        "kafka"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Nâng cao",
+      "definition": "Apache Kafka là nền tảng streaming sự kiện phân tán: truyền dữ liệu thời gian thực giữa các hệ thống với thông lượng cao, độ trễ thấp. Lõi của kiến trúc hướng sự kiện.",
+      "topics": [
+        "Kafka",
+        "Distributed System",
+        "Big Data"
+      ],
+      "related": [
+        "spark",
+        "batch_stream"
+      ]
+    },
+    "airflow": {
+      "name": "Apache Airflow",
+      "aliases": [
+        "airflow"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Nâng cao",
+      "definition": "Apache Airflow điều phối pipeline dữ liệu bằng các DAG: lập lịch, theo dõi và xử lý phụ thuộc giữa các bước ETL. Công cụ chủ lực của Data Engineer.",
+      "topics": [
+        "Airflow",
+        "Data Pipeline",
+        "ETL"
+      ],
+      "related": [
+        "etl",
+        "data_pipeline"
+      ]
+    },
+    "data_pipeline": {
+      "name": "Data Pipeline (Đường ống dữ liệu)",
+      "aliases": [
+        "data pipeline",
+        "duong ong du lieu"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Trung cấp",
+      "definition": "Data Pipeline là chuỗi bước tự động di chuyển và biến đổi dữ liệu từ nguồn tới đích (kho phân tích, mô hình ML). Có thể chạy theo lô (batch) hoặc luồng (stream).",
+      "topics": [
+        "Data Pipeline",
+        "ETL",
+        "Airflow"
+      ],
+      "related": [
+        "etl",
+        "batch_stream"
+      ]
+    },
+    "batch_stream": {
+      "name": "Xử lý theo lô & luồng (Batch & Stream)",
+      "aliases": [
+        "batch processing",
+        "stream processing",
+        "xu ly theo lo",
+        "xu ly luong"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Nâng cao",
+      "definition": "Batch xử lý dữ liệu theo khối định kỳ (báo cáo cuối ngày); Stream xử lý từng sự kiện ngay khi đến (giám sát thời gian thực). Chọn theo yêu cầu độ trễ của bài toán.",
+      "topics": [
+        "Data Pipeline",
+        "Kafka",
+        "Big Data"
+      ],
+      "related": [
+        "kafka",
+        "data_pipeline"
+      ]
+    },
+    "devops": {
+      "name": "DevOps",
+      "aliases": [
+        "devops"
+      ],
+      "category": "DevOps",
+      "level": "Trung cấp",
+      "definition": "DevOps là văn hóa + thực hành kết hợp phát triển (Dev) và vận hành (Ops) để giao phần mềm nhanh, tự động và đáng tin cậy qua CI/CD, hạ tầng như code và giám sát.",
+      "topics": [
+        "DevOps",
+        "CI/CD",
+        "Docker"
+      ],
+      "related": [
+        "ci_cd",
+        "docker",
+        "kubernetes"
+      ]
+    },
+    "ci_cd": {
+      "name": "CI/CD",
+      "aliases": [
+        "ci cd",
+        "cicd",
+        "continuous integration",
+        "continuous delivery",
+        "ci",
+        "cd",
+        "gitlab ci"
+      ],
+      "category": "DevOps",
+      "level": "Trung cấp",
+      "definition": "CI/CD tự động hóa tích hợp (CI) và triển khai (CD): mỗi lần đẩy code sẽ tự build, test và phát hành. Giúp giao phần mềm nhanh, đều và ít lỗi.",
+      "topics": [
+        "CI/CD",
+        "DevOps",
+        "Jenkins"
+      ],
+      "related": [
+        "devops",
+        "jenkins"
+      ]
+    },
+    "docker": {
+      "name": "Docker",
+      "aliases": [
+        "docker"
+      ],
+      "category": "DevOps",
+      "level": "Trung cấp",
+      "definition": "Docker đóng gói ứng dụng cùng toàn bộ phụ thuộc vào container — đơn vị nhẹ, chạy giống nhau ở mọi nơi. Giải quyết vấn đề 'máy tôi chạy được mà máy bạn thì không'.",
+      "topics": [
+        "Docker",
+        "Container",
+        "DevOps"
+      ],
+      "related": [
+        "kubernetes",
+        "vm",
+        "container"
+      ]
+    },
+    "kubernetes": {
+      "name": "Kubernetes (K8s)",
+      "aliases": [
+        "kubernetes",
+        "k8s",
+        "k8"
+      ],
+      "category": "DevOps",
+      "level": "Nâng cao",
+      "definition": "Kubernetes điều phối container ở quy mô lớn: tự động triển khai, mở rộng, tự phục hồi và cân bằng tải cho hàng trăm container. Là 'hệ điều hành' của hạ tầng cloud-native.",
+      "topics": [
+        "Kubernetes",
+        "Container",
+        "DevOps"
+      ],
+      "related": [
+        "docker",
+        "microservices",
+        "scalability"
+      ]
+    },
+    "container": {
+      "name": "Container",
+      "aliases": [
+        "container"
+      ],
+      "category": "DevOps",
+      "level": "Trung cấp",
+      "definition": "Container đóng gói ứng dụng và phụ thuộc, chia sẻ kernel của host nên nhẹ và khởi động nhanh. Khác máy ảo (VM) vốn ảo hóa cả hệ điều hành.",
+      "topics": [
+        "Container",
+        "Docker",
+        "DevOps"
+      ],
+      "related": [
+        "docker",
+        "vm",
+        "kubernetes"
+      ]
+    },
+    "vm": {
+      "name": "Máy ảo (Virtual Machine)",
+      "aliases": [
+        "vm",
+        "virtual machine",
+        "may ao"
+      ],
+      "category": "DevOps",
+      "level": "Trung cấp",
+      "definition": "Máy ảo ảo hóa toàn bộ phần cứng và chạy một hệ điều hành đầy đủ, nên nặng và khởi động chậm hơn container (Docker) vốn chỉ chia sẻ kernel host.",
+      "topics": [
+        "DevOps",
+        "Operating System",
+        "Cloud"
+      ],
+      "related": [
+        "container",
+        "docker",
+        "virtualization"
+      ]
+    },
+    "microservices": {
+      "name": "Microservices",
+      "aliases": [
+        "microservice",
+        "microservices",
+        "vi dich vu"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Nâng cao",
+      "definition": "Microservices chia ứng dụng lớn thành nhiều dịch vụ nhỏ độc lập, mỗi dịch vụ tự triển khai và mở rộng riêng. Giúp đội lớn phát triển song song — đánh đổi bằng độ phức tạp vận hành.",
+      "topics": [
+        "Microservices",
+        "Distributed System",
+        "Backend"
+      ],
+      "related": [
+        "monolith",
+        "kubernetes",
+        "scalability"
+      ]
+    },
+    "monolith": {
+      "name": "Kiến trúc nguyên khối (Monolith)",
+      "aliases": [
+        "monolith",
+        "nguyen khoi",
+        "monolithic"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Monolith đóng gói toàn bộ ứng dụng trong một khối triển khai duy nhất. Đơn giản khi bắt đầu, nhưng khó mở rộng và bảo trì khi lớn — đối lập với microservices.",
+      "topics": [
+        "Backend",
+        "Software Architecture"
+      ],
+      "related": [
+        "microservices",
+        "backend"
+      ]
+    },
+    "serverless": {
+      "name": "Serverless",
+      "aliases": [
+        "serverless",
+        "lambda",
+        "function as a service"
+      ],
+      "category": "Điện toán đám mây",
+      "level": "Nâng cao",
+      "definition": "Serverless cho phép chạy code mà không quản lý máy chủ: nhà cung cấp tự cấp phát và mở rộng, bạn chỉ trả tiền cho thời gian chạy thực tế (vd AWS Lambda).",
+      "topics": [
+        "Serverless",
+        "Cloud",
+        "AWS"
+      ],
+      "related": [
+        "cloud",
+        "scalability"
+      ]
+    },
+    "cloud": {
+      "name": "Điện toán đám mây (Cloud Computing)",
+      "aliases": [
+        "cloud",
+        "dien toan dam may",
+        "cloud computing"
+      ],
+      "category": "Điện toán đám mây",
+      "level": "Cơ bản",
+      "definition": "Điện toán đám mây cung cấp tài nguyên (máy chủ, lưu trữ, dịch vụ) theo yêu cầu qua internet, trả tiền theo mức dùng. Ba ông lớn: AWS, Azure, Google Cloud.",
+      "topics": [
+        "Cloud",
+        "AWS",
+        "DevOps"
+      ],
+      "related": [
+        "serverless",
+        "iac",
+        "scalability"
+      ]
+    },
+    "iac": {
+      "name": "Hạ tầng như mã (Infrastructure as Code)",
+      "aliases": [
+        "infrastructure as code",
+        "iac",
+        "ha tang nhu ma"
+      ],
+      "category": "DevOps",
+      "level": "Nâng cao",
+      "definition": "IaC quản lý hạ tầng (máy chủ, mạng) bằng file mã nguồn thay vì thao tác tay, cho phép tái tạo môi trường nhất quán và phiên bản hóa (vd Terraform, Ansible).",
+      "topics": [
+        "DevOps",
+        "Cloud",
+        "Terraform"
+      ],
+      "related": [
+        "terraform",
+        "devops"
+      ]
+    },
+    "terraform": {
+      "name": "Terraform",
+      "aliases": [
+        "terraform"
+      ],
+      "category": "DevOps",
+      "level": "Nâng cao",
+      "definition": "Terraform là công cụ IaC khai báo cho phép tạo và quản lý hạ tầng đa nền tảng (AWS/Azure/GCP) bằng cấu hình HCL. Theo dõi trạng thái để cập nhật an toàn.",
+      "topics": [
+        "Terraform",
+        "DevOps",
+        "Cloud"
+      ],
+      "related": [
+        "iac"
+      ]
+    },
+    "jenkins": {
+      "name": "Jenkins",
+      "aliases": [
+        "jenkins"
+      ],
+      "category": "DevOps",
+      "level": "Trung cấp",
+      "definition": "Jenkins là máy chủ tự động hóa mã nguồn mở phổ biến để xây pipeline CI/CD: tự build, test và triển khai khi có thay đổi code.",
+      "topics": [
+        "Jenkins",
+        "CI/CD",
+        "DevOps"
+      ],
+      "related": [
+        "ci_cd",
+        "devops"
+      ]
+    },
+    "monitoring": {
+      "name": "Giám sát (Monitoring)",
+      "aliases": [
+        "monitoring",
+        "giam sat",
+        "observability"
+      ],
+      "category": "DevOps",
+      "level": "Nâng cao",
+      "definition": "Giám sát thu thập metric, log và trace để theo dõi sức khỏe hệ thống, cảnh báo sự cố và phân tích hiệu năng (vd Prometheus, Grafana). Cốt lõi của vận hành tin cậy.",
+      "topics": [
+        "Monitoring",
+        "DevOps"
+      ],
+      "related": [
+        "devops",
+        "scalability"
+      ]
+    },
+    "scalability": {
+      "name": "Khả năng mở rộng (Scalability)",
+      "aliases": [
+        "scalability",
+        "kha nang mo rong",
+        "scaling"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Nâng cao",
+      "definition": "Khả năng mở rộng là năng lực hệ thống đáp ứng tải tăng: mở rộng dọc (máy mạnh hơn) hoặc ngang (thêm nhiều máy). Cân bằng tải và stateless là chìa khóa mở rộng ngang.",
+      "topics": [
+        "Distributed System",
+        "System Design",
+        "Backend"
+      ],
+      "related": [
+        "load_balancing",
+        "microservices"
+      ]
+    },
+    "load_balancing": {
+      "name": "Cân bằng tải (Load Balancing)",
+      "aliases": [
+        "load balancing",
+        "can bang tai"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Nâng cao",
+      "definition": "Cân bằng tải phân phối request đến nhiều máy chủ để không máy nào quá tải, tăng độ sẵn sàng và hiệu năng. Là thành phần cốt lõi của hệ thống quy mô lớn.",
+      "topics": [
+        "Distributed System",
+        "Mạng máy tính",
+        "System Design"
+      ],
+      "related": [
+        "scalability",
+        "cdn"
+      ]
+    },
+    "git": {
+      "name": "Git",
+      "aliases": [
+        "git",
+        "version control",
+        "quan ly phien ban"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Cơ bản",
+      "definition": "Git là hệ thống quản lý phiên bản phân tán: theo dõi lịch sử thay đổi code, hỗ trợ nhánh, hợp nhất và cộng tác nhóm. Kỹ năng bắt buộc của mọi lập trình viên.",
+      "topics": [
+        "Git",
+        "Version Control"
+      ],
+      "related": [
+        "ci_cd",
+        "code_review"
+      ]
+    },
+    "cybersecurity": {
+      "name": "An ninh mạng (Cybersecurity)",
+      "aliases": [
+        "cyber security",
+        "cybersecurity",
+        "an ninh mang",
+        "bao mat",
+        "cybersec"
+      ],
+      "category": "An ninh mạng",
+      "level": "Cơ bản",
+      "definition": "An ninh mạng bảo vệ hệ thống, mạng và dữ liệu khỏi tấn công. Gồm nhiều mảng: bảo mật web (OWASP), mật mã học, kiểm thử xâm nhập, ứng phó sự cố.",
+      "topics": [
+        "Security",
+        "OWASP",
+        "Penetration Testing"
+      ],
+      "related": [
+        "encryption",
+        "owasp",
+        "penetration_testing"
+      ]
+    },
+    "encryption": {
+      "name": "Mã hóa (Encryption)",
+      "aliases": [
+        "ma hoa",
+        "encryption"
+      ],
+      "category": "An ninh mạng",
+      "level": "Trung cấp",
+      "definition": "Mã hóa biến dữ liệu thành dạng không đọc được nếu không có khóa, bảo vệ tính bí mật. Gồm mã hóa đối xứng (một khóa) và bất đối xứng (khóa công khai/riêng tư).",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": [
+        "hashing",
+        "public_key",
+        "ssl_tls"
+      ]
+    },
+    "hashing": {
+      "name": "Băm (Hashing)",
+      "aliases": [
+        "hashing",
+        "bam",
+        "hash"
+      ],
+      "category": "An ninh mạng",
+      "level": "Trung cấp",
+      "definition": "Hàm băm biến dữ liệu thành chuỗi cố định một chiều (không giải ngược được). Dùng để lưu mật khẩu an toàn và kiểm tra toàn vẹn dữ liệu — khác mã hóa (hai chiều).",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": [
+        "encryption",
+        "jwt"
+      ]
+    },
+    "jwt": {
+      "name": "JWT (JSON Web Token)",
+      "aliases": [
+        "jwt",
+        "json web token"
+      ],
+      "category": "An ninh mạng",
+      "level": "Trung cấp",
+      "definition": "JWT là chuẩn token gọn nhẹ để xác thực không trạng thái: server ký một token đưa cho client; mỗi request client gửi kèm token, server chỉ cần xác minh chữ ký mà không phải lưu phiên.",
+      "topics": [
+        "Security",
+        "Backend",
+        "REST API"
+      ],
+      "related": [
+        "oauth",
+        "auth"
+      ]
+    },
+    "oauth": {
+      "name": "OAuth",
+      "aliases": [
+        "oauth",
+        "oauth2"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "OAuth là chuẩn ủy quyền cho phép ứng dụng truy cập tài nguyên thay người dùng mà không cần biết mật khẩu (vd 'Đăng nhập bằng Google'). Cấp token có phạm vi giới hạn.",
+      "topics": [
+        "Security",
+        "Backend"
+      ],
+      "related": [
+        "jwt",
+        "auth"
+      ]
+    },
+    "auth": {
+      "name": "Xác thực & Phân quyền (Authentication & Authorization)",
+      "aliases": [
+        "authentication",
+        "authorization",
+        "xac thuc",
+        "phan quyen"
+      ],
+      "category": "An ninh mạng",
+      "level": "Trung cấp",
+      "definition": "Xác thực (authentication) trả lời 'bạn là ai'; phân quyền (authorization) trả lời 'bạn được làm gì'. Hai lớp bảo vệ nền tảng của mọi hệ thống.",
+      "topics": [
+        "Security",
+        "Backend"
+      ],
+      "related": [
+        "jwt",
+        "oauth"
+      ]
+    },
+    "sql_injection": {
+      "name": "SQL Injection",
+      "aliases": [
+        "sql injection",
+        "sqli"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "SQL Injection là tấn công chèn mã SQL độc hại qua ô nhập liệu để truy cập/sửa dữ liệu trái phép. Phòng bằng truy vấn tham số hóa (prepared statement) và kiểm tra đầu vào.",
+      "topics": [
+        "Security",
+        "OWASP",
+        "Database"
+      ],
+      "related": [
+        "xss",
+        "owasp"
+      ]
+    },
+    "xss": {
+      "name": "XSS (Cross-Site Scripting)",
+      "aliases": [
+        "xss",
+        "cross site scripting"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "XSS là tấn công chèn mã JavaScript độc vào trang web để đánh cắp phiên/dữ liệu người dùng khác. Phòng bằng escape đầu ra và Content Security Policy.",
+      "topics": [
+        "Security",
+        "OWASP",
+        "Lập trình Web"
+      ],
+      "related": [
+        "sql_injection",
+        "owasp"
+      ]
+    },
+    "owasp": {
+      "name": "OWASP Top 10",
+      "aliases": [
+        "owasp"
+      ],
+      "category": "An ninh mạng",
+      "level": "Trung cấp",
+      "definition": "OWASP Top 10 là danh sách 10 rủi ro bảo mật web nghiêm trọng nhất (injection, broken auth, XSS...), là chuẩn tham chiếu để lập trình web an toàn.",
+      "topics": [
+        "OWASP",
+        "Security"
+      ],
+      "related": [
+        "sql_injection",
+        "xss",
+        "cybersecurity"
+      ]
+    },
+    "penetration_testing": {
+      "name": "Kiểm thử xâm nhập (Penetration Testing)",
+      "aliases": [
+        "penetration testing",
+        "pentest",
+        "kiem thu xam nhap"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Pentest là mô phỏng tấn công có kiểm soát để tìm và vá lỗ hổng trước khi tin tặc khai thác. Thực hiện trên môi trường được phép, dùng công cụ như Kali Linux.",
+      "topics": [
+        "Penetration Testing",
+        "Security",
+        "Kali Linux"
+      ],
+      "related": [
+        "owasp",
+        "cybersecurity"
+      ]
+    },
+    "ssl_tls": {
+      "name": "SSL/TLS",
+      "aliases": [
+        "ssl",
+        "tls",
+        "ssl/tls"
+      ],
+      "category": "An ninh mạng",
+      "level": "Trung cấp",
+      "definition": "TLS (kế thừa SSL) mã hóa kết nối giữa client và server (nền tảng của HTTPS), đảm bảo dữ liệu truyền đi bí mật và không bị giả mạo, dùng chứng chỉ số.",
+      "topics": [
+        "Security",
+        "Mạng máy tính",
+        "HTTP"
+      ],
+      "related": [
+        "http",
+        "encryption",
+        "public_key"
+      ]
+    },
+    "public_key": {
+      "name": "Mật mã khóa công khai (Public-key Cryptography)",
+      "aliases": [
+        "public key",
+        "mat ma khoa cong khai",
+        "asymmetric"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Mã hóa bất đối xứng dùng cặp khóa: khóa công khai để mã hóa/xác minh, khóa riêng tư để giải mã/ký. Nền tảng của HTTPS, chữ ký số và blockchain.",
+      "topics": [
+        "Cryptography",
+        "Security"
+      ],
+      "related": [
+        "encryption",
+        "ssl_tls",
+        "blockchain"
+      ]
+    },
+    "tcp_ip": {
+      "name": "TCP/IP",
+      "aliases": [
+        "tcp ip",
+        "tcp"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "TCP/IP là bộ giao thức nền tảng của Internet: IP định tuyến gói tin tới đúng địa chỉ, TCP đảm bảo truyền đáng tin cậy theo đúng thứ tự. Khung tham chiếu cho mọi giao tiếp mạng.",
+      "topics": [
+        "TCP/IP",
+        "Mạng máy tính"
+      ],
+      "related": [
+        "dns",
+        "http",
+        "osi_model"
+      ]
+    },
+    "dns": {
+      "name": "DNS (Hệ thống tên miền)",
+      "aliases": [
+        "dns",
+        "domain name system"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "DNS là 'danh bạ' của Internet, dịch tên miền dễ nhớ (google.com) sang địa chỉ IP máy chủ. Không có DNS, ta phải nhớ dãy số IP cho mỗi website.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": [
+        "tcp_ip",
+        "cdn"
+      ]
+    },
+    "osi_model": {
+      "name": "Mô hình OSI",
+      "aliases": [
+        "osi",
+        "osi model",
+        "mo hinh osi"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Mô hình OSI chia giao tiếp mạng thành 7 tầng (vật lý → ứng dụng), giúp chuẩn hóa và gỡ lỗi mạng theo từng lớp. Khung lý thuyết quan trọng để hiểu networking.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": [
+        "tcp_ip",
+        "dns"
+      ]
+    },
+    "cdn": {
+      "name": "CDN (Mạng phân phối nội dung)",
+      "aliases": [
+        "cdn",
+        "content delivery network"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Nâng cao",
+      "definition": "CDN là mạng máy chủ phân tán toàn cầu lưu bản sao nội dung gần người dùng, giảm độ trễ và tải cho server gốc. Tăng tốc website và chịu lưu lượng lớn.",
+      "topics": [
+        "Mạng máy tính",
+        "Cloud"
+      ],
+      "related": [
+        "load_balancing",
+        "cloud"
+      ]
+    },
+    "agile": {
+      "name": "Agile",
+      "aliases": [
+        "agile"
+      ],
+      "category": "Quản lý dự án CNTT",
+      "level": "Cơ bản",
+      "definition": "Agile là triết lý phát triển phần mềm linh hoạt, lặp ngắn, ưu tiên giá trị cho khách hàng và thích ứng thay đổi hơn bám kế hoạch cứng. Scrum và Kanban là khung triển khai phổ biến.",
+      "topics": [
+        "Agile",
+        "Scrum Master",
+        "Sprint Planning"
+      ],
+      "related": [
+        "scrum",
+        "kanban"
+      ]
+    },
+    "scrum": {
+      "name": "Scrum",
+      "aliases": [
+        "scrum"
+      ],
+      "category": "Quản lý dự án CNTT",
+      "level": "Trung cấp",
+      "definition": "Scrum là khung làm việc Agile tổ chức công việc theo sprint (1–4 tuần) với vai trò (PO, Scrum Master, Dev) và nghi thức (planning, daily, review, retro) rõ ràng.",
+      "topics": [
+        "Scrum Master",
+        "Sprint Planning",
+        "Agile"
+      ],
+      "related": [
+        "agile",
+        "kanban"
+      ]
+    },
+    "kanban": {
+      "name": "Kanban",
+      "aliases": [
+        "kanban"
+      ],
+      "category": "Quản lý dự án CNTT",
+      "level": "Trung cấp",
+      "definition": "Kanban trực quan hóa công việc trên bảng (To Do → Doing → Done), giới hạn việc đang làm để tối ưu dòng chảy. Linh hoạt, không cố định sprint như Scrum.",
+      "topics": [
+        "Agile",
+        "Scrum Master"
+      ],
+      "related": [
+        "agile",
+        "scrum"
+      ]
+    },
+    "design_pattern": {
+      "name": "Mẫu thiết kế (Design Pattern)",
+      "aliases": [
+        "design pattern",
+        "mau thiet ke"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Nâng cao",
+      "definition": "Design Pattern là giải pháp tái sử dụng cho các bài toán thiết kế thường gặp (Singleton, Factory, Observer...). Giúp code chuẩn, dễ trao đổi và bảo trì.",
+      "topics": [
+        "Design Pattern",
+        "OOP",
+        "Refactoring"
+      ],
+      "related": [
+        "oop",
+        "solid",
+        "refactoring"
+      ]
+    },
+    "solid": {
+      "name": "Nguyên lý SOLID",
+      "aliases": [
+        "solid"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Nâng cao",
+      "definition": "SOLID là 5 nguyên lý thiết kế hướng đối tượng (Single responsibility, Open/closed, Liskov, Interface segregation, Dependency inversion) giúp code linh hoạt, dễ mở rộng và bảo trì.",
+      "topics": [
+        "Design Pattern",
+        "OOP",
+        "Refactoring"
+      ],
+      "related": [
+        "oop",
+        "design_pattern"
+      ]
+    },
+    "mvc": {
+      "name": "MVC (Model–View–Controller)",
+      "aliases": [
+        "mvc",
+        "model view controller"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "MVC tách ứng dụng thành Model (dữ liệu), View (giao diện) và Controller (điều phối), giúp code có tổ chức, dễ test và bảo trì. Nền tảng của nhiều web framework.",
+      "topics": [
+        "Software Architecture",
+        "Backend",
+        "Design Pattern"
+      ],
+      "related": [
+        "design_pattern",
+        "backend"
+      ]
+    },
+    "refactoring": {
+      "name": "Tái cấu trúc (Refactoring)",
+      "aliases": [
+        "refactoring",
+        "tai cau truc"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Refactoring là cải thiện cấu trúc code mà không đổi hành vi bên ngoài, giúp code dễ đọc/bảo trì hơn. Cần có test bao phủ để đảm bảo không phát sinh lỗi.",
+      "topics": [
+        "Refactoring",
+        "Design Pattern"
+      ],
+      "related": [
+        "technical_debt",
+        "unit_test"
+      ]
+    },
+    "technical_debt": {
+      "name": "Nợ kỹ thuật (Technical Debt)",
+      "aliases": [
+        "technical debt",
+        "no ky thuat"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Nợ kỹ thuật là cái giá tương lai của các quyết định 'làm nhanh cho xong' hôm nay (code cẩu thả, thiếu test). Tích tụ nhiều sẽ làm chậm phát triển — cần trả dần bằng refactoring.",
+      "topics": [
+        "Refactoring",
+        "Software Architecture"
+      ],
+      "related": [
+        "refactoring",
+        "code_review"
+      ]
+    },
+    "unit_test": {
+      "name": "Kiểm thử đơn vị (Unit Test)",
+      "aliases": [
+        "unit test",
+        "kiem thu don vi"
+      ],
+      "category": "Kiểm thử phần mềm",
+      "level": "Trung cấp",
+      "definition": "Unit test kiểm tra một đơn vị code nhỏ nhất (hàm/lớp) một cách độc lập, tự động. Bắt lỗi sớm và là 'lưới an toàn' cho refactoring.",
+      "topics": [
+        "Testing",
+        "Refactoring"
+      ],
+      "related": [
+        "tdd",
+        "debugging"
+      ]
+    },
+    "tdd": {
+      "name": "TDD (Phát triển hướng kiểm thử)",
+      "aliases": [
+        "tdd",
+        "test driven development"
+      ],
+      "category": "Kiểm thử phần mềm",
+      "level": "Nâng cao",
+      "definition": "TDD viết test trước, rồi viết code đủ để test xanh, sau đó refactor (Red–Green–Refactor). Giúp thiết kế tốt hơn và đảm bảo độ bao phủ test cao.",
+      "topics": [
+        "Testing"
+      ],
+      "related": [
+        "unit_test",
+        "refactoring"
+      ]
+    },
+    "code_review": {
+      "name": "Đánh giá mã (Code Review)",
+      "aliases": [
+        "code review",
+        "danh gia ma",
+        "review code"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Code review là việc đồng đội đọc và góp ý code trước khi hợp nhất, giúp bắt lỗi, nâng chất lượng và chia sẻ kiến thức. Thực hành chuẩn của mọi đội phần mềm.",
+      "topics": [
+        "Git",
+        "Version Control",
+        "Refactoring"
+      ],
+      "related": [
+        "git",
+        "unit_test"
+      ]
+    },
+    "operating_system": {
+      "name": "Hệ điều hành (Operating System)",
+      "aliases": [
+        "he dieu hanh",
+        "operating system",
+        "os"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Hệ điều hành quản lý phần cứng và tài nguyên (CPU, bộ nhớ, file, thiết bị) và cung cấp môi trường chạy chương trình (vd Linux, Windows). Cầu nối giữa phần cứng và ứng dụng.",
+      "topics": [
+        "Operating System",
+        "Computer Architecture"
+      ],
+      "related": [
+        "process_thread",
+        "linux",
+        "memory_management"
+      ]
+    },
+    "process_thread": {
+      "name": "Tiến trình & Luồng (Process & Thread)",
+      "aliases": [
+        "process",
+        "thread",
+        "tien trinh",
+        "luong"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Nâng cao",
+      "definition": "Tiến trình là chương trình đang chạy với vùng nhớ riêng; luồng là đơn vị thực thi nhỏ hơn bên trong tiến trình, chia sẻ bộ nhớ. Hiểu chúng là cốt lõi của lập trình đa nhiệm.",
+      "topics": [
+        "Operating System",
+        "Concurrency",
+        "Thread"
+      ],
+      "related": [
+        "concurrency",
+        "operating_system"
+      ]
+    },
+    "concurrency": {
+      "name": "Lập trình đồng thời (Concurrency)",
+      "aliases": [
+        "concurrency",
+        "dong thoi",
+        "song song"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Nâng cao",
+      "definition": "Concurrency là xử lý nhiều tác vụ chồng lấn thời gian để tận dụng tài nguyên (đa luồng, bất đồng bộ). Thách thức: race condition, deadlock, đồng bộ hóa.",
+      "topics": [
+        "Concurrency",
+        "Thread",
+        "Operating System"
+      ],
+      "related": [
+        "process_thread",
+        "operating_system"
+      ]
+    },
+    "memory_management": {
+      "name": "Quản lý bộ nhớ (Memory Management)",
+      "aliases": [
+        "memory management",
+        "quan ly bo nho"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Nâng cao",
+      "definition": "Quản lý bộ nhớ kiểm soát việc cấp phát và thu hồi bộ nhớ cho chương trình (stack/heap, garbage collection). Quản lý sai gây rò rỉ bộ nhớ hoặc treo ứng dụng.",
+      "topics": [
+        "Memory Management",
+        "Operating System"
+      ],
+      "related": [
+        "operating_system",
+        "c_language"
+      ]
+    },
+    "linux": {
+      "name": "Linux",
+      "aliases": [
+        "linux"
+      ],
+      "category": "Quản trị hệ thống & Linux",
+      "level": "Trung cấp",
+      "definition": "Linux là hệ điều hành mã nguồn mở thống trị máy chủ, cloud và thiết bị nhúng. Thành thạo dòng lệnh Linux là kỹ năng bắt buộc của DevOps và quản trị hệ thống.",
+      "topics": [
+        "Linux",
+        "Operating System"
+      ],
+      "related": [
+        "operating_system",
+        "devops"
+      ]
+    },
+    "cache": {
+      "name": "Bộ nhớ đệm (Cache)",
+      "aliases": [
+        "cache",
+        "bo nho dem",
+        "caching"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Cache lưu tạm dữ liệu hay dùng ở nơi truy cập nhanh để tránh tính/lấy lại tốn kém, tăng tốc hệ thống đáng kể. Thách thức cốt lõi: làm mới (invalidation) khi dữ liệu đổi.",
+      "topics": [
+        "Caching",
+        "Redis",
+        "System Design"
+      ],
+      "related": [
+        "redis",
+        "scalability"
+      ]
+    },
+    "virtualization": {
+      "name": "Ảo hóa (Virtualization)",
+      "aliases": [
+        "virtualization",
+        "ao hoa"
+      ],
+      "category": "Điện toán đám mây",
+      "level": "Nâng cao",
+      "definition": "Ảo hóa tạo nhiều tài nguyên ảo (máy ảo) trên một phần cứng vật lý qua hypervisor, tận dụng tối đa máy chủ. Là nền tảng của điện toán đám mây.",
+      "topics": [
+        "Cloud",
+        "Operating System",
+        "DevOps"
+      ],
+      "related": [
+        "vm",
+        "cloud",
+        "container"
+      ]
+    },
+    "android": {
+      "name": "Android",
+      "aliases": [
+        "android"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Trung cấp",
+      "definition": "Android là hệ điều hành di động mã nguồn mở của Google, lập trình chủ yếu bằng Kotlin/Java. Nền tảng di động phổ biến nhất thế giới.",
+      "topics": [
+        "Android",
+        "Kotlin",
+        "Lập trình Mobile"
+      ],
+      "related": [
+        "ios",
+        "flutter",
+        "java"
+      ]
+    },
+    "ios": {
+      "name": "iOS",
+      "aliases": [
+        "ios"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Trung cấp",
+      "definition": "iOS là hệ điều hành di động của Apple, lập trình bằng Swift. Yêu cầu hệ sinh thái Apple nhưng có người dùng chi tiêu cao.",
+      "topics": [
+        "iOS",
+        "Swift",
+        "Lập trình Mobile"
+      ],
+      "related": [
+        "android",
+        "flutter"
+      ]
+    },
+    "flutter": {
+      "name": "Flutter",
+      "aliases": [
+        "flutter"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Trung cấp",
+      "definition": "Flutter là framework của Google dùng ngôn ngữ Dart để viết một lần, chạy trên cả Android lẫn iOS (và web) với giao diện đẹp, hiệu năng cao.",
+      "topics": [
+        "Flutter",
+        "Lập trình Mobile"
+      ],
+      "related": [
+        "react_native",
+        "android",
+        "ios"
+      ]
+    },
+    "react_native": {
+      "name": "React Native",
+      "aliases": [
+        "react native"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Trung cấp",
+      "definition": "React Native dùng React/JavaScript để xây ứng dụng di động đa nền tảng với thành phần gốc thật. Tận dụng được kiến thức web để làm mobile.",
+      "topics": [
+        "React Native",
+        "Lập trình Mobile",
+        "JavaScript"
+      ],
+      "related": [
+        "flutter",
+        "react"
+      ]
+    },
+    "blockchain": {
+      "name": "Blockchain",
+      "aliases": [
+        "blockchain"
+      ],
+      "category": "Blockchain & Web3",
+      "level": "Nâng cao",
+      "definition": "Blockchain là sổ cái phân tán bất biến, lưu giao dịch thành các khối nối với nhau bằng mật mã, không cần bên trung gian tin cậy. Nền tảng của tiền mã hóa và Web3.",
+      "topics": [
+        "Blockchain",
+        "Cryptography"
+      ],
+      "related": [
+        "smart_contract",
+        "cryptocurrency",
+        "public_key"
+      ]
+    },
+    "smart_contract": {
+      "name": "Hợp đồng thông minh (Smart Contract)",
+      "aliases": [
+        "smart contract",
+        "hop dong thong minh"
+      ],
+      "category": "Blockchain & Web3",
+      "level": "Nâng cao",
+      "definition": "Smart Contract là chương trình tự động thực thi trên blockchain khi điều kiện được thỏa, không cần trung gian (vd trên Ethereum, viết bằng Solidity). Nền tảng của DeFi và Web3.",
+      "topics": [
+        "Blockchain",
+        "Smart Contract",
+        "Ethereum"
+      ],
+      "related": [
+        "blockchain",
+        "cryptocurrency"
+      ]
+    },
+    "cryptocurrency": {
+      "name": "Tiền mã hóa (Cryptocurrency)",
+      "aliases": [
+        "cryptocurrency",
+        "tien ma hoa",
+        "crypto"
+      ],
+      "category": "Blockchain & Web3",
+      "level": "Trung cấp",
+      "definition": "Tiền mã hóa là tài sản số dùng mật mã để bảo mật giao dịch, vận hành trên blockchain phi tập trung (vd Bitcoin, Ethereum). Không do ngân hàng trung ương phát hành.",
+      "topics": [
+        "Blockchain",
+        "Cryptography"
+      ],
+      "related": [
+        "blockchain",
+        "smart_contract"
+      ]
+    },
+    "iot": {
+      "name": "IoT (Internet vạn vật)",
+      "aliases": [
+        "iot",
+        "internet of things",
+        "internet van vat"
+      ],
+      "category": "IoT & Hệ thống nhúng",
+      "level": "Trung cấp",
+      "definition": "IoT là mạng các thiết bị vật lý gắn cảm biến và kết nối internet để thu thập/trao đổi dữ liệu (nhà thông minh, công nghiệp 4.0). Kết hợp phần cứng nhúng, mạng và dữ liệu.",
+      "topics": [
+        "IoT",
+        "Embedded",
+        "Mạng máy tính"
+      ],
+      "related": [
+        "embedded",
+        "big_data"
+      ]
+    },
+    "embedded": {
+      "name": "Hệ thống nhúng (Embedded System)",
+      "aliases": [
+        "embedded",
+        "he thong nhung",
+        "nhung"
+      ],
+      "category": "IoT & Hệ thống nhúng",
+      "level": "Nâng cao",
+      "definition": "Hệ thống nhúng là máy tính chuyên dụng tích hợp trong thiết bị (vi điều khiển) để điều khiển chức năng cụ thể, tài nguyên hạn chế (vd Arduino, vi xử lý ô tô).",
+      "topics": [
+        "Embedded",
+        "IoT",
+        "Arduino"
+      ],
+      "related": [
+        "iot",
+        "c_language"
+      ]
+    },
+    "ar_vr": {
+      "name": "AR / VR (Thực tế tăng cường / ảo)",
+      "aliases": [
+        "ar vr",
+        "thuc te ao",
+        "virtual reality",
+        "augmented reality",
+        "vr",
+        "ar"
+      ],
+      "category": "AR/VR & Thực tế ảo",
+      "level": "Nâng cao",
+      "definition": "VR đưa người dùng vào môi trường ảo hoàn toàn; AR phủ thông tin số lên thế giới thực. Ứng dụng trong game, giáo dục, mô phỏng và đào tạo.",
+      "topics": [
+        "Virtual Reality",
+        "Unity"
+      ],
+      "related": [
+        "game_engine"
+      ]
+    },
+    "game_engine": {
+      "name": "Game Engine",
+      "aliases": [
+        "game engine",
+        "engine game"
+      ],
+      "category": "Phát triển Game",
+      "level": "Nâng cao",
+      "definition": "Game Engine cung cấp sẵn đồ họa, vật lý, âm thanh và công cụ để xây game nhanh (vd Unity, Unreal Engine). Lập trình viên tập trung vào gameplay thay vì viết lại nền tảng.",
+      "topics": [
+        "Game Development",
+        "Unity"
+      ],
+      "related": [
+        "ar_vr",
+        "csharp"
+      ]
+    },
+    "quantum_computing": {
+      "name": "Điện toán lượng tử (Quantum Computing)",
+      "aliases": [
+        "quantum computing",
+        "dien toan luong tu",
+        "luong tu"
+      ],
+      "category": "Điện toán lượng tử",
+      "level": "Nâng cao",
+      "definition": "Điện toán lượng tử dùng qubit (chồng chập và vướng víu lượng tử) để giải một số bài toán nhanh hơn máy tính cổ điển theo cấp số mũ (mật mã, mô phỏng phân tử). Còn ở giai đoạn đầu.",
+      "topics": [
+        "Quantum Computing"
+      ],
+      "related": [
+        "encryption"
+      ]
+    },
+    "ui_ux": {
+      "name": "UI/UX (Thiết kế giao diện & trải nghiệm)",
+      "aliases": [
+        "ui ux",
+        "thiet ke giao dien",
+        "trai nghiem nguoi dung",
+        "ui",
+        "ux"
+      ],
+      "category": "Thiết kế UI/UX",
+      "level": "Cơ bản",
+      "definition": "UI là thiết kế giao diện (màu, bố cục, nút); UX là thiết kế trải nghiệm tổng thể sao cho dễ dùng và hữu ích. Tốt cả hai mới giữ chân người dùng (vd dùng Figma).",
+      "topics": [
+        "Design System",
+        "Figma"
+      ],
+      "related": [
+        "frontend",
+        "responsive_design"
+      ]
+    },
+    "responsive_design": {
+      "name": "Thiết kế đáp ứng (Responsive Design)",
+      "aliases": [
+        "responsive design",
+        "thiet ke dap ung",
+        "responsive"
+      ],
+      "category": "Thiết kế UI/UX",
+      "level": "Trung cấp",
+      "definition": "Responsive Design giúp trang web tự điều chỉnh bố cục phù hợp mọi kích thước màn hình (điện thoại, tablet, desktop) bằng CSS linh hoạt và media query.",
+      "topics": [
+        "Frontend",
+        "Lập trình Web"
+      ],
+      "related": [
+        "css",
+        "ui_ux"
+      ]
+    },
+    "web3": {
+      "name": "Web3",
+      "aliases": [
+        "web3",
+        "web 3"
+      ],
+      "category": "Blockchain & Web3",
+      "level": "Nâng cao",
+      "definition": "Web3 là tầm nhìn về Internet phi tập trung dựa trên blockchain, nơi người dùng sở hữu dữ liệu và tài sản số mà không phụ thuộc nền tảng tập trung. Bao gồm DeFi, NFT, DAO.",
+      "topics": [
+        "Blockchain",
+        "Ethereum",
+        "Smart Contract"
+      ],
+      "related": [
+        "blockchain",
+        "smart_contract"
+      ]
+    },
+    "business_analysis": {
+      "name": "Phân tích nghiệp vụ (Business Analysis)",
+      "aliases": [
+        "business analysis",
+        "phan tich nghiep vu",
+        "ba"
+      ],
+      "category": "Phân tích nghiệp vụ (BA)",
+      "level": "Trung cấp",
+      "definition": "Phân tích nghiệp vụ là cầu nối giữa nhu cầu kinh doanh và giải pháp CNTT: thu thập yêu cầu, mô hình hóa quy trình, viết tài liệu (user story, UML). Đảm bảo xây đúng thứ cần xây.",
+      "topics": [
+        "Business Analysis",
+        "UML",
+        "User Story"
+      ],
+      "related": [
+        "agile",
+        "data_modeling"
+      ]
+    },
+    "cntt": {
+      "name": "CNTT (Công nghệ thông tin)",
+      "aliases": [
+        "cntt",
+        "cong nghe thong tin",
+        "information technology",
+        "it"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Công nghệ thông tin (CNTT/IT) là lĩnh vực sử dụng máy tính, phần mềm, mạng và dữ liệu để lưu trữ, xử lý và truyền tải thông tin. Bao trùm nhiều mảng: lập trình, mạng, cơ sở dữ liệu, AI, an ninh mạng, hệ thống và quản trị.",
+      "topics": [
+        "Lập trình",
+        "Computer Architecture",
+        "Operating System"
+      ],
+      "related": [
+        "computer_science",
+        "software",
+        "hardware",
+        "internet"
+      ],
+      "example": "Một website bán hàng dùng CNTT: code (lập trình), máy chủ (hạ tầng), cơ sở dữ liệu và mạng Internet."
+    },
+    "computer_science": {
+      "name": "Khoa học máy tính (Computer Science)",
+      "aliases": [
+        "khoa hoc may tinh",
+        "computer science",
+        "cs"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Khoa học máy tính nghiên cứu lý thuyết tính toán, thuật toán, cấu trúc dữ liệu, ngôn ngữ và kiến trúc máy tính — phần 'khoa học' nền tảng đứng sau công nghệ thông tin.",
+      "topics": [
+        "Computer Architecture",
+        "Algorithms",
+        "Data Structures"
+      ],
+      "related": [
+        "cntt",
+        "algorithm",
+        "data_structure"
+      ]
+    },
+    "software": {
+      "name": "Phần mềm (Software)",
+      "aliases": [
+        "phan mem",
+        "software"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Phần mềm là tập hợp chương trình và dữ liệu ra lệnh cho máy tính thực hiện công việc (hệ điều hành, ứng dụng, trình duyệt). Đối lập với phần cứng — phần vật lý sờ được.",
+      "topics": [
+        "Lập trình",
+        "Operating System"
+      ],
+      "related": [
+        "hardware",
+        "operating_system",
+        "programming"
+      ]
+    },
+    "hardware": {
+      "name": "Phần cứng (Hardware)",
+      "aliases": [
+        "phan cung",
+        "hardware"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Phần cứng là các bộ phận vật lý của máy tính: CPU, RAM, ổ cứng, bo mạch, thiết bị ngoại vi. Phần mềm chạy trên nền phần cứng.",
+      "topics": [
+        "Computer Architecture",
+        "Operating System"
+      ],
+      "related": [
+        "software",
+        "cpu",
+        "computer"
+      ]
+    },
+    "computer": {
+      "name": "Máy tính (Computer)",
+      "aliases": [
+        "may tinh",
+        "computer"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Máy tính là thiết bị điện tử nhận đầu vào, xử lý theo chương trình và xuất kết quả. Gồm phần cứng (CPU, bộ nhớ, lưu trữ) và phần mềm điều khiển.",
+      "topics": [
+        "Computer Architecture",
+        "Operating System"
+      ],
+      "related": [
+        "hardware",
+        "cpu",
+        "operating_system"
+      ]
+    },
+    "cpu": {
+      "name": "CPU (Bộ xử lý trung tâm)",
+      "aliases": [
+        "cpu",
+        "bo xu ly trung tam",
+        "vi xu ly"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "CPU là 'bộ não' của máy tính, thực thi các lệnh và phép tính. Hiệu năng phụ thuộc số nhân, xung nhịp và kiến trúc.",
+      "topics": [
+        "Computer Architecture",
+        "Operating System"
+      ],
+      "related": [
+        "ram",
+        "gpu",
+        "hardware"
+      ]
+    },
+    "ram": {
+      "name": "RAM (Bộ nhớ trong)",
+      "aliases": [
+        "ram",
+        "bo nho trong",
+        "bo nho tam"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "RAM là bộ nhớ truy cập ngẫu nhiên lưu tạm dữ liệu và chương trình đang chạy, tốc độ cao nhưng mất dữ liệu khi tắt máy. Nhiều RAM giúp chạy nhiều tác vụ mượt hơn.",
+      "topics": [
+        "Computer Architecture",
+        "Memory Management"
+      ],
+      "related": [
+        "cpu",
+        "storage",
+        "memory_management"
+      ]
+    },
+    "gpu": {
+      "name": "GPU (Bộ xử lý đồ họa)",
+      "aliases": [
+        "gpu",
+        "bo xu ly do hoa",
+        "card do hoa"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "GPU xử lý song song hàng nghìn phép tính, ban đầu cho đồ họa, nay là phần cứng then chốt để huấn luyện Deep Learning và xử lý dữ liệu lớn.",
+      "topics": [
+        "Deep Learning",
+        "Computer Architecture"
+      ],
+      "related": [
+        "cpu",
+        "deep_learning"
+      ]
+    },
+    "storage": {
+      "name": "Lưu trữ (HDD/SSD)",
+      "aliases": [
+        "luu tru",
+        "o cung",
+        "hdd",
+        "ssd",
+        "storage"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Thiết bị lưu trữ giữ dữ liệu lâu dài kể cả khi tắt máy. HDD dùng đĩa từ (rẻ, chậm), SSD dùng chip nhớ (nhanh, bền hơn).",
+      "topics": [
+        "Computer Architecture",
+        "Operating System"
+      ],
+      "related": [
+        "ram",
+        "hardware"
+      ]
+    },
+    "internet": {
+      "name": "Internet",
+      "aliases": [
+        "internet",
+        "mang internet"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Cơ bản",
+      "definition": "Internet là mạng toàn cầu kết nối hàng tỷ thiết bị qua bộ giao thức TCP/IP, cho phép trao đổi dữ liệu và dịch vụ (web, email, video). Hạ tầng nền tảng của thời đại số.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": [
+        "website",
+        "tcp_ip",
+        "dns"
+      ]
+    },
+    "website": {
+      "name": "Website / World Wide Web",
+      "aliases": [
+        "website",
+        "web",
+        "www",
+        "trang web",
+        "world wide web"
+      ],
+      "category": "Lập trình Web",
+      "level": "Cơ bản",
+      "definition": "Website là tập hợp các trang web liên kết, truy cập qua trình duyệt bằng địa chỉ (URL). World Wide Web (WWW) là dịch vụ chia sẻ tài liệu siêu văn bản chạy trên Internet.",
+      "topics": [
+        "Lập trình Web",
+        "Frontend",
+        "HTTP"
+      ],
+      "related": [
+        "browser",
+        "html",
+        "http"
+      ]
+    },
+    "browser": {
+      "name": "Trình duyệt web (Browser)",
+      "aliases": [
+        "trinh duyet",
+        "browser",
+        "web browser"
+      ],
+      "category": "Lập trình Web",
+      "level": "Cơ bản",
+      "definition": "Trình duyệt là phần mềm tải và hiển thị trang web (Chrome, Firefox, Safari), diễn giải HTML/CSS/JavaScript thành giao diện người dùng tương tác được.",
+      "topics": [
+        "Frontend",
+        "Lập trình Web",
+        "JavaScript"
+      ],
+      "related": [
+        "website",
+        "html",
+        "dom"
+      ]
+    },
+    "server_client": {
+      "name": "Mô hình Máy chủ - Máy khách (Client-Server)",
+      "aliases": [
+        "client server",
+        "may chu may khach",
+        "server",
+        "may chu",
+        "client"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Trong mô hình client-server, máy khách (client) gửi yêu cầu và máy chủ (server) xử lý rồi trả kết quả. Là kiến trúc nền tảng của web và hầu hết ứng dụng mạng.",
+      "topics": [
+        "Backend",
+        "Mạng máy tính",
+        "HTTP"
+      ],
+      "related": [
+        "backend",
+        "http",
+        "internet"
+      ]
+    },
+    "data_concept": {
+      "name": "Dữ liệu & Thông tin (Data & Information)",
+      "aliases": [
+        "du lieu",
+        "data",
+        "thong tin"
+      ],
+      "category": "Khoa học dữ liệu",
+      "level": "Cơ bản",
+      "definition": "Dữ liệu là các sự kiện/số liệu thô; thông tin là dữ liệu đã được xử lý để có ý nghĩa. Biến dữ liệu thành thông tin và tri thức là mục tiêu của khoa học dữ liệu.",
+      "topics": [
+        "Data Analysis",
+        "SQL",
+        "Data Warehouse"
+      ],
+      "related": [
+        "data_science",
+        "database",
+        "big_data"
+      ]
+    },
+    "data_science": {
+      "name": "Khoa học dữ liệu (Data Science)",
+      "aliases": [
+        "khoa hoc du lieu",
+        "data science",
+        "ds"
+      ],
+      "category": "Khoa học dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Khoa học dữ liệu kết hợp thống kê, lập trình và kiến thức nghiệp vụ để rút ra hiểu biết và dự đoán từ dữ liệu. Quy trình: thu thập, làm sạch, phân tích, mô hình hóa, trực quan hóa.",
+      "topics": [
+        "Data Analysis",
+        "Machine Learning",
+        "Statistics"
+      ],
+      "related": [
+        "machine_learning",
+        "data_concept",
+        "big_data"
+      ]
+    },
+    "information_system": {
+      "name": "Hệ thống thông tin (Information System)",
+      "aliases": [
+        "he thong thong tin",
+        "information system",
+        "his"
+      ],
+      "category": "Phân tích nghiệp vụ (BA)",
+      "level": "Trung cấp",
+      "definition": "Hệ thống thông tin là tổ hợp con người, quy trình, dữ liệu và công nghệ phối hợp để thu thập, xử lý và cung cấp thông tin hỗ trợ vận hành và ra quyết định trong tổ chức.",
+      "topics": [
+        "Business Analysis",
+        "Database"
+      ],
+      "related": [
+        "business_analysis",
+        "database",
+        "cntt"
+      ]
+    },
+    "binary": {
+      "name": "Hệ nhị phân (Bit & Byte)",
+      "aliases": [
+        "nhi phan",
+        "binary",
+        "bit",
+        "byte"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Máy tính lưu và xử lý mọi thứ bằng hệ nhị phân (0 và 1). Bit là đơn vị nhỏ nhất; 8 bit tạo thành 1 byte. Đây là 'ngôn ngữ gốc' của máy tính.",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": [
+        "computer",
+        "computer_science"
+      ]
+    },
+    "open_source": {
+      "name": "Mã nguồn mở (Open Source)",
+      "aliases": [
+        "ma nguon mo",
+        "open source",
+        "opensource",
+        "oss"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Cơ bản",
+      "definition": "Phần mềm mã nguồn mở công khai mã nguồn để mọi người dùng, xem, sửa và chia sẻ tự do theo giấy phép (vd Linux, Python, React). Thúc đẩy cộng tác và minh bạch.",
+      "topics": [
+        "Git",
+        "Version Control"
+      ],
+      "related": [
+        "git",
+        "linux"
+      ]
+    },
+    "digital_transformation": {
+      "name": "Chuyển đổi số (Digital Transformation)",
+      "aliases": [
+        "chuyen doi so",
+        "digital transformation"
+      ],
+      "category": "Quản lý dự án CNTT",
+      "level": "Trung cấp",
+      "definition": "Chuyển đổi số là việc ứng dụng công nghệ số vào mọi mặt hoạt động của tổ chức để thay đổi cách vận hành, mô hình kinh doanh và trải nghiệm khách hàng. Không chỉ là số hóa mà là tái định hình.",
+      "topics": [
+        "Project Management",
+        "Business Analysis"
+      ],
+      "related": [
+        "cntt",
+        "cloud",
+        "business_analysis"
+      ]
+    },
+    "sdlc": {
+      "name": "Vòng đời phát triển phần mềm (SDLC)",
+      "aliases": [
+        "sdlc",
+        "vong doi phat trien phan mem",
+        "software development life cycle"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "SDLC là quy trình phát triển phần mềm qua các giai đoạn: thu thập yêu cầu, thiết kế, lập trình, kiểm thử, triển khai, bảo trì. Agile và Waterfall là hai mô hình triển khai phổ biến.",
+      "topics": [
+        "Agile",
+        "Testing",
+        "Software Architecture"
+      ],
+      "related": [
+        "agile",
+        "software_testing",
+        "developer_role"
+      ]
+    },
+    "source_code": {
+      "name": "Mã nguồn (Source Code)",
+      "aliases": [
+        "ma nguon",
+        "source code",
+        "source"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "Mã nguồn là tập hợp các dòng lệnh do lập trình viên viết bằng ngôn ngữ lập trình, sau đó được biên dịch/thông dịch thành chương trình chạy được.",
+      "topics": [
+        "Lập trình",
+        "Git"
+      ],
+      "related": [
+        "programming",
+        "git",
+        "compiler"
+      ]
+    },
+    "bug": {
+      "name": "Lỗi phần mềm (Bug)",
+      "aliases": [
+        "bug",
+        "loi phan mem"
+      ],
+      "category": "Kiểm thử phần mềm",
+      "level": "Cơ bản",
+      "definition": "Bug là lỗi/khiếm khuyết khiến phần mềm chạy sai so với mong đợi. Tìm và sửa bug (debugging) cùng kiểm thử là phần không thể thiếu của phát triển phần mềm.",
+      "topics": [
+        "Testing",
+        "Lập trình"
+      ],
+      "related": [
+        "debugging",
+        "software_testing",
+        "unit_test"
+      ]
+    },
+    "software_testing": {
+      "name": "Kiểm thử phần mềm (Software Testing / QA)",
+      "aliases": [
+        "kiem thu phan mem",
+        "software testing",
+        "qa",
+        "tester",
+        "kiem thu"
+      ],
+      "category": "Kiểm thử phần mềm",
+      "level": "Trung cấp",
+      "definition": "Kiểm thử phần mềm là quá trình đánh giá phần mềm để phát hiện lỗi và đảm bảo chất lượng trước khi phát hành. Gồm kiểm thử thủ công và tự động, ở nhiều cấp (unit, integration, system).",
+      "topics": [
+        "Testing"
+      ],
+      "related": [
+        "unit_test",
+        "tdd",
+        "bug"
+      ]
+    },
+    "developer_role": {
+      "name": "Lập trình viên (Developer)",
+      "aliases": [
+        "lap trinh vien",
+        "developer",
+        "programmer",
+        "coder",
+        "dev"
+      ],
+      "category": "Nền tảng lập trình",
+      "level": "Cơ bản",
+      "definition": "Lập trình viên là người thiết kế, viết và bảo trì phần mềm bằng ngôn ngữ lập trình. Chia theo mảng: frontend, backend, fullstack, mobile, AI/ML, DevOps...",
+      "topics": [
+        "Lập trình",
+        "Git"
+      ],
+      "related": [
+        "programming",
+        "frontend",
+        "backend"
+      ]
+    },
+    "ip_address": {
+      "name": "Địa chỉ IP",
+      "aliases": [
+        "dia chi ip",
+        "ip address",
+        "ip"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Địa chỉ IP là dãy số định danh duy nhất cho mỗi thiết bị trên mạng, giúp dữ liệu được định tuyến tới đúng nơi. Có hai phiên bản: IPv4 và IPv6.",
+      "topics": [
+        "TCP/IP",
+        "Mạng máy tính"
+      ],
+      "related": [
+        "tcp_ip",
+        "dns",
+        "internet"
+      ]
+    },
+    "spring_boot": {
+      "name": "Spring Boot",
+      "aliases": [
+        "spring boot",
+        "springboot",
+        "spring"
+      ],
+      "category": "Lập trình Web",
+      "level": "Nâng cao",
+      "definition": "Spring Boot là framework Java giúp dựng nhanh ứng dụng backend/microservices với cấu hình tối thiểu và server nhúng. Tiêu chuẩn thực tế của backend Java doanh nghiệp.",
+      "topics": [
+        "Backend",
+        "Java",
+        "REST API"
+      ],
+      "related": [
+        "java",
+        "backend",
+        "microservices"
+      ]
+    },
+    "php": {
+      "name": "PHP",
+      "aliases": [
+        "php"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "PHP là ngôn ngữ kịch bản phía server phổ biến cho web, nền tảng của WordPress và Laravel. Dễ triển khai, hệ sinh thái lớn cho ứng dụng web truyền thống.",
+      "topics": [
+        "Backend",
+        "Lập trình Web"
+      ],
+      "related": [
+        "backend",
+        "javascript"
+      ]
+    },
+    "kotlin": {
+      "name": "Kotlin",
+      "aliases": [
+        "kotlin"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Trung cấp",
+      "definition": "Kotlin là ngôn ngữ hiện đại chạy trên JVM, gọn và an toàn hơn Java, là ngôn ngữ chính thức được Google khuyến nghị cho phát triển Android.",
+      "topics": [
+        "Kotlin",
+        "Android",
+        "Lập trình Mobile"
+      ],
+      "related": [
+        "android",
+        "java"
+      ]
+    },
+    "swift": {
+      "name": "Swift",
+      "aliases": [
+        "swift"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Trung cấp",
+      "definition": "Swift là ngôn ngữ của Apple để phát triển ứng dụng iOS/macOS, cú pháp hiện đại, an toàn và hiệu năng cao. Thay thế Objective-C.",
+      "topics": [
+        "Swift",
+        "iOS",
+        "Lập trình Mobile"
+      ],
+      "related": [
+        "ios",
+        "kotlin"
+      ]
+    },
+    "dart": {
+      "name": "Dart",
+      "aliases": [
+        "dart"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Trung cấp",
+      "definition": "Dart là ngôn ngữ của Google, là nền tảng của framework Flutter để xây ứng dụng đa nền tảng (mobile, web, desktop) từ một mã nguồn.",
+      "topics": [
+        "Flutter",
+        "Lập trình Mobile"
+      ],
+      "related": [
+        "flutter",
+        "kotlin"
+      ]
+    },
+    "cloud_models": {
+      "name": "IaaS / PaaS / SaaS",
+      "aliases": [
+        "iaas",
+        "paas",
+        "saas",
+        "mo hinh dich vu cloud"
+      ],
+      "category": "Điện toán đám mây",
+      "level": "Nâng cao",
+      "definition": "Ba mô hình dịch vụ đám mây: IaaS cho thuê hạ tầng (máy ảo, mạng); PaaS cung cấp nền tảng để phát triển/triển khai; SaaS cung cấp phần mềm dùng ngay qua trình duyệt (vd Gmail).",
+      "topics": [
+        "Cloud",
+        "AWS",
+        "DevOps"
+      ],
+      "related": [
+        "cloud",
+        "serverless",
+        "virtualization"
+      ]
+    },
+    "ftp": {
+      "name": "FTP (File Transfer Protocol)",
+      "aliases": [
+        "ftp",
+        "file transfer protocol"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Giao thức truyền tệp giữa máy khách và máy chủ qua mạng TCP/IP.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "sftp": {
+      "name": "SFTP (SSH File Transfer Protocol)",
+      "aliases": [
+        "sftp"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Phiên bản truyền tệp an toàn, mã hóa dữ liệu qua kênh SSH.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "smtp": {
+      "name": "SMTP (Simple Mail Transfer Protocol)",
+      "aliases": [
+        "smtp"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Giao thức chuẩn để gửi email giữa các máy chủ thư.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "imap": {
+      "name": "IMAP (Internet Message Access Protocol)",
+      "aliases": [
+        "imap"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Giao thức nhận và đồng bộ email, giữ thư trên máy chủ để truy cập từ nhiều thiết bị.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "pop3": {
+      "name": "POP3 (Post Office Protocol v3)",
+      "aliases": [
+        "pop3",
+        "pop"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Giao thức tải email về máy cục bộ, thường xóa khỏi máy chủ sau khi tải.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "url": {
+      "name": "URL (Uniform Resource Locator)",
+      "aliases": [
+        "url",
+        "uniform resource locator"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Địa chỉ định vị một tài nguyên trên web (vd https://example.com/page).",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "uri": {
+      "name": "URI (Uniform Resource Identifier)",
+      "aliases": [
+        "uri"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Chuỗi định danh một tài nguyên; URL là một dạng URI có kèm cách truy cập.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "xml": {
+      "name": "XML (eXtensible Markup Language)",
+      "aliases": [
+        "xml"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Ngôn ngữ đánh dấu mở rộng để lưu và trao đổi dữ liệu có cấu trúc bằng thẻ.",
+      "topics": [
+        "Lập trình"
+      ],
+      "related": []
+    },
+    "json": {
+      "name": "JSON (JavaScript Object Notation)",
+      "aliases": [
+        "json"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Định dạng dữ liệu nhẹ, dễ đọc, phổ biến nhất để trao đổi dữ liệu giữa client và API.",
+      "topics": [
+        "Lập trình"
+      ],
+      "related": []
+    },
+    "yaml": {
+      "name": "YAML (YAML Ain't Markup Language)",
+      "aliases": [
+        "yaml",
+        "yml"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Định dạng dữ liệu dễ đọc cho con người, hay dùng cho file cấu hình (Docker, K8s, CI).",
+      "topics": [
+        "Lập trình"
+      ],
+      "related": []
+    },
+    "soap": {
+      "name": "SOAP (Simple Object Access Protocol)",
+      "aliases": [
+        "soap"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Giao thức trao đổi thông điệp dạng XML cho web service, chặt chẽ hơn REST nhưng nặng hơn.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "grpc": {
+      "name": "gRPC (gRPC Remote Procedure Call)",
+      "aliases": [
+        "grpc"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Framework RPC hiệu năng cao của Google dùng HTTP/2 và Protocol Buffers, phổ biến cho microservices.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "rpc": {
+      "name": "RPC (Remote Procedure Call)",
+      "aliases": [
+        "rpc",
+        "remote procedure call"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Cơ chế gọi hàm thực thi trên máy chủ từ xa như gọi hàm cục bộ.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "ssr": {
+      "name": "SSR (Server-Side Rendering)",
+      "aliases": [
+        "ssr",
+        "server side rendering"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Kết xuất HTML ở phía máy chủ rồi gửi về trình duyệt, tốt cho SEO và tải trang đầu nhanh.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "csr": {
+      "name": "CSR (Client-Side Rendering)",
+      "aliases": [
+        "csr",
+        "client side rendering"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Kết xuất giao diện ở trình duyệt bằng JavaScript sau khi tải khung trang.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "spa": {
+      "name": "SPA (Single Page Application)",
+      "aliases": [
+        "spa",
+        "single page application"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Ứng dụng web tải một trang rồi cập nhật nội dung động không tải lại toàn trang.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "pwa": {
+      "name": "PWA (Progressive Web App)",
+      "aliases": [
+        "pwa",
+        "progressive web app"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Web app có trải nghiệm như app gốc: chạy offline, cài lên màn hình chính, gửi thông báo.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "seo": {
+      "name": "SEO (Search Engine Optimization)",
+      "aliases": [
+        "seo"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Tối ưu website để xếp hạng cao trên công cụ tìm kiếm như Google.",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "cms": {
+      "name": "CMS (Content Management System)",
+      "aliases": [
+        "cms",
+        "content management system"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Hệ thống quản trị nội dung giúp tạo và quản lý website không cần code nhiều (vd WordPress).",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "wsgi": {
+      "name": "WSGI (Web Server Gateway Interface)",
+      "aliases": [
+        "wsgi"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Chuẩn giao tiếp giữa web server và ứng dụng web Python (vd Gunicorn, uWSGI).",
+      "topics": [
+        "Lập trình Web",
+        "REST API",
+        "Frontend"
+      ],
+      "related": []
+    },
+    "udp": {
+      "name": "UDP (User Datagram Protocol)",
+      "aliases": [
+        "udp"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Giao thức truyền nhanh, không đảm bảo tin cậy, hợp cho streaming/game thời gian thực.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "icmp": {
+      "name": "ICMP (Internet Control Message Protocol)",
+      "aliases": [
+        "icmp"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Giao thức báo lỗi và chẩn đoán mạng (lệnh ping dùng ICMP).",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "dhcp": {
+      "name": "DHCP (Dynamic Host Configuration Protocol)",
+      "aliases": [
+        "dhcp"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Tự động cấp địa chỉ IP và cấu hình mạng cho thiết bị khi kết nối.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "nat": {
+      "name": "NAT (Network Address Translation)",
+      "aliases": [
+        "nat"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Chuyển đổi địa chỉ IP riêng sang IP công khai, cho nhiều thiết bị dùng chung một IP ra Internet.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "vpn": {
+      "name": "VPN (Virtual Private Network)",
+      "aliases": [
+        "vpn"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Mạng riêng ảo mã hóa kết nối qua Internet, bảo mật và ẩn địa chỉ thật.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "lan": {
+      "name": "LAN (Local Area Network)",
+      "aliases": [
+        "lan",
+        "mang noi bo"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Mạng cục bộ phạm vi hẹp (nhà, văn phòng) kết nối các thiết bị gần nhau.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "wan": {
+      "name": "WAN (Wide Area Network)",
+      "aliases": [
+        "wan",
+        "mang dien rong"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Mạng diện rộng kết nối các mạng cục bộ qua khoảng cách lớn (Internet là WAN lớn nhất).",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "mac_addr": {
+      "name": "MAC Address (Media Access Control)",
+      "aliases": [
+        "mac address",
+        "dia chi mac"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Địa chỉ phần cứng duy nhất gán cho card mạng để định danh ở tầng liên kết dữ liệu.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "ssh": {
+      "name": "SSH (Secure Shell)",
+      "aliases": [
+        "ssh",
+        "secure shell"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Giao thức truy cập và điều khiển máy chủ từ xa qua kênh mã hóa an toàn.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "isp": {
+      "name": "ISP (Internet Service Provider)",
+      "aliases": [
+        "isp",
+        "nha cung cap dich vu internet"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Nhà cung cấp dịch vụ Internet (vd Viettel, FPT, VNPT).",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "vlan": {
+      "name": "VLAN (Virtual LAN)",
+      "aliases": [
+        "vlan"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Chia một mạng vật lý thành nhiều mạng logic độc lập để tăng bảo mật và quản lý.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "qos": {
+      "name": "QoS (Quality of Service)",
+      "aliases": [
+        "qos"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "Kỹ thuật ưu tiên băng thông cho lưu lượng quan trọng để đảm bảo chất lượng dịch vụ.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "mfa": {
+      "name": "MFA / 2FA (Multi-Factor Authentication)",
+      "aliases": [
+        "mfa",
+        "2fa",
+        "xac thuc da yeu to",
+        "xac thuc hai lop"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Xác thực bằng nhiều yếu tố (mật khẩu + mã OTP/sinh trắc) để tăng an toàn đăng nhập.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "csrf": {
+      "name": "CSRF (Cross-Site Request Forgery)",
+      "aliases": [
+        "csrf"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Tấn công lừa trình duyệt người dùng gửi yêu cầu trái phép tới site họ đang đăng nhập.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "ddos": {
+      "name": "DDoS (Distributed Denial of Service)",
+      "aliases": [
+        "ddos",
+        "dos",
+        "tu choi dich vu"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Tấn công làm quá tải hệ thống bằng lượng truy cập khổng lồ từ nhiều nguồn, khiến dịch vụ ngừng.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "rce": {
+      "name": "RCE (Remote Code Execution)",
+      "aliases": [
+        "rce"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Lỗ hổng cho phép kẻ tấn công chạy mã tùy ý trên máy nạn nhân từ xa — cực kỳ nguy hiểm.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "pki": {
+      "name": "PKI (Public Key Infrastructure)",
+      "aliases": [
+        "pki"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Hạ tầng quản lý khóa và chứng chỉ số để xác thực và mã hóa (nền tảng của HTTPS).",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "ca": {
+      "name": "CA (Certificate Authority)",
+      "aliases": [
+        "certificate authority",
+        "to chuc chung thuc"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Tổ chức tin cậy cấp chứng chỉ số xác nhận danh tính website (cho SSL/TLS).",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "aes": {
+      "name": "AES (Advanced Encryption Standard)",
+      "aliases": [
+        "aes"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Chuẩn mã hóa đối xứng mạnh, phổ biến nhất hiện nay để bảo vệ dữ liệu.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "rsa": {
+      "name": "RSA (Rivest–Shamir–Adleman)",
+      "aliases": [
+        "rsa"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Thuật toán mã hóa bất đối xứng dùng cặp khóa công khai/riêng tư, nền tảng của chữ ký số.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "sha": {
+      "name": "SHA (Secure Hash Algorithm)",
+      "aliases": [
+        "sha",
+        "sha256"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Họ hàm băm mật mã (SHA-256...) tạo dấu vân tay cố định cho dữ liệu, kiểm tra toàn vẹn.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "md5": {
+      "name": "MD5 (Message Digest 5)",
+      "aliases": [
+        "md5"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Hàm băm cũ tạo chuỗi 128-bit; nay không an toàn cho mật mã nhưng còn dùng kiểm tra toàn vẹn.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "sso": {
+      "name": "SSO (Single Sign-On)",
+      "aliases": [
+        "sso",
+        "dang nhap mot lan"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Đăng nhập một lần để truy cập nhiều ứng dụng mà không phải nhập lại thông tin.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "iam": {
+      "name": "IAM (Identity and Access Management)",
+      "aliases": [
+        "iam"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Quản lý danh tính và quyền truy cập: ai được làm gì với tài nguyên nào (cốt lõi bảo mật cloud).",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "ids_ips": {
+      "name": "IDS / IPS (Intrusion Detection/Prevention System)",
+      "aliases": [
+        "ids",
+        "ips"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Hệ thống phát hiện (IDS) và ngăn chặn (IPS) xâm nhập mạng dựa trên dấu hiệu bất thường.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "waf": {
+      "name": "WAF (Web Application Firewall)",
+      "aliases": [
+        "waf"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Tường lửa lọc lưu lượng HTTP để bảo vệ ứng dụng web khỏi SQLi, XSS và tấn công phổ biến.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "cve": {
+      "name": "CVE (Common Vulnerabilities and Exposures)",
+      "aliases": [
+        "cve"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Hệ thống định danh công khai cho các lỗ hổng bảo mật đã biết (vd CVE-2021-44228).",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "pgp": {
+      "name": "PGP / GPG (Pretty Good Privacy)",
+      "aliases": [
+        "pgp",
+        "gpg"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Công cụ mã hóa và ký số email/tệp bằng mật mã khóa công khai.",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "saml": {
+      "name": "SAML (Security Assertion Markup Language)",
+      "aliases": [
+        "saml"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "Chuẩn XML trao đổi thông tin xác thực giữa nhà cung cấp danh tính và dịch vụ (dùng cho SSO doanh nghiệp).",
+      "topics": [
+        "Security",
+        "Cryptography"
+      ],
+      "related": []
+    },
+    "crud": {
+      "name": "CRUD (Create, Read, Update, Delete)",
+      "aliases": [
+        "crud"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Bốn thao tác cơ bản với dữ liệu: tạo, đọc, cập nhật, xóa — nền tảng của hầu hết ứng dụng.",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": []
+    },
+    "dbms": {
+      "name": "DBMS (Database Management System)",
+      "aliases": [
+        "dbms",
+        "he quan tri co so du lieu"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Phần mềm quản lý cơ sở dữ liệu: lưu trữ, truy vấn, bảo mật, sao lưu (vd MySQL, PostgreSQL).",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": []
+    },
+    "rdbms": {
+      "name": "RDBMS (Relational DBMS)",
+      "aliases": [
+        "rdbms"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Hệ quản trị cơ sở dữ liệu quan hệ, lưu dữ liệu thành bảng có quan hệ và hỗ trợ SQL.",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": []
+    },
+    "olap": {
+      "name": "OLAP (Online Analytical Processing)",
+      "aliases": [
+        "olap"
+      ],
+      "category": "Khoa học dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Xử lý phân tích trực tuyến trên dữ liệu tổng hợp đa chiều, phục vụ báo cáo và BI.",
+      "topics": [
+        "Data Analysis",
+        "SQL"
+      ],
+      "related": []
+    },
+    "oltp": {
+      "name": "OLTP (Online Transaction Processing)",
+      "aliases": [
+        "oltp"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Xử lý giao dịch trực tuyến: nhiều thao tác nhỏ, nhanh, đồng thời (vd hệ thống bán hàng).",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": []
+    },
+    "elt": {
+      "name": "ELT (Extract, Load, Transform)",
+      "aliases": [
+        "elt"
+      ],
+      "category": "Khoa học dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Biến thể của ETL: nạp dữ liệu thô vào kho trước rồi mới biến đổi, tận dụng sức mạnh kho hiện đại.",
+      "topics": [
+        "Data Analysis",
+        "SQL"
+      ],
+      "related": []
+    },
+    "ddl_dml": {
+      "name": "DDL / DML (Data Definition/Manipulation Language)",
+      "aliases": [
+        "ddl",
+        "dml"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "DDL định nghĩa cấu trúc (CREATE, ALTER); DML thao tác dữ liệu (SELECT, INSERT, UPDATE).",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": []
+    },
+    "bi": {
+      "name": "BI (Business Intelligence)",
+      "aliases": [
+        "bi",
+        "business intelligence"
+      ],
+      "category": "Khoa học dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Tập công cụ và quy trình biến dữ liệu thành báo cáo, dashboard hỗ trợ ra quyết định kinh doanh.",
+      "topics": [
+        "Data Analysis",
+        "SQL"
+      ],
+      "related": []
+    },
+    "kpi": {
+      "name": "KPI (Key Performance Indicator)",
+      "aliases": [
+        "kpi"
+      ],
+      "category": "Khoa học dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Chỉ số đo lường hiệu suất then chốt để đánh giá mức đạt mục tiêu.",
+      "topics": [
+        "Data Analysis",
+        "SQL"
+      ],
+      "related": []
+    },
+    "eda": {
+      "name": "EDA (Exploratory Data Analysis)",
+      "aliases": [
+        "eda",
+        "phan tich kham pha du lieu"
+      ],
+      "category": "Khoa học dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Phân tích khám phá dữ liệu bằng thống kê và trực quan để hiểu cấu trúc trước khi mô hình hóa.",
+      "topics": [
+        "Data Analysis",
+        "SQL"
+      ],
+      "related": []
+    },
+    "sla": {
+      "name": "SLA (Service Level Agreement)",
+      "aliases": [
+        "sla"
+      ],
+      "category": "Điện toán đám mây",
+      "level": "Nâng cao",
+      "definition": "Cam kết mức dịch vụ giữa nhà cung cấp và khách hàng (vd uptime 99.9%).",
+      "topics": [
+        "Cloud",
+        "AWS",
+        "DevOps"
+      ],
+      "related": []
+    },
+    "sre": {
+      "name": "SRE (Site Reliability Engineering)",
+      "aliases": [
+        "sre"
+      ],
+      "category": "DevOps",
+      "level": "Nâng cao",
+      "definition": "Áp dụng tư duy kỹ thuật phần mềm vào vận hành để hệ thống tin cậy, có thể mở rộng.",
+      "topics": [
+        "DevOps",
+        "CI/CD",
+        "Docker"
+      ],
+      "related": []
+    },
+    "faas": {
+      "name": "FaaS (Function as a Service)",
+      "aliases": [
+        "faas"
+      ],
+      "category": "Điện toán đám mây",
+      "level": "Nâng cao",
+      "definition": "Mô hình serverless chạy từng hàm theo sự kiện, tự mở rộng, trả tiền theo lần gọi (vd AWS Lambda).",
+      "topics": [
+        "Cloud",
+        "AWS",
+        "DevOps"
+      ],
+      "related": []
+    },
+    "cli": {
+      "name": "CLI (Command Line Interface)",
+      "aliases": [
+        "cli",
+        "giao dien dong lenh"
+      ],
+      "category": "DevOps",
+      "level": "Nâng cao",
+      "definition": "Giao diện dòng lệnh để điều khiển máy tính bằng câu lệnh văn bản, mạnh và tự động hóa được.",
+      "topics": [
+        "DevOps",
+        "CI/CD",
+        "Docker"
+      ],
+      "related": []
+    },
+    "gui": {
+      "name": "GUI (Graphical User Interface)",
+      "aliases": [
+        "gui",
+        "giao dien do hoa"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Giao diện đồ họa với cửa sổ, nút bấm, biểu tượng để tương tác trực quan.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "dr": {
+      "name": "DR (Disaster Recovery)",
+      "aliases": [
+        "disaster recovery",
+        "khoi phuc tham hoa"
+      ],
+      "category": "Điện toán đám mây",
+      "level": "Nâng cao",
+      "definition": "Kế hoạch và giải pháp khôi phục hệ thống/dữ liệu sau sự cố nghiêm trọng.",
+      "topics": [
+        "Cloud",
+        "AWS",
+        "DevOps"
+      ],
+      "related": []
+    },
+    "ha": {
+      "name": "HA (High Availability)",
+      "aliases": [
+        "high availability",
+        "tinh san sang cao"
+      ],
+      "category": "Điện toán đám mây",
+      "level": "Nâng cao",
+      "definition": "Thiết kế hệ thống duy trì hoạt động liên tục, tối thiểu thời gian ngừng (dự phòng, cân bằng tải).",
+      "topics": [
+        "Cloud",
+        "AWS",
+        "DevOps"
+      ],
+      "related": []
+    },
+    "rnn": {
+      "name": "RNN (Recurrent Neural Network)",
+      "aliases": [
+        "rnn"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Mạng nơ-ron hồi quy xử lý dữ liệu tuần tự (văn bản, chuỗi thời gian) bằng cách ghi nhớ trạng thái trước.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "lstm": {
+      "name": "LSTM (Long Short-Term Memory)",
+      "aliases": [
+        "lstm"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Biến thể RNN giải quyết vấn đề quên dài hạn, học được phụ thuộc xa trong chuỗi.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "gan": {
+      "name": "GAN (Generative Adversarial Network)",
+      "aliases": [
+        "gan"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Hai mạng (sinh và phân biệt) đối kháng nhau để tạo dữ liệu giả giống thật (ảnh, giọng nói).",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "gpt": {
+      "name": "GPT (Generative Pre-trained Transformer)",
+      "aliases": [
+        "gpt"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Họ mô hình ngôn ngữ lớn dựa trên Transformer, sinh văn bản tự nhiên (nền tảng của ChatGPT).",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "bert": {
+      "name": "BERT (Bidirectional Encoder Representations from Transformers)",
+      "aliases": [
+        "bert"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Mô hình Transformer hiểu ngữ cảnh hai chiều, mạnh cho phân loại và hiểu văn bản.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "ocr": {
+      "name": "OCR (Optical Character Recognition)",
+      "aliases": [
+        "ocr",
+        "nhan dang ky tu quang hoc"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Nhận dạng và trích xuất chữ từ ảnh hoặc tài liệu quét thành văn bản số.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "svm": {
+      "name": "SVM (Support Vector Machine)",
+      "aliases": [
+        "svm"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Thuật toán ML phân loại bằng cách tìm siêu phẳng tách các lớp với biên lớn nhất.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "knn": {
+      "name": "KNN (K-Nearest Neighbors)",
+      "aliases": [
+        "knn"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Thuật toán phân loại/hồi quy dựa trên k điểm dữ liệu gần nhất — đơn giản, trực quan.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "pca": {
+      "name": "PCA (Principal Component Analysis)",
+      "aliases": [
+        "pca"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Kỹ thuật giảm chiều dữ liệu, giữ lại các thành phần chính chứa nhiều biến thiên nhất.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "mlops": {
+      "name": "MLOps (Machine Learning Operations)",
+      "aliases": [
+        "mlops"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "Áp dụng thực hành DevOps cho ML: tự động hóa huấn luyện, triển khai, giám sát mô hình.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "asr_tts": {
+      "name": "ASR / TTS (Speech-to-Text / Text-to-Speech)",
+      "aliases": [
+        "asr",
+        "tts",
+        "speech to text",
+        "text to speech"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "ASR chuyển giọng nói thành văn bản; TTS chuyển văn bản thành giọng nói.",
+      "topics": [
+        "Machine Learning",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "rom": {
+      "name": "ROM (Read-Only Memory)",
+      "aliases": [
+        "rom"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Bộ nhớ chỉ đọc lưu dữ liệu cố định (vd firmware), không mất khi tắt máy.",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "bios": {
+      "name": "BIOS (Basic Input/Output System)",
+      "aliases": [
+        "bios"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Phần mềm firmware khởi động phần cứng và nạp hệ điều hành khi bật máy.",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "io": {
+      "name": "I/O (Input/Output)",
+      "aliases": [
+        "i/o",
+        "input output",
+        "vao ra"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Hoạt động nhập/xuất dữ liệu giữa máy tính và thiết bị (bàn phím, ổ đĩa, mạng).",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "usb": {
+      "name": "USB (Universal Serial Bus)",
+      "aliases": [
+        "usb"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Chuẩn cổng kết nối phổ biến để truyền dữ liệu và cấp nguồn cho thiết bị ngoại vi.",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "tpu": {
+      "name": "TPU (Tensor Processing Unit)",
+      "aliases": [
+        "tpu"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Chip chuyên dụng của Google tăng tốc tính toán cho mạng nơ-ron, tối ưu cho TensorFlow.",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "fpga": {
+      "name": "FPGA (Field-Programmable Gate Array)",
+      "aliases": [
+        "fpga"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Vi mạch lập trình lại được phần cứng, dùng cho xử lý chuyên biệt tốc độ cao.",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "raid": {
+      "name": "RAID (Redundant Array of Independent Disks)",
+      "aliases": [
+        "raid"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Kỹ thuật ghép nhiều ổ đĩa để tăng tốc độ và/hoặc dự phòng chống mất dữ liệu.",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "nic": {
+      "name": "NIC (Network Interface Card)",
+      "aliases": [
+        "nic",
+        "card mang"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Trung cấp",
+      "definition": "Card mạng giúp máy tính kết nối và giao tiếp với mạng.",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "mvvm": {
+      "name": "MVVM (Model-View-ViewModel)",
+      "aliases": [
+        "mvvm"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Mẫu kiến trúc tách giao diện khỏi logic qua lớp ViewModel, phổ biến ở app mobile/desktop.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "bdd": {
+      "name": "BDD (Behavior-Driven Development)",
+      "aliases": [
+        "bdd"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Phát triển hướng hành vi: mô tả yêu cầu bằng kịch bản ngôn ngữ tự nhiên (Given-When-Then).",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "ddd": {
+      "name": "DDD (Domain-Driven Design)",
+      "aliases": [
+        "ddd"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Thiết kế hướng miền nghiệp vụ: mô hình hóa phần mềm bám sát ngôn ngữ và quy tắc của lĩnh vực.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "dry": {
+      "name": "DRY (Don't Repeat Yourself)",
+      "aliases": [
+        "dry"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Nguyên tắc tránh lặp lại logic — mỗi tri thức chỉ nên có một nguồn duy nhất trong code.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "kiss": {
+      "name": "KISS (Keep It Simple, Stupid)",
+      "aliases": [
+        "kiss"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Nguyên tắc giữ thiết kế đơn giản nhất có thể, tránh phức tạp không cần thiết.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "yagni": {
+      "name": "YAGNI (You Aren't Gonna Need It)",
+      "aliases": [
+        "yagni"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Nguyên tắc chỉ làm tính năng thực sự cần ngay, đừng xây trước thứ chưa cần.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "uat": {
+      "name": "UAT (User Acceptance Testing)",
+      "aliases": [
+        "uat",
+        "kiem thu chap nhan"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Kiểm thử chấp nhận do người dùng cuối thực hiện để xác nhận phần mềm đáp ứng nhu cầu thực tế.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "poc": {
+      "name": "PoC (Proof of Concept)",
+      "aliases": [
+        "poc",
+        "proof of concept"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Bản thử nghiệm nhỏ để chứng minh một ý tưởng/công nghệ khả thi trước khi đầu tư lớn.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "mvp": {
+      "name": "MVP (Minimum Viable Product)",
+      "aliases": [
+        "mvp",
+        "san pham kha dung toi thieu"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Phiên bản tối thiểu đủ tính năng cốt lõi để ra mắt sớm, thu phản hồi và lặp cải tiến.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "uml": {
+      "name": "UML (Unified Modeling Language)",
+      "aliases": [
+        "uml"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Ngôn ngữ mô hình hóa trực quan hệ thống phần mềm bằng sơ đồ (lớp, tuần tự, use case).",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "api_first": {
+      "name": "SOLID/DRY/KISS — nguyên tắc thiết kế",
+      "aliases": [
+        "clean code"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Nhóm nguyên tắc giúp viết code sạch, dễ bảo trì và mở rộng.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern"
+      ],
+      "related": []
+    },
+    "ascii": {
+      "name": "ASCII (American Standard Code for Information Interchange)",
+      "aliases": [
+        "ascii"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Bảng mã ký tự cơ bản gán số cho chữ cái, chữ số và ký hiệu (nền tảng mã hóa văn bản).",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "unicode": {
+      "name": "Unicode / UTF-8",
+      "aliases": [
+        "unicode",
+        "utf-8",
+        "utf8"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Chuẩn mã hóa ký tự toàn cầu hỗ trợ mọi ngôn ngữ (UTF-8 là dạng phổ biến nhất trên web).",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "rfc": {
+      "name": "RFC (Request for Comments)",
+      "aliases": [
+        "rfc"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Tài liệu kỹ thuật định nghĩa chuẩn Internet (vd RFC định nghĩa HTTP, TCP).",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "iso": {
+      "name": "ISO (International Organization for Standardization)",
+      "aliases": [
+        "iso"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Tổ chức ban hành tiêu chuẩn quốc tế (vd ISO 27001 về an toàn thông tin).",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "ieee": {
+      "name": "IEEE",
+      "aliases": [
+        "ieee"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Hiệp hội kỹ sư điện-điện tử, ban hành nhiều chuẩn (vd IEEE 802.11 Wi-Fi).",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "w3c": {
+      "name": "W3C (World Wide Web Consortium)",
+      "aliases": [
+        "w3c"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Tổ chức xây dựng chuẩn cho web (HTML, CSS, các đặc tả trình duyệt).",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "gdpr": {
+      "name": "GDPR (General Data Protection Regulation)",
+      "aliases": [
+        "gdpr"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Quy định bảo vệ dữ liệu cá nhân của EU, áp dụng cho mọi dịch vụ xử lý dữ liệu công dân EU.",
+      "topics": [
+        "Computer Architecture"
+      ],
+      "related": []
+    },
+    "pdf": {
+      "name": "PDF (Portable Document Format)",
+      "aliases": [
+        "pdf"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Định dạng tài liệu giữ nguyên bố cục trên mọi thiết bị, phổ biến để chia sẻ văn bản.",
+      "topics": [
+        "Lập trình"
+      ],
+      "related": []
+    },
+    "csv": {
+      "name": "CSV (Comma-Separated Values)",
+      "aliases": [
+        "csv"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Định dạng bảng dữ liệu dạng văn bản, các giá trị ngăn bằng dấu phẩy — phổ biến cho dữ liệu.",
+      "topics": [
+        "Lập trình"
+      ],
+      "related": []
+    },
+    "svg": {
+      "name": "SVG (Scalable Vector Graphics)",
+      "aliases": [
+        "svg"
+      ],
+      "category": "Khoa học máy tính",
+      "level": "Cơ bản",
+      "definition": "Định dạng ảnh vector dựa trên XML, phóng to không vỡ, dùng nhiều trên web.",
+      "topics": [
+        "Lập trình"
+      ],
+      "related": []
+    },
+    "software_engineering": {
+      "name": "SE / SWE (Software Engineering / Engineer)",
+      "aliases": [
+        "software engineering",
+        "software engineer",
+        "swe",
+        "se",
+        "ky thuat phan mem",
+        "ki thuat phan mem"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "Kỹ thuật phần mềm là ngành áp dụng phương pháp kỹ thuật có hệ thống để phân tích, thiết kế, xây dựng và bảo trì phần mềm chất lượng. SWE (kỹ sư phần mềm) là người làm công việc này.",
+      "topics": [
+        "Software Architecture",
+        "Design Pattern",
+        "Clean Code"
+      ],
+      "related": []
+    },
+    "srs": {
+      "name": "SRS (Software Requirement Specification)",
+      "aliases": [
+        "srs",
+        "software requirement specification",
+        "dac ta yeu cau"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Trung cấp",
+      "definition": "SRS là tài liệu đặc tả đầy đủ yêu cầu của phần mềm (chức năng + phi chức năng) để cả nhóm hiểu thống nhất phải xây gì trước khi lập trình.",
+      "topics": [
+        "Requirements Engineering",
+        "Documentation",
+        "Business Analysis"
+      ],
+      "related": []
+    },
+    "nextjs": {
+      "name": "Next.js",
+      "aliases": [
+        "next.js",
+        "nextjs"
+      ],
+      "category": "Lập trình Web",
+      "level": "Nâng cao",
+      "definition": "Next.js là framework dựa trên React hỗ trợ kết xuất phía máy chủ (SSR), tạo trang tĩnh và định tuyến sẵn — tối ưu hiệu năng và SEO cho web React.",
+      "topics": [
+        "React",
+        "Frontend",
+        "Web Performance"
+      ],
+      "related": []
+    },
+    "django": {
+      "name": "Django",
+      "aliases": [
+        "django"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Django là framework web Python 'pin sẵn' (ORM, admin, auth), giúp dựng ứng dụng backend nhanh, an toàn và quy củ.",
+      "topics": [
+        "Backend",
+        "Python",
+        "REST API"
+      ],
+      "related": []
+    },
+    "laravel": {
+      "name": "Laravel",
+      "aliases": [
+        "laravel"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Laravel là framework web PHP cú pháp thanh lịch, có ORM Eloquent, routing, queue — chuẩn thực tế cho backend PHP hiện đại.",
+      "topics": [
+        "Backend",
+        "REST API"
+      ],
+      "related": []
+    },
+    "dotnet": {
+      "name": "ASP.NET / .NET",
+      "aliases": [
+        ".net",
+        "dotnet",
+        "asp.net",
+        "net core"
+      ],
+      "category": "Lập trình Web",
+      "level": "Nâng cao",
+      "definition": ".NET là nền tảng phát triển đa năng của Microsoft (C#); ASP.NET dùng để xây web/API doanh nghiệp hiệu năng cao.",
+      "topics": [
+        "Backend",
+        "REST API"
+      ],
+      "related": []
+    },
+    "mobile_dev": {
+      "name": "Mobile Development (Lập trình di động)",
+      "aliases": [
+        "mobile dev",
+        "lap trinh di dong",
+        "lap trinh mobile"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Cơ bản",
+      "definition": "Lập trình di động là xây ứng dụng cho điện thoại (Android/iOS), gốc (native) hoặc đa nền tảng (Flutter/React Native).",
+      "topics": [
+        "Android",
+        "iOS",
+        "Flutter"
+      ],
+      "related": []
+    },
+    "apk": {
+      "name": "APK (Android Package Kit)",
+      "aliases": [
+        "apk"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Trung cấp",
+      "definition": "APK là định dạng gói cài đặt ứng dụng Android. AAB (Android App Bundle) là định dạng đóng gói mới Google ưu tiên, tối ưu dung lượng tải.",
+      "topics": [
+        "Android",
+        "Lập trình Mobile"
+      ],
+      "related": []
+    },
+    "aab": {
+      "name": "AAB (Android App Bundle)",
+      "aliases": [
+        "aab",
+        "android app bundle"
+      ],
+      "category": "Lập trình Mobile",
+      "level": "Nâng cao",
+      "definition": "AAB là định dạng đóng gói ứng dụng Android do Google Play yêu cầu, tự tạo APK tối ưu theo từng thiết bị để giảm dung lượng tải.",
+      "topics": [
+        "Android",
+        "Lập trình Mobile"
+      ],
+      "related": []
+    },
+    "erd": {
+      "name": "ERD (Entity Relationship Diagram)",
+      "aliases": [
+        "erd",
+        "so do thuc the lien ket"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "ERD là sơ đồ mô tả các thực thể (bảng) và quan hệ giữa chúng — công cụ thiết kế cơ sở dữ liệu trực quan.",
+      "topics": [
+        "Database",
+        "Data Modeling"
+      ],
+      "related": []
+    },
+    "dcl": {
+      "name": "DCL (Data Control Language)",
+      "aliases": [
+        "dcl"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Nâng cao",
+      "definition": "DCL là nhóm lệnh SQL quản lý quyền truy cập dữ liệu (GRANT, REVOKE), bên cạnh DDL (định nghĩa) và DML (thao tác).",
+      "topics": [
+        "SQL",
+        "Database"
+      ],
+      "related": []
+    },
+    "oracle_db": {
+      "name": "Oracle Database",
+      "aliases": [
+        "oracle",
+        "oracle db"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Nâng cao",
+      "definition": "Oracle Database là hệ quản trị CSDL quan hệ thương mại mạnh mẽ, phổ biến trong ngân hàng và doanh nghiệp lớn.",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": []
+    },
+    "sql_server": {
+      "name": "Microsoft SQL Server",
+      "aliases": [
+        "sql server",
+        "mssql"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Trung cấp",
+      "definition": "SQL Server là hệ quản trị CSDL quan hệ của Microsoft, tích hợp tốt với hệ sinh thái .NET và công cụ BI.",
+      "topics": [
+        "Database",
+        "SQL"
+      ],
+      "related": []
+    },
+    "data_analyst": {
+      "name": "DA (Data Analyst)",
+      "aliases": [
+        "data analyst",
+        "chuyen vien phan tich du lieu"
+      ],
+      "category": "Khoa học dữ liệu",
+      "level": "Trung cấp",
+      "definition": "Data Analyst phân tích dữ liệu để trả lời câu hỏi kinh doanh: làm sạch, trực quan hóa, báo cáo (SQL, Excel, Power BI). Khác Data Scientist (thiên mô hình ML) và Data Engineer (thiên hạ tầng).",
+      "topics": [
+        "Data Analysis",
+        "SQL",
+        "Power BI"
+      ],
+      "related": []
+    },
+    "data_mining": {
+      "name": "DM (Data Mining)",
+      "aliases": [
+        "data mining",
+        "khai pha du lieu"
+      ],
+      "category": "Khoa học dữ liệu",
+      "level": "Nâng cao",
+      "definition": "Khai phá dữ liệu là quá trình tìm mẫu, quy luật ẩn trong tập dữ liệu lớn bằng thống kê và máy học.",
+      "topics": [
+        "Data Analysis",
+        "Machine Learning"
+      ],
+      "related": []
+    },
+    "snowflake": {
+      "name": "Snowflake",
+      "aliases": [
+        "snowflake"
+      ],
+      "category": "Dữ liệu lớn",
+      "level": "Nâng cao",
+      "definition": "Snowflake là nền tảng kho dữ liệu (data warehouse) trên đám mây, tách rời lưu trữ và tính toán, mở rộng linh hoạt cho phân tích quy mô lớn.",
+      "topics": [
+        "Data Warehouse",
+        "Big Data"
+      ],
+      "related": []
+    },
+    "rlhf": {
+      "name": "RLHF (RL from Human Feedback)",
+      "aliases": [
+        "rlhf"
+      ],
+      "category": "Trí tuệ nhân tạo",
+      "level": "Nâng cao",
+      "definition": "RLHF tinh chỉnh mô hình ngôn ngữ bằng phản hồi của con người (xếp hạng câu trả lời) để mô hình hữu ích và an toàn hơn — kỹ thuật cốt lõi đứng sau ChatGPT/Claude.",
+      "topics": [
+        "Machine Learning",
+        "NLP",
+        "Deep Learning"
+      ],
+      "related": []
+    },
+    "cloud_providers": {
+      "name": "AWS / Azure / GCP (Nhà cung cấp Cloud)",
+      "aliases": [
+        "aws",
+        "azure",
+        "gcp",
+        "google cloud",
+        "amazon web services"
+      ],
+      "category": "Điện toán đám mây",
+      "level": "Trung cấp",
+      "definition": "Ba nhà cung cấp điện toán đám mây lớn nhất: AWS (Amazon), Azure (Microsoft), GCP (Google) — cung cấp máy chủ, lưu trữ, database, AI theo yêu cầu.",
+      "topics": [
+        "Cloud",
+        "AWS",
+        "DevOps"
+      ],
+      "related": []
+    },
+    "scm": {
+      "name": "SCM (Source Code Management)",
+      "aliases": [
+        "scm",
+        "source code management"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Cơ bản",
+      "definition": "Quản lý mã nguồn là việc theo dõi và kiểm soát thay đổi code theo thời gian, thường bằng Git — nền tảng của cộng tác phần mềm.",
+      "topics": [
+        "Git",
+        "Version Control"
+      ],
+      "related": []
+    },
+    "soc": {
+      "name": "SOC (Security Operation Center)",
+      "aliases": [
+        "soc",
+        "trung tam dieu hanh an ninh"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "SOC là trung tâm giám sát, phát hiện và ứng phó sự cố an ninh 24/7 của tổ chức, thường dùng công cụ SIEM.",
+      "topics": [
+        "Security",
+        "Incident Response"
+      ],
+      "related": []
+    },
+    "siem": {
+      "name": "SIEM (Security Information and Event Management)",
+      "aliases": [
+        "siem"
+      ],
+      "category": "An ninh mạng",
+      "level": "Nâng cao",
+      "definition": "SIEM thu thập và phân tích log/sự kiện bảo mật từ toàn hệ thống để phát hiện tấn công và cảnh báo theo thời gian thực.",
+      "topics": [
+        "Security",
+        "Monitoring"
+      ],
+      "related": []
+    },
+    "man_network": {
+      "name": "MAN (Metropolitan Area Network)",
+      "aliases": [
+        "metropolitan area network",
+        "mang do thi"
+      ],
+      "category": "Mạng máy tính",
+      "level": "Trung cấp",
+      "definition": "MAN là mạng phạm vi thành phố/đô thị, nằm giữa LAN (cục bộ) và WAN (diện rộng) về quy mô.",
+      "topics": [
+        "Mạng máy tính",
+        "TCP/IP"
+      ],
+      "related": []
+    },
+    "iiot": {
+      "name": "IIoT (Industrial IoT)",
+      "aliases": [
+        "iiot",
+        "industrial iot",
+        "iot cong nghiep"
+      ],
+      "category": "IoT & Hệ thống nhúng",
+      "level": "Nâng cao",
+      "definition": "IIoT là ứng dụng IoT trong công nghiệp: cảm biến, máy móc kết nối để giám sát và tự động hóa sản xuất (Công nghiệp 4.0).",
+      "topics": [
+        "IoT",
+        "Embedded"
+      ],
+      "related": []
+    },
+    "mcu": {
+      "name": "MCU (Microcontroller Unit)",
+      "aliases": [
+        "mcu",
+        "microcontroller unit",
+        "vi dieu khien"
+      ],
+      "category": "IoT & Hệ thống nhúng",
+      "level": "Trung cấp",
+      "definition": "Vi điều khiển (MCU) là chip tích hợp CPU + bộ nhớ + ngoại vi trên một con, điều khiển thiết bị nhúng (Arduino, ESP32).",
+      "topics": [
+        "Microcontroller",
+        "Embedded",
+        "Arduino"
+      ],
+      "related": []
+    },
+    "rtos": {
+      "name": "RTOS (Real-Time Operating System)",
+      "aliases": [
+        "rtos",
+        "he dieu hanh thoi gian thuc"
+      ],
+      "category": "IoT & Hệ thống nhúng",
+      "level": "Nâng cao",
+      "definition": "RTOS là hệ điều hành đảm bảo phản hồi trong thời hạn xác định, dùng cho hệ thống nhúng đòi hỏi thời gian thực (ô tô, y tế).",
+      "topics": [
+        "Embedded",
+        "RTOS"
+      ],
+      "related": []
+    },
+    "pcb": {
+      "name": "PCB (Printed Circuit Board)",
+      "aliases": [
+        "pcb",
+        "bang mach in"
+      ],
+      "category": "IoT & Hệ thống nhúng",
+      "level": "Nâng cao",
+      "definition": "PCB là bảng mạch in liên kết các linh kiện điện tử — nền tảng vật lý của mọi thiết bị phần cứng.",
+      "topics": [
+        "PCB Design",
+        "Embedded"
+      ],
+      "related": []
+    },
+    "game_developer": {
+      "name": "GD (Game Developer)",
+      "aliases": [
+        "game developer",
+        "lap trinh game"
+      ],
+      "category": "Phát triển Game",
+      "level": "Cơ bản",
+      "definition": "Lập trình viên game xây dựng cơ chế chơi, đồ họa, vật lý và logic cho trò chơi bằng engine như Unity/Unreal.",
+      "topics": [
+        "Game Development",
+        "Unity"
+      ],
+      "related": []
+    },
+    "gdd": {
+      "name": "GDD (Game Design Document)",
+      "aliases": [
+        "gdd",
+        "game design document"
+      ],
+      "category": "Phát triển Game",
+      "level": "Trung cấp",
+      "definition": "GDD là tài liệu thiết kế game mô tả cốt truyện, cơ chế chơi, nhân vật, level — kim chỉ nam cho cả nhóm phát triển.",
+      "topics": [
+        "Game Design",
+        "Game Development"
+      ],
+      "related": []
+    },
+    "fps": {
+      "name": "FPS (Frames Per Second)",
+      "aliases": [
+        "fps",
+        "khung hinh moi giay"
+      ],
+      "category": "Phát triển Game",
+      "level": "Cơ bản",
+      "definition": "FPS là số khung hình hiển thị mỗi giây — chỉ số then chốt cho độ mượt của game/đồ họa (60 FPS là mượt). (FPS cũng là thể loại game bắn súng góc nhìn thứ nhất.)",
+      "topics": [
+        "Game Development",
+        "3D Graphics"
+      ],
+      "related": []
+    },
+    "npc": {
+      "name": "NPC (Non-Player Character)",
+      "aliases": [
+        "npc"
+      ],
+      "category": "Phát triển Game",
+      "level": "Cơ bản",
+      "definition": "NPC là nhân vật trong game do máy điều khiển (không phải người chơi), thường có AI để tương tác với người chơi.",
+      "topics": [
+        "Game Development",
+        "Game Design"
+      ],
+      "related": []
+    },
+    "pm_role": {
+      "name": "PM (Project Manager)",
+      "aliases": [
+        "pm",
+        "project manager",
+        "quan ly du an"
+      ],
+      "category": "Quản lý dự án CNTT",
+      "level": "Trung cấp",
+      "definition": "Project Manager lập kế hoạch, điều phối nguồn lực, tiến độ và rủi ro để dự án về đích đúng phạm vi, thời gian, ngân sách.",
+      "topics": [
+        "Project Management",
+        "Agile",
+        "Risk Management"
+      ],
+      "related": []
+    },
+    "po_role": {
+      "name": "PO (Product Owner)",
+      "aliases": [
+        "po",
+        "product owner"
+      ],
+      "category": "Quản lý dự án CNTT",
+      "level": "Trung cấp",
+      "definition": "Product Owner đại diện khách hàng trong nhóm Scrum, quản lý và ưu tiên backlog để nhóm xây đúng giá trị cần nhất.",
+      "topics": [
+        "Scrum Master",
+        "Product Owner",
+        "Agile"
+      ],
+      "related": []
+    },
+    "qc_role": {
+      "name": "QC (Quality Control)",
+      "aliases": [
+        "qc",
+        "quality control"
+      ],
+      "category": "Kiểm thử phần mềm",
+      "level": "Trung cấp",
+      "definition": "QC (Kiểm soát chất lượng) tập trung phát hiện lỗi của sản phẩm qua kiểm thử; còn QA (Đảm bảo chất lượng) thiên về cải tiến quy trình để phòng lỗi.",
+      "topics": [
+        "Testing",
+        "QA Process"
+      ],
+      "related": []
+    },
+    "vcs": {
+      "name": "VCS (Version Control System)",
+      "aliases": [
+        "vcs",
+        "he thong quan ly phien ban"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Cơ bản",
+      "definition": "Hệ thống quản lý phiên bản theo dõi lịch sử thay đổi code và hỗ trợ cộng tác (Git là VCS phổ biến nhất).",
+      "topics": [
+        "Git",
+        "Version Control"
+      ],
+      "related": []
+    },
+    "pull_request": {
+      "name": "PR / MR (Pull / Merge Request)",
+      "aliases": [
+        "pull request",
+        "merge request",
+        "pr",
+        "mr"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Cơ bản",
+      "definition": "PR/MR là yêu cầu hợp nhất nhánh code của bạn vào nhánh chính, kèm review của đồng đội — quy trình cộng tác chuẩn trên Git.",
+      "topics": [
+        "Git",
+        "Version Control"
+      ],
+      "related": []
+    },
+    "fork": {
+      "name": "Fork (Git)",
+      "aliases": [
+        "fork"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Cơ bản",
+      "definition": "Fork là tạo bản sao độc lập của một repository (thường để đóng góp vào dự án mã nguồn mở mà không có quyền ghi trực tiếp).",
+      "topics": [
+        "Git",
+        "Version Control"
+      ],
+      "related": []
+    },
+    "repo": {
+      "name": "Repository (Repo)",
+      "aliases": [
+        "repo",
+        "repository"
+      ],
+      "category": "Kỹ thuật phần mềm",
+      "level": "Cơ bản",
+      "definition": "Repository (repo) là kho chứa toàn bộ mã nguồn và lịch sử thay đổi của một dự án, quản lý bằng Git (GitHub/GitLab).",
+      "topics": [
+        "Git",
+        "Version Control"
+      ],
+      "related": []
+    },
+    "dba": {
+      "name": "DBA (Database Administrator)",
+      "aliases": [
+        "dba",
+        "database administrator",
+        "quan tri co so du lieu"
+      ],
+      "category": "Cơ sở dữ liệu",
+      "level": "Nâng cao",
+      "definition": "DBA quản trị cơ sở dữ liệu: cài đặt, sao lưu, tối ưu hiệu năng, bảo mật và đảm bảo dữ liệu luôn sẵn sàng.",
+      "topics": [
+        "Database",
+        "SQL",
+        "Query Optimization"
+      ],
+      "related": []
+    }
+  }
+}

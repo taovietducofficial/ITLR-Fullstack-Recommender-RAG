@@ -1,0 +1,18 @@
+<%- include('partials/admin-header') %>
+
+<div class="auth-box center admin-login-box">
+  <div class="admin-login-ic">🔐</div>
+  <h1>Khu vực Quản trị</h1>
+  <p class="muted">Trang riêng, tách biệt với giao diện người dùng. Nhập passcode để tiếp tục.</p>
+  <% if (error) { %><div class="alert"><%= error %></div><% } %>
+  <form action="/admin/login" method="post">
+    <%- include('partials/csrf') %>
+    <label style="text-align:left;display:block">Passcode
+      <input type="password" name="passcode" autofocus required autocomplete="current-password">
+    </label>
+    <button class="btn-primary block" type="submit">Vào trang quản trị</button>
+  </form>
+  <p class="muted small" style="margin-top:14px"><a href="/">← Về trang người dùng</a></p>
+</div>
+
+<%- include('partials/admin-footer') %>

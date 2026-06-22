@@ -1,0 +1,83 @@
+<%- include('partials/admin-header') %>
+
+<div class="admin-head">
+  <h1 class="page-title">🔧 Bảng quản trị</h1>
+  <a class="btn-ghost xs" href="/" target="_blank" rel="noopener">Xem trang người dùng ↗</a>
+</div>
+
+<div class="stat-row">
+  <div class="stat"><span class="stat-n"><%= stats.users.toLocaleString('vi-VN') %></span><span>Người dùng</span></div>
+  <div class="stat"><span class="stat-n"><%= stats.courses.toLocaleString('vi-VN') %></span><span>Khóa học/TL</span></div>
+  <div class="stat"><span class="stat-n"><%= stats.enrollments.toLocaleString('vi-VN') %></span><span>Lượt lưu</span></div>
+  <div class="stat"><span class="stat-n"><%= stats.posts %></span><span>Bài viết</span></div>
+  <div class="stat"><span class="stat-n"><%= stats.comments %></span><span>Bình luận</span></div>
+  <div class="stat"><span class="stat-n"><%= stats.attachments %></span><span>File đính kèm</span></div>
+</div>
+
+<p class="muted small admin-privacy">🔒 Vì quyền riêng tư: nội dung tin nhắn bạn bè và hội thoại với Trợ lý CNTT KHÔNG hiển thị cho quản trị viên — chỉ thống kê tổng (<%= stats.conversations %> hội thoại · <%= stats.messages %> tin nhắn).</p>
+
+<h2 class="section-title">📂 Kho file đã tải lên (<%= files.length %>)</h2>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Loại</th><th>Tên</th><th>Định dạng</th><th>KB</th><th>Người tải</th><th>Nguồn</th><th>Ngày</th><th></th></tr></thead>
+  <tbody>
+    <% files.forEach(function(f){ %>
+      <tr>
+        <td><span class="badge badge-cat"><%= f.kind %></span></td>
+        <td><%= f.name %></td>
+        <td class="muted small"><%= f.mime || '' %></td>
+        <td><%= Math.max(1, Math.round((f.bytes||0)/1024)) %></td>
+        <td class="muted small"><%= f.uploader || '' %></td>
+        <td class="muted small"><%= f.context %></td>
+        <td class="muted small"><%= new Date(f.created_at).toLocaleString('vi-VN') %></td>
+        <td class="row-actions">
+          <a class="btn-ghost xs" href="/admin/file/<%= f.kind %>/<%= f.id %>/download">Tải</a>
+          <form action="/admin/file/<%= f.kind %>/<%= f.id %>/delete" method="post" onsubmit="return confirm('Xóa file này?')"><%- include('partials/csrf') %><button class="btn-ghost xs danger">Xóa</button></form>
+        </td>
+      </tr>
+    <% }); %>
+    <% if (!files.length) { %><tr><td colspan="8" class="muted">Chưa có file nào.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">👤 Người dùng (<%= users.length %>)</h2>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>ID</th><th>Tên</th><th>Email</th><th>Vai trò</th><th>Ngày tạo</th><th></th></tr></thead>
+  <tbody>
+    <% users.forEach(function(u){ %>
+      <tr>
+        <td><%= u.id %></td><td><%= u.name %></td><td><%= u.email %></td>
+        <td><span class="badge <%= u.role==='admin'?'badge-course':'badge-cat' %>"><%= u.role %></span></td>
+        <td class="muted small"><%= new Date(u.created_at).toLocaleDateString('vi-VN') %></td>
+        <td class="row-actions">
+          <form action="/admin/user/<%= u.id %>/role" method="post"><%- include('partials/csrf') %><button class="btn-ghost xs"><%= u.role==='admin'?'Bỏ admin':'Cấp admin' %></button></form>
+          <form action="/admin/user/<%= u.id %>/delete" method="post" onsubmit="return confirm('Xóa user này kèm toàn bộ dữ liệu của họ?')"><%- include('partials/csrf') %><button class="btn-ghost xs danger">Xóa</button></form>
+        </td>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>
+</div>
+
+<h2 class="section-title">📝 Bài viết (<%= posts.length %>)</h2>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>ID</th><th>Tác giả</th><th>Nội dung</th><th>Media</th><th>Ngày</th><th></th></tr></thead>
+  <tbody>
+    <% posts.forEach(function(p){ %>
+      <tr>
+        <td><%= p.id %></td><td><%= p.author %></td>
+        <td><%= p.content %></td>
+        <td class="muted small"><%= p.img ? '🖼️' : '' %> <%= p.doc || '' %></td>
+        <td class="muted small"><%= new Date(p.created_at).toLocaleString('vi-VN') %></td>
+        <td><form action="/admin/post/<%= p.id %>/delete" method="post" onsubmit="return confirm('Xóa bài này?')"><%- include('partials/csrf') %><button class="btn-ghost xs danger">Xóa</button></form></td>
+      </tr>
+    <% }); %>
+    <% if (!posts.length) { %><tr><td colspan="6" class="muted">Chưa có bài.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+
+<%- include('partials/admin-footer') %>

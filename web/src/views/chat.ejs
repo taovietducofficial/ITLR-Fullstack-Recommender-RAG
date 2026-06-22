@@ -1,0 +1,54 @@
+<%- include('partials/header') %>
+
+<div class="chat-shell">
+  <aside class="chat-side">
+    <a href="/chat" class="newchat-btn">＋ Cuộc trò chuyện mới</a>
+    <div class="conv-list">
+      <% conversations.forEach(function(cv){ %>
+        <div class="conv-item <%= activeId===cv.id ? 'active' : '' %>" data-conv="<%= cv.id %>">
+          <a href="/chat?c=<%= cv.id %>" class="conv-title"><%= cv.title %></a>
+          <button class="conv-del" type="button" data-conv="<%= cv.id %>" title="Xóa cuộc trò chuyện">×</button>
+        </div>
+      <% }); %>
+      <% if (!conversations.length) { %><p class="muted small conv-empty">Chưa có lịch sử trò chuyện.</p><% } %>
+    </div>
+  </aside>
+
+  <section class="chat-main">
+    <div id="chatlog" class="chatlog" data-conv="<%= activeId || '' %>">
+      <% if (messages.length) { %>
+        <% messages.forEach(function(m){ %>
+          <div class="msg <%= m.role %>">
+            <div class="avatar"><%= m.role==='user' ? '🧑' : '🤖' %></div>
+            <div class="bubble"><% if (m.role==='assistant') { %><%- m.html %><% } else { %><%= m.content %><% } %></div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <div class="chat-welcome">
+          <div class="cw-avatar">🤖</div>
+          <h2>IT Learning Assistant</h2>
+          <p>Trợ lý học tập CNTT thông minh — giúp bạn tìm đúng tài nguyên và đi đúng lộ trình.</p>
+          <div class="cw-feats">
+            <div class="cw-feat"><span class="cw-ic">🔍</span><div><b>Tìm kiếm</b><small>khóa học &amp; tài liệu phù hợp</small></div></div>
+            <div class="cw-feat"><span class="cw-ic">💡</span><div><b>Gợi ý</b><small>nội dung học cá nhân hóa</small></div></div>
+            <div class="cw-feat"><span class="cw-ic">🗺️</span><div><b>Lộ trình</b><small>từ cơ bản đến nâng cao</small></div></div>
+            <div class="cw-feat"><span class="cw-ic">❓</span><div><b>Giải đáp</b><small>mọi câu hỏi lĩnh vực CNTT</small></div></div>
+          </div>
+          <% if (prompts && prompts.length) { %>
+            <div class="prompts">
+              <% prompts.forEach(function(p){ %><button type="button" class="prompt-chip"><%= p %></button><% }); %>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+
+    <form id="chatform" class="chatbar">
+      <input id="chatinput" type="text" placeholder="Hỏi về lộ trình, khóa học, khái niệm CNTT..." autocomplete="off">
+      <button class="btn-primary" type="submit">Gửi</button>
+    </form>
+    <p class="muted center small">Trợ lý chỉ trả lời chủ đề CNTT. Có thể mắc lỗi — hãy kiểm tra thông tin quan trọng.</p>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

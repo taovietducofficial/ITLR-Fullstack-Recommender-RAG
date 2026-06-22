@@ -1,0 +1,50 @@
+<%- include('partials/admin-header') %>
+
+<div class="admin-head">
+  <h1 class="page-title"><%= kind === 'course' ? '🎬 Khóa học' : '📚 Mục tài liệu' %> (<%= total.toLocaleString('vi-VN') %>)</h1>
+  <a class="btn-ghost xs" href="/admin">← Bảng quản trị</a>
+</div>
+<p class="muted small">
+  <%= kind === 'course' ? 'Chọn một khóa học để dán link video YouTube bài giảng.' : 'Chọn một mục tài liệu để tải lên file tài liệu.' %>
+  Cột <b>Chờ duyệt</b> là số đóng góp của người dùng đang chờ bạn phê duyệt.
+</p>
+
+<form class="admin-search" method="get" action="<%= kind === 'course' ? '/admin/courses' : '/admin/docs' %>">
+  <input type="text" name="q" value="<%= q %>" placeholder="Tìm theo tên..." autocomplete="off">
+  <button class="btn-primary" type="submit">Tìm</button>
+  <% if (q) { %><a class="btn-ghost xs" href="<%= kind === 'course' ? '/admin/courses' : '/admin/docs' %>">Xóa lọc</a><% } %>
+</form>
+
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>ID</th><th>Tên</th><th>Chuyên mục</th><th>Cấp độ</th><th><%= kind === 'course' ? 'Bài học' : 'Tài liệu' %></th><th>Chờ duyệt</th><th></th></tr></thead>
+  <tbody>
+    <% items.forEach(function(it){ %>
+      <tr>
+        <td class="muted small"><%= it.item_id %></td>
+        <td><%= it.title %></td>
+        <td class="muted small"><%= it.category || '' %></td>
+        <td class="muted small"><%= it.level || '' %></td>
+        <td><%= it.n %></td>
+        <td><% if (it.pending) { %><span class="badge badge-warn"><%= it.pending %></span><% } else { %><span class="muted">0</span><% } %></td>
+        <td class="row-actions">
+          <a class="btn-primary-sm" href="<%= (kind === 'course' ? '/admin/courses/' : '/admin/docs/') + it.item_id %>"><%= kind === 'course' ? 'Dán link' : 'Tải tài liệu' %></a>
+        </td>
+      </tr>
+    <% }); %>
+    <% if (!items.length) { %><tr><td colspan="7" class="muted">Không có mục nào khớp.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+
+<% if (pages > 1) {
+     var baseUrl = (kind === 'course' ? '/admin/courses' : '/admin/docs') + '?' + (q ? ('q=' + encodeURIComponent(q) + '&') : '');
+%>
+  <div class="admin-pager">
+    <% if (page > 1) { %><a class="btn-ghost xs" href="<%= baseUrl %>page=<%= page-1 %>">← Trước</a><% } %>
+    <span class="muted small">Trang <%= page %> / <%= pages %></span>
+    <% if (page < pages) { %><a class="btn-ghost xs" href="<%= baseUrl %>page=<%= page+1 %>">Sau →</a><% } %>
+  </div>
+<% } %>
+
+<%- include('partials/admin-footer') %>

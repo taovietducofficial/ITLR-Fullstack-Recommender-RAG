@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<h1 class="page-title">Tài khoản</h1>
+
+<div class="account-grid">
+  <div class="card account-info">
+    <%- include('partials/avatar', { id: user.id, name: user.name, has: hasAvatar, cls: 'lg' }) %>
+    <h3><%= user.name %></h3>
+    <p class="muted"><%= user.email %></p>
+    <span class="badge badge-cat">Vai trò: <%= user.role %></span>
+    <form action="/api/account/avatar?_csrf=<%= csrfToken %>" method="post" enctype="multipart/form-data" class="avatar-form">
+      <label class="pc-attach">🖼️ Đổi ảnh đại diện
+        <input type="file" name="avatar" accept="image/*" hidden onchange="this.form.submit()">
+      </label>
+    </form>
+    <a class="btn-ghost xs" href="/u/<%= user.id %>">Xem trang cá nhân →</a>
+  </div>
+
+  <div class="cards-col">
+    <div class="card">
+      <h3>Đổi tên hiển thị</h3>
+      <form action="/account/profile" method="post" class="acc-form">
+        <%- include('partials/csrf') %>
+        <label>Tên<input type="text" name="name" value="<%= user.name %>" maxlength="80" required></label>
+        <button class="btn-primary" type="submit">Lưu tên</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Đổi mật khẩu</h3>
+      <% if (ok) { %><div class="ok-box">✅ Đã đổi mật khẩu thành công.</div><% } %>
+      <% if (error) { %><div class="alert"><%= error %></div><% } %>
+      <form action="/account/password" method="post" class="acc-form">
+        <%- include('partials/csrf') %>
+        <label>Mật khẩu hiện tại<input type="password" name="current" required></label>
+        <label>Mật khẩu mới
+          <div class="pw-row">
+            <input id="acc-password" type="password" name="password" required>
+            <button type="button" class="btn-ghost pw-gen" id="genpass" title="Tạo mật khẩu mạnh">Tạo</button>
+            <button type="button" class="btn-ghost pw-eye" id="togglepw" title="Hiện/ẩn">👁</button>
+          </div>
+        </label>
+        <label>Xác nhận mật khẩu mới<input type="password" name="confirm" required></label>
+        <p class="muted small">Tối thiểu 8 ký tự, có chữ HOA, chữ thường và ký tự đặc biệt.</p>
+        <button class="btn-primary" type="submit">Cập nhật mật khẩu</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

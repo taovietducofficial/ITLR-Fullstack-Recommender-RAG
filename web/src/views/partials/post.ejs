@@ -1,0 +1,42 @@
+<article class="post card" data-post="<%= p.id %>">
+  <div class="post-head">
+    <a href="/u/<%= p.user_id %>"><%- include('avatar', { id: p.user_id, name: p.author, has: p.author_avatar, cls: 'sm' }) %></a>
+    <div class="post-meta">
+      <a href="/u/<%= p.user_id %>"><b><%= p.author %></b></a>
+      <div class="muted small"><%= new Date(p.created_at).toLocaleString('vi-VN') %><% if (p.shared_from) { %> · đã chia sẻ ↪<% } %></div>
+    </div>
+    <% if (user && (p.user_id === user.id || isAdmin)) { %>
+      <button class="post-del" type="button" data-post="<%= p.id %>" title="Xóa bài">🗑</button>
+    <% } %>
+  </div>
+
+  <% if (p.content) { %><p class="post-content"><%= p.content %></p><% } %>
+  <% if (p.has_image) { %><img class="post-img" src="/api/media/post/<%= p.id %>/image" alt="ảnh" loading="lazy"><% } %>
+  <% if (p.has_video) { %><video class="post-video" src="/api/media/post/<%= p.id %>/video" controls preload="metadata"></video><% } %>
+  <% if (p.has_doc) { %><a class="post-doc" href="/api/media/post/<%= p.id %>/doc">📄 <%= p.doc_original %></a><% } %>
+
+  <% if (p.origin) { %>
+    <div class="post-origin">
+      <div class="muted small">↪ Bài gốc của <b><%= p.origin.author %></b></div>
+      <% if (p.origin.content) { %><p class="post-content"><%= p.origin.content %></p><% } %>
+      <% if (p.origin.has_image) { %><img class="post-img" src="/api/media/post/<%= p.shared_from %>/image" alt="ảnh" loading="lazy"><% } %>
+      <% if (p.origin.has_video) { %><video class="post-video" src="/api/media/post/<%= p.shared_from %>/video" controls preload="metadata"></video><% } %>
+      <% if (p.origin.has_doc) { %><a class="post-doc" href="/api/media/post/<%= p.shared_from %>/doc">📄 <%= p.origin.doc_original %></a><% } %>
+    </div>
+  <% } %>
+
+  <div class="post-actions">
+    <button class="like-btn <%= p.liked ? 'liked' : '' %>" type="button" data-post="<%= p.id %>">
+      <span class="like-ic">❤</span> <span class="like-count"><%= p.likes %></span> Thích
+    </button>
+    <button class="share-btn" type="button" data-post="<%= p.id %>">↪ Chia sẻ</button>
+    <button class="share-btn" type="button" data-share-post="<%= p.id %>" title="Gửi vào tin nhắn">✉️ Gửi</button>
+    <span class="muted small"><span class="cmt-count"><%= p.comments.length %></span> bình luận</span>
+  </div>
+  <div class="comments">
+    <% p.comments.forEach(function(c){ %><div class="cmt"><b><%= c.author %></b> <%= c.content %></div><% }); %>
+  </div>
+  <form class="cmt-form" data-post="<%= p.id %>">
+    <input type="text" placeholder="Viết bình luận..." required><button class="btn-ghost" type="submit">Gửi</button>
+  </form>
+</article>
