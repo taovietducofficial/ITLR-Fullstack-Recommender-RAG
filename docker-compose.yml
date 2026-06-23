@@ -38,6 +38,12 @@ services:
       # Cho phép tải model HuggingFace ở lần chạy đầu (server tự setdefault =1).
       HF_HUB_OFFLINE: "0"
       TRANSFORMERS_OFFLINE: "0"
+      # DỮ LIỆU THẬT: trỏ catalog + tương tác sang bộ 4.088 khóa IT thật (đồng bộ với web).
+      # Engine vốn nạp item_list.pkl từ artifacts (đã build trên data thật); các biến này
+      # giữ mọi code path đọc CSV cũng nhất quán dùng data thật.
+      ITLR_ITEMS_CSV: /app/data/it_learning_items_real.csv
+      ITLR_INTERACTIONS_CSV: /app/data/interactions_real.csv
+      EMBEDDING_MODEL: minilm           # artifacts build bằng minilm (đa ngữ); khớp search_meta.pkl
       # LLM cho chatbot (tùy chọn) — bỏ trống thì chạy tổng hợp cục bộ offline:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
@@ -64,7 +70,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-it_learning}
       RECOMMENDER_URL: http://recommender:8000
       JWT_SECRET: ${JWT_SECRET:-doi-thanh-chuoi-bi-mat-that-dai}
-      ITEMS_CSV: /data/it_learning_items.csv
+      ITEMS_CSV: /data/it_learning_items_real.csv   # DỮ LIỆU THẬT: seed 4.088 khóa IT thật (khớp recommender)
       ADMIN_PASSCODE: ${ADMIN_PASSCODE:-1}  # passcode vào trang /admin
       # Email quên mật khẩu (tùy chọn): App Password Gmail
       SMTP_USER: ${SMTP_USER:-}
@@ -73,7 +79,7 @@ services:
       # Bật khi chạy sau HTTPS/reverse-proxy (cookie secure). Để trống nếu chạy HTTP thuần:
       # NODE_ENV: production
     volumes:
-      - ./data:/data                       # CSV: seed 50k + GHI cộng dồn file upload (cần quyền ghi)
+      - ./data:/data                       # CSV: seed 4.088 khóa THẬT + GHI cộng dồn file upload (cần quyền ghi)
     ports:
       - "${WEB_PORT:-3000}:3000"
 

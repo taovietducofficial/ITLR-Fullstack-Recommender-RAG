@@ -23,3 +23,14 @@ openai
 # Chỉ mục vector ANN (tùy chọn). Nếu môi trường chưa có wheel phù hợp,
 # app tự fallback brute-force; có thể thay bằng `hnswlib`.
 faiss-cpu
+
+# ── Khung đánh giá / nâng cấp (Trụ cột B–G) — chỉ cần khi chạy scripts/eval/* ──
+# Learning-to-Rank (LambdaMART). Đánh giá/kiểm định/đồ thị dùng scipy/matplotlib/shap.
+lightgbm
+scipy
+matplotlib
+shap
+# Experiment tracking (Trụ cột G) + kiểm thử + đo RSS (tùy chọn)
+mlflow
+pytest
+psutil

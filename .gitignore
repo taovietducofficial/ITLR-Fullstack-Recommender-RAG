@@ -2,6 +2,10 @@
 #    itlr/chatbot/data/ chứa glossary nguồn cần commit)
 /artifacts/
 /data/
+# backup artifacts synthetic (~550MB) — chỉ giữ local
+/artifacts_synthetic_backup/
+# data thô Kaggle tải tay (~40MB) — chỉ giữ local
+/data_real_kaggle/
 
 # ── Python ──
 __pycache__/

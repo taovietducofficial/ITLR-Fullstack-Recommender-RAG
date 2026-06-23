@@ -1,82 +1,105 @@
-"""Sinh dữ liệu tương tác giả (user-item) để mô phỏng Collaborative Filtering.
+"""Sinh dữ liệu tương tác (user-item) có CẤU TRÚC LATENT để mô phỏng Collaborative Filtering.
 
-Mỗi user có 1-2 chuyên mục sở thích; lịch sử "đã xem/học" được lấy mẫu chủ yếu trong
-các chuyên mục đó (theo độ phổ biến tiềm ẩn của item) + một ít item ngẫu nhiên để tạo
-liên kết chéo (giúp CF khám phá "người học X cũng học Y").
+NÂNG CẤP (2026-06-23): phiên bản cũ lấy mẫu item theo độ phổ biến thuần -> co-occurrence
+KHÔNG mang tín hiệu cộng tác thật, nên CF đánh giá leave-one-out/temporal KHÔNG rò rỉ gần
+như bằng 0 (xem reports/cf_eval.md). Phiên bản này dùng **mô hình nhân tử ẩn (latent-factor)**:
 
-    python generate_interactions.py [số_user]   # mặc định 1500
+  - Mỗi item i có vector ẩn q_i dựng từ chuyên mục + chủ đề (item cùng category/topic -> q gần nhau).
+  - Mỗi user u có vector sở thích ẩn p_u lấy quanh một "archetype" (cộng đồng) -> tạo các nhóm
+    user có gu tương tự.
+  - Xác suất user u tương tác item i ∝ exp(p_u · q_i): user gu giống nhau chọn item q gần nhau
+    -> "người học X cũng học Y" XUẤT HIỆN THẬT trong đồng-xuất-hiện -> item-based CF (co-occurrence)
+    khôi phục được hàng xóm q_i -> đánh giá KHÔNG rò rỉ có tín hiệu (recall > 0 đáng kể).
+
+Vẫn giữ skew độ phổ biến (một số item hot hơn) cho thực tế. Output/ CLI giữ nguyên.
+
+    python generate_interactions.py [số_user]   # mặc định 1800
 
 Output: data/interactions.csv  (user_id, item_id)
 """
 
 import csv
-import random
+import os
 import sys
 
+import numpy as np
 import pandas as pd
 
 from itlr import config
+from itlr.core.recommender import parse_topics
 
-random.seed(7)
-
-N_USERS = int(sys.argv[1]) if len(sys.argv) > 1 else 1500
+SEED = 7
+N_USERS = int(sys.argv[1]) if len(sys.argv) > 1 else 1800
 MIN_INTERACTIONS, MAX_INTERACTIONS = 8, 40
-CROSS_CATEGORY_RATE = 0.15   # tỉ lệ tương tác "lạc" sang chuyên mục khác
+
+LATENT_DIM = 24          # số nhân tử ẩn
+N_ARCHETYPES = 40        # số "cộng đồng" gu (nhiều hơn số chuyên mục -> tạo nhóm con)
+USER_NOISE = 0.35        # độ lệch p_u quanh archetype (nhỏ -> cộng đồng chặt)
+SHARPNESS = 6.0          # độ "nhọn" của lựa chọn (cao -> chọn tập item nhất quán hơn)
+
+
+def build_item_factors(items: pd.DataFrame, rng: np.random.Generator) -> np.ndarray:
+    """q_i = chuẩn hóa( vector_chuyên_mục + Σ vector_chủ_đề + nhiễu nhỏ ). Item cùng
+    category/topic -> q gần nhau (đó là nguồn tín hiệu cộng tác)."""
+    cats = sorted(items["category"].unique())
+    cat_vec = {c: rng.normal(size=LATENT_DIM) for c in cats}
+    topic_vec: dict = {}
+    item_topics = [parse_topics(t) for t in items["topics"]]
+    for ts in item_topics:
+        for t in ts:
+            if t not in topic_vec:
+                topic_vec[t] = rng.normal(size=LATENT_DIM) * 0.8
+
+    q = np.zeros((len(items), LATENT_DIM))
+    for i, (cat, ts) in enumerate(zip(items["category"], item_topics)):
+        v = cat_vec[cat].copy()
+        for t in ts:
+            v += topic_vec[t]
+        v += rng.normal(size=LATENT_DIM) * 0.15
+        n = np.linalg.norm(v)
+        q[i] = v / n if n > 0 else v
+    return q
 
 
 def main():
-    items = pd.read_csv(config.ITEMS_CSV)
-    items = items.dropna().reset_index(drop=True)
+    rng = np.random.default_rng(SEED)
+    items = pd.read_csv(config.ITEMS_CSV).dropna(subset=["category", "topics"]).reset_index(drop=True)
+    n_items = len(items)
+    item_ids = items["item_id"].astype(int).to_numpy()
 
-    by_category = {}
-    for _, row in items.iterrows():
-        by_category.setdefault(row["category"], []).append(int(row["item_id"]))
-    categories = list(by_category.keys())
-
-    all_ids = items["item_id"].astype(int).tolist()
-
-    # Độ phổ biến tiềm ẩn: một số item "hot" hơn hẳn (phân bố lệch) -> CF có tín hiệu
-    popularity = {iid: random.paretovariate(1.3) for iid in all_ids}
-
-    def weighted_sample(pool, k):
-        pool = list(pool)
-        if k >= len(pool):
-            return pool
-        weights = [popularity[i] for i in pool]
-        chosen, seen = [], set()
-        # lấy mẫu không lặp theo trọng số
-        while len(chosen) < k and len(seen) < len(pool):
-            pick = random.choices(pool, weights=weights, k=1)[0]
-            if pick not in seen:
-                seen.add(pick)
-                chosen.append(pick)
-        return chosen
+    q = build_item_factors(items, rng)                       # (n_items, d)
+    archetypes = rng.normal(size=(N_ARCHETYPES, LATENT_DIM))  # tâm các cộng đồng gu
+    # skew độ phổ biến nội tại (Pareto) -> một số item hot hơn dù cùng độ khớp
+    pop_bias = np.log(rng.pareto(2.0, size=n_items) + 1.0)
 
     rows = []
     for uid in range(1, N_USERS + 1):
-        n_fav = random.choice([1, 1, 2, 2, 3])
-        favs = random.sample(categories, min(n_fav, len(categories)))
-        k = random.randint(MIN_INTERACTIONS, MAX_INTERACTIONS)
+        arch = archetypes[rng.integers(0, N_ARCHETYPES)]
+        p_u = arch + rng.normal(size=LATENT_DIM) * USER_NOISE
+        scores = q @ p_u + 0.3 * pop_bias                    # độ hấp dẫn item với user
+        # xác suất chọn ∝ exp(sharpness * z(scores)); softmax ổn định số học
+        z = (scores - scores.mean()) / (scores.std() + 1e-9)
+        logits = SHARPNESS * z
+        logits -= logits.max()
+        probs = np.exp(logits)
+        probs /= probs.sum()
 
-        fav_pool = [iid for c in favs for iid in by_category[c]]
-        n_cross = int(k * CROSS_CATEGORY_RATE)
-        n_fav_items = k - n_cross
+        k = int(rng.integers(MIN_INTERACTIONS, MAX_INTERACTIONS + 1))
+        k = min(k, n_items)
+        picks = rng.choice(n_items, size=k, replace=False, p=probs)
+        for pos in picks:
+            rows.append({"user_id": uid, "item_id": int(item_ids[pos])})
 
-        picks = set(weighted_sample(fav_pool, n_fav_items))
-        picks.update(weighted_sample(all_ids, n_cross))
-
-        for iid in picks:
-            rows.append({"user_id": uid, "item_id": iid})
-
-    import os
     os.makedirs(config.DATA_DIR, exist_ok=True)
     with open(config.INTERACTIONS_CSV, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["user_id", "item_id"])
-        writer.writeheader()
-        writer.writerows(rows)
+        w = csv.DictWriter(f, fieldnames=["user_id", "item_id"])
+        w.writeheader()
+        w.writerows(rows)
 
+    n_distinct = len({r["item_id"] for r in rows})
     print(f"Generated {len(rows)} interactions cho {N_USERS} users -> {config.INTERACTIONS_CSV}")
-    print(f"  Trung bình {len(rows) / N_USERS:.1f} tương tác/user | {len(all_ids)} items | {len(categories)} chuyên mục")
+    print(f"  latent-factor (d={LATENT_DIM}, {N_ARCHETYPES} archetypes) | "
+          f"TB {len(rows)/N_USERS:.1f} tương tác/user | {n_distinct}/{n_items} item được chạm")
 
 
 if __name__ == "__main__":

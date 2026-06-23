@@ -34,12 +34,13 @@ os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
 import itlr.utils.runtime_patches  # noqa: F401,E402  (dọn nhiễu console trước khi nạp model)
 
+import time  # noqa: E402
 from contextlib import asynccontextmanager  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import List, Optional, Union  # noqa: E402
 
-from fastapi import FastAPI, HTTPException  # noqa: E402
-from fastapi.responses import FileResponse  # noqa: E402
+from fastapi import FastAPI, HTTPException, Request  # noqa: E402
+from fastapi.responses import FileResponse, PlainTextResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
@@ -76,6 +77,56 @@ async def lifespan(_app):
 
 
 app = FastAPI(title="IT Learning Recommender API", version="1.0.0", lifespan=lifespan)
+
+
+# ── Observability (Trụ cột G): đếm request + độ trễ theo route, phơi /metrics ─────
+_METRICS = {"requests_total": 0, "errors_total": 0, "by_route": {}}
+
+
+@app.middleware("http")
+async def _track_metrics(request: Request, call_next):
+    t0 = time.perf_counter()
+    _METRICS["requests_total"] += 1
+    try:
+        resp = await call_next(request)
+    except Exception:
+        _METRICS["errors_total"] += 1
+        raise
+    dt_ms = (time.perf_counter() - t0) * 1000.0
+    route = request.url.path
+    r = _METRICS["by_route"].setdefault(route, {"count": 0, "ms_sum": 0.0, "ms_max": 0.0})
+    r["count"] += 1
+    r["ms_sum"] += dt_ms
+    r["ms_max"] = max(r["ms_max"], dt_ms)
+    if resp.status_code >= 500:
+        _METRICS["errors_total"] += 1
+    return resp
+
+
+@app.get("/health")
+def health():
+    """Liveness/readiness: engine đã nạp được artifacts chưa."""
+    try:
+        load_engine()
+        return {"status": "ok", "engine": "ready"}
+    except FileNotFoundError:
+        raise HTTPException(status_code=503, detail="Artifacts chưa build (chạy scripts/build_all.py)")
+
+
+@app.get("/metrics", response_class=PlainTextResponse)
+def metrics():
+    """Phơi metric quan sát hệ thống dạng text (đếm request, độ trễ TB/đỉnh mỗi route)."""
+    lines = [
+        f"requests_total {_METRICS['requests_total']}",
+        f"errors_total {_METRICS['errors_total']}",
+    ]
+    for route, r in sorted(_METRICS["by_route"].items()):
+        avg = r["ms_sum"] / r["count"] if r["count"] else 0.0
+        safe = route.replace('"', "")
+        lines.append(f'route_requests_total{{path="{safe}"}} {r["count"]}')
+        lines.append(f'route_latency_ms_avg{{path="{safe}"}} {avg:.2f}')
+        lines.append(f'route_latency_ms_max{{path="{safe}"}} {r["ms_max"]:.2f}')
+    return "\n".join(lines) + "\n"
 
 
 # ── Schema request ────────────────────────────────────────────────────────────

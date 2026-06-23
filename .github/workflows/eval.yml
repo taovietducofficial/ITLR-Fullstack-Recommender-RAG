@@ -1,0 +1,31 @@
+name: eval
+
+# CI cho khung đánh giá (Trụ cột G): mỗi push/PR chạy kiểm thử đơn vị các module metric/
+# significance/off-policy (numpy thuần, KHÔNG cần nạp model nặng) + smoke import pipeline.
+# Bộ eval đầy đủ (cần artifacts ~500MB) chạy thủ công bằng scripts/eval/run_all.py.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  unit-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install (deps nhẹ cho test eval)
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy scipy scikit-learn pandas nltk pytest
+      - name: Smoke import pipeline + eval
+        run: |
+          python -c "import itlr.eval.metrics, itlr.eval.diversity, itlr.eval.significance, itlr.eval.off_policy, itlr.eval.cf_eval"
+      - name: Unit tests (metric / significance / off-policy)
+        run: |
+          python -m pytest tests/test_eval.py -q
