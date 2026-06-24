@@ -101,6 +101,42 @@ def strip_accents(text):
     return "".join(c for c in text if unicodedata.category(c) != "Mn")
 
 
+# Gộp các TỪ LẶP liên tiếp do dịch máy lỗi: "kỹ thuật thuật thuật toán" -> "kỹ thuật toán".
+# \w (Unicode) bắt cả chữ tiếng Việt; backreference \1 + re.I gộp không phân biệt hoa thường.
+_REPEAT_WORD_RE = re.compile(r"\b(\w+)(\s+\1\b)+", re.IGNORECASE | re.UNICODE)
+# Bỏ KHOẢNG TRẮNG THỪA trước dấu câu. Tách riêng dấu chấm: CHỈ bỏ cách trước '.' khi nó là dấu
+# chấm KẾT câu (theo sau là khoảng trắng/hết chuỗi) -> KHÔNG phá " .NET" / " .js" (theo sau là chữ).
+_SPACE_BEFORE_PUNCT_RE = re.compile(r"\s+([,;:!?])")
+_SPACE_BEFORE_PERIOD_RE = re.compile(r"\s+\.(?=\s|$)")
+# Thêm cách SAU dấu phẩy/chấm-phẩy/hai-chấm dính chữ: "câu,Xác" -> "câu, Xác" (số thập phân an toàn
+# vì yêu cầu CHỮ cái ngay sau, không phải chữ số).
+_SPACE_AFTER_COMMA_RE = re.compile(r"([,;:])(?=[A-Za-zÀ-ỹ])")
+# Tách CÂU bị dính: <chữ thường>.<Chữ HOA + thường> -> thêm cách. Lookbehind 2 ký tự thường +
+# yêu cầu sau dấu chấm là Hoa-rồi-thường (một từ viết hoa bình thường) nên KHÔNG đụng ".NET",
+# ".JS", từ viết tắt toàn hoa, hay phần mở rộng file.
+_SENTENCE_GLUE_RE = re.compile(r"(?<=[a-zà-ỹ]{2})([.!?])(?=[A-ZÀ-Ỹ][a-zà-ỹ])")
+
+
+def clean_display_text(text):
+    """Làm sạch mô tả/tiêu đề catalog cho HIỂN THỊ (sửa lỗi DỊCH MÁY an toàn, không viết lại câu):
+    gộp từ lặp liên tiếp, sửa khoảng trắng quanh dấu câu, tách câu bị dính, viết hoa chữ đầu.
+    KHÔNG đụng truy hồi/chấm điểm (chỉ áp ở tầng hiển thị)."""
+    s = _REPEAT_WORD_RE.sub(r"\1", str(text))
+    s = _SPACE_BEFORE_PUNCT_RE.sub(r"\1", s)
+    s = _SPACE_BEFORE_PERIOD_RE.sub(".", s)
+    s = _SPACE_AFTER_COMMA_RE.sub(r"\1 ", s)
+    s = _SENTENCE_GLUE_RE.sub(r"\1 ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s[0].upper() + s[1:] if s else s
+
+
+def clean_link(link):
+    """Chỉ giữ link http(s) hợp lệ; placeholder ('Đang cập nhật') / rỗng -> '' để KHÔNG render
+    link hỏng (`[Mở tài nguyên](Đang cập nhật)`)."""
+    s = str(link).strip()
+    return s if s.lower().startswith(("http://", "https://")) else ""
+
+
 def maybe_stem(token):
     if token.isascii() and token.isalpha():
         return STEMMER.stem(token)
@@ -484,14 +520,14 @@ def mmr_rerank(candidates, similarity_matrix, top_n=8, lambda_param=0.72):
 def row_to_dict(row, score=None, tfidf_score=None):
     result = {
         "item_id": int(row["item_id"]),
-        "title": row["title"],
+        "title": clean_display_text(row["title"]),
         "type": row["type"],
         "category": row["category"],
-        "description": row["description"],
+        "description": clean_display_text(row["description"]),
         "topics": row["topics"],
         "instructor": row["instructor"],
         "platform": row["platform"],
-        "link": row["link"],
+        "link": clean_link(row["link"]),
     }
     if "level" in row and str(row["level"]).strip():   # trường cấp độ (mới), nếu có
         result["level"] = row["level"]

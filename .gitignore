@@ -34,3 +34,8 @@ progress.md
 # ── Log & rác công cụ (transient, không commit) ──
 *.log
 .playwright-mcp/
+
+# ── Override compose CỤC BỘ (cấu hình theo máy, có thể chứa API key) — giữ local ──
+docker-compose.override.yml
+# backup tự sinh khi làm sạch glossary/catalog — giữ local
+itlr/chatbot/data/*.before*.json
