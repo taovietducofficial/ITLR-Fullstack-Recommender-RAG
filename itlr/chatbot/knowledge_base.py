@@ -116,6 +116,33 @@ CAREERS = {
             ("Tích hợp", ["REST API", "State Management", "Database"]),
             ("Nâng cao", ["Performance", "CI/CD", "Publishing"]),
         ]},
+    # Vai trò NGHIỆP VỤ/QA (không thuần code) — newbie hay hỏi. aliases ở đây dùng cho find_career
+    # (khớp CHUỖI CON) nên KHÔNG để token cực ngắn dễ đụng ('ba' nằm trong 'cơ bản') — token ngắn
+    # đó để FIELD_TO_CAREER (khớp theo TỪ) xử lý an toàn hơn.
+    "business_analyst": {"name": "Business Analyst (BA)",
+        "aliases": ["business analyst", "phan tich nghiep vu", "chuyen vien phan tich nghiep vu", "ba it"],
+        "milestones": [
+            ("Nền tảng nghiệp vụ & tư duy", ["Business Analysis", "Requirements", "Critical Thinking", "Communication"]),
+            ("Mô hình hóa & quy trình", ["UML", "BPMN", "Use Case", "User Story", "Agile", "Scrum"]),
+            ("Dữ liệu & công cụ", ["SQL", "Excel", "Data Analysis", "Data Visualization"]),
+            ("Nâng cao", ["Stakeholder Management", "Documentation", "Wireframe", "Product Thinking"]),
+        ]},
+    "data_analyst": {"name": "Data Analyst",
+        "aliases": ["data analyst", "chuyen vien phan tich du lieu", "nha phan tich du lieu"],
+        "milestones": [
+            ("Nền tảng", ["Excel", "SQL", "Statistics"]),
+            ("Phân tích & trực quan", ["Data Analysis", "Data Cleaning", "Data Visualization", "Tableau", "Power BI"]),
+            ("Lập trình phân tích", ["Python", "Pandas", "NumPy"]),
+            ("Nâng cao", ["Predictive Modeling", "A/B Testing", "Dashboard"]),
+        ]},
+    "tester": {"name": "QA / Tester (Kiểm thử phần mềm)",
+        "aliases": ["kiem thu phan mem", "qa engineer", "quality assurance", "kiem thu vien", "tester"],
+        "milestones": [
+            ("Nền tảng kiểm thử", ["Software Testing", "Test Case", "Manual Testing", "SDLC"]),
+            ("Tự động hóa", ["Selenium", "Automation Testing", "API Testing", "Postman"]),
+            ("Kỹ thuật & công cụ", ["SQL", "Git", "CI/CD", "Performance Testing"]),
+            ("Nâng cao", ["Security Testing", "Test Strategy", "Agile Testing"]),
+        ]},
 }
 
 
@@ -260,6 +287,10 @@ def find_career(query):
 FIELD_TO_CAREER = {
     "ai engineer": ["ai", "tri tue nhan tao", "tri tue"],
     "frontend": ["web", "lap trinh web"],
+    # Vai trò viết tắt/ngắn -> khớp theo TỪ (an toàn hơn substring) cho câu LỘ TRÌNH.
+    "business_analyst": ["ba", "business analyst", "phan tich nghiep vu", "nghiep vu"],
+    "data_analyst": ["data analyst", "phan tich du lieu"],
+    "tester": ["qa", "qc", "tester", "kiem thu", "kiem thu phan mem"],
 }
 
 
@@ -270,12 +301,22 @@ def find_roadmap_field(query):
     chuỗi con. Ưu tiên alias dài hơn (đặc trưng hơn). Chỉ nên gọi cho câu đã xác định là LỘ TRÌNH.
     """
     q = strip_accents(normalize_text(query))
-    toks = set(q.split())
+    tok_list = q.split()
+    toks = set(tok_list)
+    # 'ba' nhập nhằng (Business Analyst vs số 3): bỏ nếu là 'ba <đơn vị>' ("ba tháng", "ba khóa").
+    _ambig_unit = {"thang", "tuan", "nam", "ngay", "buoi", "gio", "khoa", "muc", "phan", "loai"}
     best = None  # (career_key, len)
     for career, terms in FIELD_TO_CAREER.items():
         for t in terms:
             tk = strip_accents(t)
-            hit = (tk in q) if " " in tk else (tk in toks)
+            if " " in tk:
+                hit = tk in q
+            else:
+                hit = tk in toks
+                if hit and tk == "ba":
+                    idx = tok_list.index("ba")
+                    if idx + 1 < len(tok_list) and tok_list[idx + 1] in _ambig_unit:
+                        hit = False
             if hit and (best is None or len(tk) > best[1]):
                 best = (career, len(tk))
     return best[0] if best else None

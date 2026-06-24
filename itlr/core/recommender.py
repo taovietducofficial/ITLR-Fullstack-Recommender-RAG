@@ -101,9 +101,35 @@ def strip_accents(text):
     return "".join(c for c in text if unicodedata.category(c) != "Mn")
 
 
-# Gộp các TỪ LẶP liên tiếp do dịch máy lỗi: "kỹ thuật thuật thuật toán" -> "kỹ thuật toán".
-# \w (Unicode) bắt cả chữ tiếng Việt; backreference \1 + re.I gộp không phân biệt hoa thường.
-_REPEAT_WORD_RE = re.compile(r"\b(\w+)(\s+\1\b)+", re.IGNORECASE | re.UNICODE)
+def _collapse_repeats(text):
+    """Gộp CỤM TỪ lặp liên tiếp do dịch máy lỗi (từ đơn lẫn cụm 2-4 từ):
+        "kỹ thuật thuật thuật toán"        -> "kỹ thuật toán"
+        "Kỹ thuật Kỹ thuật Kỹ thuật ..."   -> "Kỹ thuật"
+    Làm theo token (an toàn, không backtracking); so khớp không phân biệt hoa thường."""
+    toks = str(text).split()
+    if len(toks) < 2:
+        return str(text)
+    changed = True
+    while changed:
+        changed = False
+        for k in range(4, 0, -1):  # cụm dài trước (4 từ) -> từ đơn
+            i, res, n = 0, [], len(toks)
+            while i < n:
+                seg = [t.lower() for t in toks[i:i + k]]
+                if i + 2 * k <= n and seg == [t.lower() for t in toks[i + k:i + 2 * k]]:
+                    res.extend(toks[i:i + k])                       # giữ 1 bản
+                    j = i + k
+                    while j + k <= len(toks) and [t.lower() for t in toks[j:j + k]] == seg:
+                        j += k                                      # bỏ các bản lặp còn lại
+                    i = j
+                    changed = True
+                else:
+                    res.append(toks[i])
+                    i += 1
+            toks = res
+    return " ".join(toks)
+
+
 # Bỏ KHOẢNG TRẮNG THỪA trước dấu câu. Tách riêng dấu chấm: CHỈ bỏ cách trước '.' khi nó là dấu
 # chấm KẾT câu (theo sau là khoảng trắng/hết chuỗi) -> KHÔNG phá " .NET" / " .js" (theo sau là chữ).
 _SPACE_BEFORE_PUNCT_RE = re.compile(r"\s+([,;:!?])")
@@ -121,7 +147,7 @@ def clean_display_text(text):
     """Làm sạch mô tả/tiêu đề catalog cho HIỂN THỊ (sửa lỗi DỊCH MÁY an toàn, không viết lại câu):
     gộp từ lặp liên tiếp, sửa khoảng trắng quanh dấu câu, tách câu bị dính, viết hoa chữ đầu.
     KHÔNG đụng truy hồi/chấm điểm (chỉ áp ở tầng hiển thị)."""
-    s = _REPEAT_WORD_RE.sub(r"\1", str(text))
+    s = _collapse_repeats(str(text))
     s = _SPACE_BEFORE_PUNCT_RE.sub(r"\1", s)
     s = _SPACE_BEFORE_PERIOD_RE.sub(".", s)
     s = _SPACE_AFTER_COMMA_RE.sub(r"\1 ", s)
