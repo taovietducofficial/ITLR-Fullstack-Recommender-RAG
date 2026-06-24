@@ -69,9 +69,18 @@ def route_intent(query):
                  r"\bchon nghe\b|toi nen lam (nghe )?gi", q):
         return "career_guidance", {}
 
-    # 1) THỐNG KÊ / QUẢN TRỊ — "có bao nhiêu khóa học AI?", "tài liệu nào xem nhiều nhất?"
-    if re.search(r"bao nhieu|thong ke|nhieu nhat|pho bien nhat|xem nhieu|goi y nhieu|"
-                 r"top \d|hay nhat .* nao", q):
+    # 0c') NGƯỜI MỚI MẤT PHƯƠNG HƯỚNG — "mới bắt đầu không biết học gì". CỐ Ý HẸP: yêu cầu cụm
+    #      "không biết ... gì" (mất hướng THẬT, không có chủ đề) -> KHÔNG nuốt "học tiếng Anh bắt
+    #      đầu từ đâu". Và chỉ khi KHÔNG nhắc vai trò/khái niệm IT cụ thể.
+    if re.search(r"khong biet (nen )?(hoc|bat dau|lam) gi|moi bat dau ma khong biet|"
+                 r"moi vao nghe it|newbie.*khong biet", q) \
+            and not find_role_key(query) and not find_concepts(query):
+        return "career_guidance", {}
+
+    # 1) THỐNG KÊ / QUẢN TRỊ — "có bao nhiêu khóa học AI?", "tài liệu nào xem nhiều nhất?".
+    #    "bao nhiêu" PHẢI kèm danh từ catalog (khóa/tài liệu/mục) -> tránh "lương X bao nhiêu" lọt.
+    if re.search(r"bao nhieu (khoa|tai lieu|muc|mon|loai|tai nguyen)|thong ke|nhieu nhat|"
+                 r"pho bien nhat|xem nhieu|goi y nhieu|top \d|hay nhat .* nao", q):
         return "admin_stat", {"raw": query}
 
     # 2) KỸ NĂNG CÒN THIẾU — "tôi còn thiếu gì để làm Data Engineer?"

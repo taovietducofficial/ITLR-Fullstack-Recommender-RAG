@@ -2742,7 +2742,8 @@
         "process",
         "thread",
         "tien trinh",
-        "luong"
+        "da luong",
+        "luong xu ly"
       ],
       "category": "Khoa học máy tính",
       "level": "Nâng cao",
@@ -6301,6 +6302,25 @@
         "ci_cd",
         "devops",
         "docker"
+      ]
+    },
+    "svelte": {
+      "name": "Svelte",
+      "aliases": [
+        "svelte",
+        "sveltekit"
+      ],
+      "category": "Lập trình Web",
+      "level": "Trung cấp",
+      "definition": "Svelte là framework JavaScript xây dựng giao diện web, biên dịch component thành mã thuần lúc build (không dùng Virtual DOM) nên nhẹ và nhanh. Là lựa chọn thay thế React/Vue.",
+      "topics": [
+        "JavaScript",
+        "Web Development"
+      ],
+      "related": [
+        "javascript",
+        "react",
+        "vue"
       ]
     }
   }

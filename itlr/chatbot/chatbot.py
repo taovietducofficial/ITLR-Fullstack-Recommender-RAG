@@ -52,6 +52,27 @@ SUGGESTED_PROMPTS = [
 ]
 
 
+# Intent BẮT BUỘC tham chiếu một thực thể IT trong KB (vai trò/career/khái niệm) -> CHẮC CHẮN
+# thuộc CNTT -> bỏ qua cổng off-topic (không chặn nhầm vai trò ít liên quan catalog như SysAdmin).
+# CỐ Ý loại admin_stat/time_estimate/next_skill: chúng khớp mẫu chung ("bao nhiêu", "bao lâu",
+# "học gì tiếp") không cần thực thể IT -> để cổng off-topic lọc; câu IT thật vẫn qua cổng nhờ
+# whitelist khái niệm ("Python mất bao lâu", "bao nhiêu khóa học AI").
+_IT_SAFE_INTENTS = {
+    "career_path", "interview", "salary", "skill_gap", "definition", "career_guidance",
+}
+
+# Chào hỏi / hỏi về chính trợ lý -> trả lời lời chào (KHÔNG coi là off-topic, KHÔNG truy hồi).
+_GREETING_RE = re.compile(
+    r"^\s*(xin chao|chao ban|chao buoi|hello|helo|halo|alo|hey)\b|"
+    r"\bban la ai\b|ban ten (la )?gi|gioi thieu (ve )?(ban|minh|chatbot)|"
+    r"ban (co the )?(lam|giup) (duoc )?(gi|nhung gi)|ban biet (lam )?gi"
+)
+
+
+def _is_greeting(text):
+    return bool(_GREETING_RE.search(strip_accents(str(text).lower())))
+
+
 def detect_item_type(message):
     if re.search(r"khóa học|khoa hoc|course", message, re.IGNORECASE):
         return "Khóa học"
@@ -1206,13 +1227,26 @@ QUY TẮC:
         search_text = understanding["corrected"]
         display_query = understanding["display"]
 
-        # 0a) CỔNG OFF-TOPIC TẬP TRUNG: chặn câu NGOÀI lĩnh vực CNTT TRƯỚC mọi handler &
-        #     truy hồi. Nhờ chạy sớm, nó bao trùm cả định nghĩa/so sánh/lộ trình lẫn nhánh
-        #     BM25 dự phòng -> không còn tình trạng handler intent trả lời câu lạc đề chỉ vì
-        #     khớp mẫu "X là gì". Dùng search_text (đã sửa lỗi + mở rộng viết tắt) để "k8s",
-        #     "machne lerning"... vẫn được nhận đúng là CNTT; KHÔNG nối lịch sử ở đây để một
-        #     câu lạc đề đột ngột vẫn bị chặn dù trước đó đang nói chuyện về CNTT.
-        if self._is_off_topic(search_text, raw=message):
+        # 0) CHÀO HỎI / hỏi về trợ lý ("xin chào", "bạn là ai", "bạn làm được gì") -> lời chào,
+        #    KHÔNG để cổng off-topic chặn (trước đây "xin chào bạn là ai" bị coi là lạc đề).
+        if _is_greeting(message):
+            return "final", {
+                "response": self.WELCOME_MESSAGE, "intent": "greeting",
+                "sources": [], "recommendations": [],
+            }
+
+        # 0a) ĐỊNH TUYẾN INTENT ĐỊNH HƯỚNG (CHẠY TRƯỚC cổng off-topic): định nghĩa, so sánh,
+        #     lộ trình/phỏng vấn/lương/tư vấn nghề, kỹ năng thiếu, học gì tiếp, thời gian, thống kê.
+        #     Dùng DISPLAY (đã sửa lỗi chính tả nhưng CHƯA nối mở rộng viết tắt) để nhận diện
+        #     khái niệm/nghề chính xác — tránh "sql"->"co so du lieu" làm lệch khái niệm.
+        intent, slots = route_intent(display_query)
+
+        # 0b) CỔNG OFF-TOPIC: chặn câu NGOÀI lĩnh vực CNTT TRƯỚC truy hồi. CHỈ áp khi route_intent
+        #     KHÔNG nhận ra intent IT có giá trị — các intent định hướng (lộ trình/phỏng vấn/lương/
+        #     tư vấn/định nghĩa khái niệm/thống kê) đã CHẮC CHẮN là IT (grounded trong KB), nên bỏ
+        #     qua cổng để KHÔNG chặn nhầm vai trò ít liên quan catalog (vd "lộ trình SysAdmin").
+        #     Câu lạc đề thật (route_intent=None) vẫn bị cổng chặn như cũ.
+        if intent not in _IT_SAFE_INTENTS and self._is_off_topic(search_text, raw=message):
             return "final", {
                 "response": OFF_TOPIC_MESSAGE,
                 "intent": "off_topic",
@@ -1220,13 +1254,6 @@ QUY TẮC:
                 "recommendations": [],
             }
 
-        # 0b) ĐỊNH TUYẾN INTENT ĐỊNH HƯỚNG: định nghĩa, so sánh, lộ trình nghề, kỹ năng
-        #     còn thiếu, học gì tiếp, ước lượng thời gian, thống kê. Đây là nhóm câu hỏi
-        #     "tạo giá trị" — trả lời định hướng thay vì chỉ liệt kê tài nguyên. Không khớp
-        #     -> rơi về pipeline tìm tài nguyên bên dưới.
-        #     Dùng DISPLAY (đã sửa lỗi chính tả nhưng CHƯA nối mở rộng viết tắt) để nhận
-        #     diện khái niệm/nghề chính xác — tránh "sql"->"co so du lieu" làm lệch khái niệm.
-        intent, slots = route_intent(display_query)
         # Khi có LLM (Ollama/Claude): MỌI câu ĐỊNH NGHĨA/GIẢI THÍCH ("X là gì", "giải thích X",
         # "vì sao X", "X hoạt động thế nào"...) đều để LLM trả lời TỰ NHIÊN & ĐI SÂU thay vì in
         # template định nghĩa tĩnh (vốn chỉ in 1 đoạn nghĩa từ glossary -> nông & dễ bị coi là
