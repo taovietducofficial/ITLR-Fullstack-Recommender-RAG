@@ -29,6 +29,21 @@ def _split_comparison(query):
     return parts[:2] if len(parts) >= 2 else []
 
 
+# Chỉ coi user "ĐÃ CÓ" kỹ năng khi câu có tín hiệu sở hữu/quá khứ. Tránh "lộ trình HỌC CI/CD"
+# bị hiểu là "đã biết CI/CD" rồi khuyên bỏ qua (user muốn HỌC, không phải đã biết).
+_KNOWN_SIGNAL = re.compile(
+    r"da hoc|da biet|biet roi|thanh thao|\bda co\b|hoc xong|nam vung|nam duoc|"
+    r"co kinh nghiem|da nam|tung hoc|tung lam|da lam|dang biet"
+)
+
+
+def _known_skills(query, career_key):
+    """Kỹ năng user ĐÃ CÓ — chỉ trích khi câu có tín hiệu sở hữu; ngược lại rỗng."""
+    if not _KNOWN_SIGNAL.search(strip_accents(normalize_text(query))):
+        return []
+    return clean_known(extract_skills(query), career_key)
+
+
 def route_intent(query):
     """Trả (intent, slots). intent ∈ {admin_stat, skill_gap, next_skill, time_estimate,
     career_path, comparison, definition} hoặc None nếu không khớp -> dùng pipeline cũ."""
@@ -62,7 +77,7 @@ def route_intent(query):
     # 2) KỸ NĂNG CÒN THIẾU — "tôi còn thiếu gì để làm Data Engineer?"
     if career_key and re.search(r"con thieu|thieu gi|thieu ky nang|thieu nhung|con yeu|"
                                 r"can bo sung|can hoc gi de|can gi de", q):
-        return "skill_gap", {"career": career_key, "known": clean_known(extract_skills(query), career_key)}
+        return "skill_gap", {"career": career_key, "known": _known_skills(query, career_key)}
 
     # 3) HỌC GÌ TIẾP — "đã học Python, OOP nên học gì tiếp?"
     if re.search(r"hoc gi tiep|hoc gi nua|hoc gi sau|tiep theo (nen )?hoc|sau do hoc gi|"
@@ -82,7 +97,7 @@ def route_intent(query):
     # 5) LỘ TRÌNH NGHỀ — "tôi muốn trở thành Backend Developer", "roadmap DevOps"
     if career_key and re.search(r"muon tro thanh|tro thanh|muon lam|de lam|lam .*(developer|engineer|ky su)|"
                                 r"lo trinh|roadmap|theo nghe|huong nghiep|developer|engineer|ky su", q):
-        return "career_path", {"career": career_key, "known": clean_known(extract_skills(query), career_key)}
+        return "career_path", {"career": career_key, "known": _known_skills(query, career_key)}
 
     # 5b) LỘ TRÌNH theo LĨNH VỰC trần — "lộ trình AI cho người mới bắt đầu", "học web từ đầu".
     #     find_career chỉ bắt TÊN NGHỀ, không bắt lĩnh vực trần ("AI", "web"), nên map lĩnh vực
@@ -95,7 +110,7 @@ def route_intent(query):
         field_career = find_roadmap_field(query)
         if field_career:
             return "career_path", {"career": field_career,
-                                   "known": clean_known(extract_skills(query), field_career)}
+                                   "known": _known_skills(query, field_career)}
 
     # 6) SO SÁNH — "Java vs Python", "MongoDB khác PostgreSQL ở điểm nào?"
     if re.search(r"\bvs\b|\bversus\b|so sanh|khac nhau|khac gi|khac .* o diem|nen dung cai nao|"

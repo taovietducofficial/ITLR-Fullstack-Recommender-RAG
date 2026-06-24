@@ -1396,9 +1396,14 @@ QUY TẮC:
     # Mỗi handler trả dict {response, intent, sources, recommendations} hoặc None để
     # rơi về pipeline tìm tài nguyên. Tài nguyên luôn kéo từ catalog thật (_quick_resources).
 
-    def _quick_resources(self, text, k=3, item_type=None, filters=None):
+    def _quick_resources(self, text, k=3, item_type=None, filters=None, require_overlap=False):
         """Tra cứu tài nguyên NHANH (1 truy vấn embedding, KHÔNG cross-encoder) cho các
-        handler định hướng — tránh gọi rerank nhiều lần gây chậm. Trả list item dict."""
+        handler định hướng — tránh gọi rerank nhiều lần gây chậm. Trả list item dict.
+
+        require_overlap: chỉ giữ khóa có ÍT NHẤT 1 từ khóa kỹ năng (token) trong tiêu đề/chủ đề/
+        mô tả. Dùng cho LỘ TRÌNH: giai đoạn niche (GitOps/ArgoCD/SRE) mà catalog không có khóa
+        khớp -> trả RỖNG (chỉ nêu kỹ năng) thay vì vơ đại khóa lạc chủ đề ('Sass Workflow').
+        (Điểm % hiển thị đã hiệu chỉnh 90-100% nên không lọc lệch được bằng ngưỡng điểm.)"""
         if not text or not text.strip():
             return []
         if self.embed_model is not None and self.search_index:
@@ -1415,6 +1420,16 @@ QUY TẮC:
                 self.item_list, self.retrieval_model, text,
                 top_n=max(k + 4, 8), item_type=item_type, use_mmr=True,
             )
+        if require_overlap:
+            toks = [tk for tk in (strip_accents(t) for t in text.lower().split()) if len(tk) >= 3]
+
+            def _ov(it):
+                hay = strip_accents(
+                    f"{it.get('title', '')} {it.get('topics', '')} {it.get('description', '')}".lower()
+                )
+                return any(tk in hay for tk in toks)
+
+            items = [it for it in items if _ov(it)]
         if filters:
             items = self._filter_items(items, filters) or items
         return items[:k]
@@ -1510,7 +1525,7 @@ QUY TẮC:
             dur_txt = f" · ⏱️ {dur}" if dur else ""
             resp += f"\n### {emojis[i % len(emojis)]} Giai đoạn {i + 1} — {stage}{dur_txt}\n"
             resp += f"**Kỹ năng:** {badges}\n\n"
-            its = self._quick_resources(" ".join(skills), k=2, filters=filters)
+            its = self._quick_resources(" ".join(skills), k=2, filters=filters, require_overlap=True)
             items += its
             if its:
                 resp += format_sources_inline(its, 2) + "\n"
@@ -1537,7 +1552,7 @@ QUY TẮC:
         resp += "\n".join(f"{i}. {q}" for i, q in enumerate(qs, 1))
         # Tài nguyên ôn tập: tìm theo kỹ năng GIAI ĐOẠN ĐẦU của vai trò (sát phần cần ôn nhất).
         seed = " ".join(role.get("roadmap", [{}])[0].get("skills", [])) or role.get("name", "")
-        items = dedupe_items(self._quick_resources(seed, k=3))
+        items = dedupe_items(self._quick_resources(seed, k=3, require_overlap=True))
         if items:
             resp += "\n\n### 📚 Tài nguyên ôn tập\n\n" + format_sources_inline(items, 3)
         resp += (
