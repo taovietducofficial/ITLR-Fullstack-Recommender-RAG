@@ -207,28 +207,36 @@ def find_concepts(query):
     return [key for _, key in scored]
 
 
-def safe_concept_match(query):
-    """Khái niệm khớp truy vấn AN TOÀN cho enrichment tìm kiếm (KHÔNG có cổng trigger).
+def safe_concepts(query, limit=4):
+    """MỌI khái niệm khớp truy vấn một cách AN TOÀN (cùng quy tắc safe_concept_match nhưng
+    trả NHIỀU key, theo thứ tự alias khớp dài nhất). Dùng để nêu khái niệm cho TẤT CẢ từ khóa
+    CNTT trong câu (viết tắt/viết thường/viết hoa đều bắt được vì so khớp đã bỏ dấu + thường).
 
-    Khác find_concepts: token đơn chỉ được tin khi alias >= 3 ký tự HOẶC truy vấn đúng
-    MỘT từ. Tránh alias 2 ký tự nhập nhằng ('be','ai') trong câu off-topic nhiều từ
-    ('em bé', 'ai là ca sĩ') bị nhận nhầm thành backend/AI. Trả key concept hoặc None.
-    """
+    Token đơn chỉ được tin khi alias >= 3 ký tự HOẶC truy vấn đúng MỘT từ -> tránh 'be'/'ai'
+    trong câu nhiều từ bị nhận nhầm. Trả list key (có thể rỗng)."""
     pre = str(query).lower().replace("c++", "cpp").replace("c#", "csharp")
     qn = strip_accents(normalize_text(pre))
     toks = qn.split()
     if not toks:
-        return None
+        return []
     single = len(toks) == 1
+    out = []
     for key in find_concepts(query):
         for a in sorted(CONCEPTS[key]["aliases"], key=len, reverse=True):
             ka = _key(a)
-            if " " in ka:
-                if ka in qn:
-                    return key
-            elif ka in toks and (len(ka) >= 3 or single):
-                return key
-    return None
+            hit = (ka in qn) if " " in ka else (ka in toks and (len(ka) >= 3 or single))
+            if hit:
+                out.append(key)
+                break
+        if len(out) >= limit:
+            break
+    return out
+
+
+def safe_concept_match(query):
+    """Khái niệm khớp truy vấn AN TOÀN (1 key tốt nhất) — bọc safe_concepts. Trả key hoặc None."""
+    keys = safe_concepts(query, limit=1)
+    return keys[0] if keys else None
 
 
 def find_career(query):
@@ -242,6 +250,35 @@ def find_career(query):
                     best = (key, info, len(a))
                 break
     return (best[0], best[1]) if best else (None, None)
+
+
+# LĨNH VỰC trần (UMBRELLA, KHÔNG phải tên nghề & KHÔNG phải chủ đề cụ thể) -> scaffold nghề gần
+# nhất, DÙNG RIÊNG cho câu LỘ TRÌNH ("lộ trình AI", "học web từ đầu"). Tách khỏi find_career để
+# không làm nhiễu nhận diện nghề. CỐ Ý hẹp: KHÔNG gồm chủ đề cụ thể như "machine learning",
+# "data science" (đã có nhánh lộ trình theo chủ đề từ catalog), cũng KHÔNG gồm các từ vốn đã là
+# alias nghề ("an ninh mạng", "devops", "mobile", "backend"...) -> find_career bắt trước.
+FIELD_TO_CAREER = {
+    "ai engineer": ["ai", "tri tue nhan tao", "tri tue"],
+    "frontend": ["web", "lap trinh web"],
+}
+
+
+def find_roadmap_field(query):
+    """Khớp LĨNH VỰC trần (AI/web/data...) -> career_key scaffold gần nhất; None nếu không khớp.
+
+    Khớp theo TỪ (token) cho alias 1 từ để 'ai' không dính 'training'/'email'; cụm nhiều từ khớp
+    chuỗi con. Ưu tiên alias dài hơn (đặc trưng hơn). Chỉ nên gọi cho câu đã xác định là LỘ TRÌNH.
+    """
+    q = strip_accents(normalize_text(query))
+    toks = set(q.split())
+    best = None  # (career_key, len)
+    for career, terms in FIELD_TO_CAREER.items():
+        for t in terms:
+            tk = strip_accents(t)
+            hit = (tk in q) if " " in tk else (tk in toks)
+            if hit and (best is None or len(tk) > best[1]):
+                best = (career, len(tk))
+    return best[0] if best else None
 
 
 # Vốn kỹ năng nhận diện được = mọi kỹ năng trong CAREERS + tên khái niệm + NEXT_SKILL.

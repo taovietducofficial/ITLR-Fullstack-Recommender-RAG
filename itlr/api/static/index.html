@@ -263,20 +263,59 @@ async function sendChat() {
   chatHistory.push({role:"user", content:text});
 
   const log = document.getElementById("chatlog");
-  const thinking = document.createElement("div");
-  thinking.className = "msg assistant";
-  thinking.innerHTML = `<div class="avatar">🤖</div><div class="bubble">▌</div>`;
-  log.appendChild(thinking);
+  const wel = document.querySelector("#chatlog .welcome"); if (wel) wel.remove();
+  const wrap = document.createElement("div");
+  wrap.className = "msg assistant";
+  // Gợi ý chờ: model chạy nội bộ (Ollama) có thể mất ~30-60s cho câu đầu — báo trước để
+  // người dùng không tưởng là treo. Sẽ bị thay bằng nội dung ngay khi token đầu tới.
+  wrap.innerHTML = `<div class="avatar">🤖</div><div class="bubble">`
+    + `<span class="hint">⏳ Đang soạn câu trả lời… (mô hình chạy nội bộ, có thể mất ~30–60s)</span></div>`;
+  log.appendChild(wrap);
+  const bubble = wrap.querySelector(".bubble");
   window.scrollTo(0, document.body.scrollHeight);
 
+  let acc = "", recs = [];
   try {
-    const data = await api("/api/chat", { message: text, history: chatHistory.slice(0,-1) });
-    thinking.remove();
-    appendMsg("assistant", md(data.response), data.recommendations);
-    chatHistory.push({role:"assistant", content:data.response});
+    // STREAMING (SSE): đọc dần thay vì chờ cả câu -> không "treo", vượt timeout proxy 30s.
+    const resp = await fetch("/api/chat/stream", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ message: text, history: chatHistory.slice(0,-1) }),
+    });
+    if (!resp.ok || !resp.body) throw new Error(resp.status || "no-stream");
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, {stream:true});
+      let idx;
+      while ((idx = buf.indexOf("\n\n")) >= 0) {
+        const line = buf.slice(0, idx).trim(); buf = buf.slice(idx + 2);
+        if (!line.startsWith("data:")) continue;
+        let obj; try { obj = JSON.parse(line.slice(5).trim()); } catch(_) { continue; }
+        if (obj.type === "text") {
+          acc += obj.text;
+          bubble.innerHTML = md(acc);
+          window.scrollTo(0, document.body.scrollHeight);
+        } else if (obj.type === "meta" && obj.recommendations) {
+          recs = obj.recommendations;
+        }
+      }
+    }
+    bubble.innerHTML = md(acc || "Xin lỗi, mình chưa tạo được câu trả lời. Bạn thử gửi lại nhé.");
+    if (recs && recs.length) {
+      const d = document.createElement("details");
+      d.className = "recs";
+      d.innerHTML = `<summary>📚 ${recs.length} tài nguyên liên quan</summary>`
+        + `<div class="grid">${recs.slice(0,4).map(it=>cardHtml(it)).join("")}</div>`;
+      log.appendChild(d);
+    }
+    chatHistory.push({role:"assistant", content: acc});
+    window.scrollTo(0, document.body.scrollHeight);
   } catch(e) {
-    thinking.remove();
-    appendMsg("assistant", "Xin lỗi, có lỗi khi xử lý: " + e.message);
+    bubble.innerHTML = md("Xin lỗi, có lỗi khi xử lý: " + e.message + ". Bạn thử gửi lại giúp mình nhé.");
   }
 }
 

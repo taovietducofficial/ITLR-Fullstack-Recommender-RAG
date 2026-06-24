@@ -34,13 +34,14 @@ os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
 import itlr.utils.runtime_patches  # noqa: F401,E402  (dọn nhiễu console trước khi nạp model)
 
+import json  # noqa: E402
 import time  # noqa: E402
 from contextlib import asynccontextmanager  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import List, Optional, Union  # noqa: E402
 
 from fastapi import FastAPI, HTTPException, Request  # noqa: E402
-from fastapi.responses import FileResponse, PlainTextResponse  # noqa: E402
+from fastapi.responses import FileResponse, PlainTextResponse, StreamingResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
@@ -63,10 +64,15 @@ def _log(msg):
 
 def _prewarm_ollama():
     """Nạp sẵn model Ollama vào RAM (chạy NỀN) -> câu hỏi chatbot ĐẦU TIÊN không bị
-    cold-start ~90s. Bỏ qua nếu không bật USE_OLLAMA hoặc Ollama chưa sẵn sàng."""
-    if not os.environ.get("USE_OLLAMA"):
+    cold-start ~90s (nguyên nhân hay gây timeout/'báo lỗi' ở câu đầu).
+
+    Warm khi Ollama LÀ backend đang dùng: bỏ qua nếu đã có API key (Claude/OpenAI) hoặc
+    USE_OLLAMA bị tắt tường minh. Không cần BẮT BUỘC đặt USE_OLLAMA nữa (khớp _llm_available
+    vốn tự phát hiện Ollama)."""
+    if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY"):
         return
-    import json
+    if str(os.environ.get("USE_OLLAMA", "")).lower() in ("0", "false", "no"):
+        return
     import threading
     import urllib.request
 
@@ -186,17 +192,61 @@ def api_search(req: SearchReq):
     return eng.search(req.query, item_type=item_type, min_pct=req.min_pct)
 
 
+_CHAT_ERROR_MSG = (
+    "Xin lỗi, mình gặp trục trặc khi xử lý câu hỏi này. Bạn thử gửi lại hoặc diễn đạt khác giúp mình nhé."
+)
+
+
 @app.post("/api/chat")
 def api_chat(req: ChatReq):
     eng = load_engine()
     history = [{"role": m.role, "content": m.content} for m in req.history]
-    result = eng.chat(req.message, history=history)
+    # Bọc pipeline: lỗi bất ngờ -> câu xin lỗi gọn (200) thay vì 500 -> frontend không hiện "báo lỗi".
+    try:
+        result = eng.chat(req.message, history=history)
+    except Exception as e:  # noqa: BLE001
+        _log(f"[!] /api/chat lỗi: {e}")
+        return {"response": _CHAT_ERROR_MSG, "recommendations": [], "intent": "error"}
     # Chỉ trả các trường cần cho UI (response + recommendations + intent).
     return {
         "response": result["response"],
         "recommendations": result.get("recommendations", []),
         "intent": result.get("intent"),
     }
+
+
+@app.post("/api/chat/stream")
+def api_chat_stream(req: ChatReq):
+    """Trả lời chatbot dạng STREAMING (SSE). Mỗi frame là 1 dòng `data: {json}` rồi dòng trống.
+
+    Vì sao stream: model local (Ollama) chậm ~30-135s/câu -> nếu chờ cả câu, người dùng thấy
+    "treo" và proxy/Heroku (timeout 30s) trả 503 -> frontend báo lỗi. Stream đẩy chữ ngay khi
+    sinh (byte chảy sớm) nên không treo & không chạm hard-timeout."""
+    eng = load_engine()
+    history = [{"role": m.role, "content": m.content} for m in req.history]
+
+    def _frame(obj):
+        return "data: " + json.dumps(obj, ensure_ascii=False) + "\n\n"
+
+    def gen():
+        try:
+            for ev, data in eng.chat_stream(req.message, history=history):
+                if ev == "text":
+                    yield _frame({"type": "text", "text": data})
+                elif ev == "meta":
+                    yield _frame({"type": "meta", "intent": data.get("intent"),
+                                  "recommendations": data.get("recommendations", [])})
+        except Exception as e:  # noqa: BLE001
+            _log(f"[!] /api/chat/stream lỗi: {e}")
+            yield _frame({"type": "text", "text": "\n\n_" + _CHAT_ERROR_MSG + "_"})
+        yield _frame({"type": "done"})
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        # Tắt buffering ở proxy (nginx) để chữ tới client tức thì.
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @app.post("/admin/reload")

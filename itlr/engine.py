@@ -76,6 +76,10 @@ class RecommenderEngine:
         """Trả lời chatbot (off-topic gate + khái niệm-trước đã nằm trong EducationalChatbot)."""
         return self.chatbot.chat(message, history=history or [])
 
+    def chat_stream(self, message, history=None):
+        """Bản STREAMING: generator yield (event, data) — xem EducationalChatbot.chat_stream."""
+        yield from self.chatbot.chat_stream(message, history=history or [])
+
     # ── Tab Dành cho bạn (Collaborative Filtering) ─────────────────────────────
     def personas(self):
         """Danh sách hồ sơ người dùng mô phỏng: [{uid, label}]."""

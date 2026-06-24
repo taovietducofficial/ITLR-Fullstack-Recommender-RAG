@@ -455,7 +455,9 @@ def concept_overview_block(query, items, category):
     "Đa khía cạnh" = gắn định nghĩa từ khóa với bức tranh lĩnh vực + các khái niệm liên quan.
     Trả về chuỗi markdown kết thúc bằng '---' (ngăn cách phần sau), hoặc "" nếu không có gì.
     """
-    key = kb.safe_concept_match(query)
+    # Quét TẤT CẢ từ khóa CNTT trong câu (không chỉ 1) -> nêu khái niệm cho từng cái.
+    keys = kb.safe_concepts(query, limit=4)
+    key = keys[0] if keys else None
     parts, title = [], None
 
     if key:
@@ -472,6 +474,16 @@ def concept_overview_block(query, items, category):
         rel = [kb.CONCEPTS[r]["name"] for r in c.get("related", []) if r in kb.CONCEPTS]
         if rel:
             parts.append("🔗 **Khái niệm liên quan:** " + ", ".join(f"*{r}*" for r in rel))
+        # CÁC TỪ KHÓA KHÁC trong câu: nêu định nghĩa NGẮN (1 câu) cho mỗi từ -> người dùng
+        # hiểu rõ mọi thuật ngữ mình hỏi, không chỉ từ khóa chính.
+        extra_lines = []
+        for k in keys[1:]:
+            ce = kb.CONCEPTS[k]
+            short = (ce.get("def") or "").split(". ")[0].strip().rstrip(".")
+            if short:
+                extra_lines.append(f"- **{ce['name']}**: {short}.")
+        if extra_lines:
+            parts.append("📌 **Các từ khóa khác trong câu hỏi:**\n" + "\n".join(extra_lines))
     else:
         # Không khớp khái niệm cụ thể -> dùng ngữ cảnh lĩnh vực / chủ đề làm khái niệm chung.
         if category and category in CATEGORY_CONTEXT:
@@ -779,6 +791,112 @@ def try_llm_response(system_prompt, user_message, history=None):
         return None
 
 
+def _history_msgs(history):
+    """Chuẩn hóa lịch sử hội thoại về list {role, content} (chỉ user/assistant, 6 lượt gần nhất)."""
+    out = []
+    for msg in (history or [])[-6:]:
+        if msg.get("role") in ("user", "assistant"):
+            out.append({"role": msg["role"], "content": msg["content"]})
+    return out
+
+
+def _stream_ollama(messages):
+    """Generator: gọi Ollama với stream=true -> yield từng mảnh văn bản NGAY khi sinh.
+
+    Nhờ stream, người dùng thấy chữ chạy sau ~1-2s thay vì chờ cả câu (~30-135s trên CPU),
+    và byte chảy sớm giúp VƯỢT hard-timeout 30s của proxy/Heroku (tránh 503 'báo lỗi')."""
+    ollama_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+    ollama_model = _ollama_model()
+    num_predict = int(os.environ.get("OLLAMA_NUM_PREDICT", "384"))
+    timeout_s = int(os.environ.get("OLLAMA_TIMEOUT", "210"))
+    payload = json.dumps(
+        {"model": ollama_model, "messages": messages, "stream": True,
+         "keep_alive": "2h", "options": {"num_predict": num_predict, "temperature": 0.5}}
+    ).encode()
+    req = urllib.request.Request(
+        f"{ollama_url.rstrip('/')}/api/chat",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+        for raw in resp:  # Ollama trả NDJSON: mỗi dòng 1 JSON {message:{content}, done}
+            raw = raw.strip()
+            if not raw:
+                continue
+            try:
+                obj = json.loads(raw)
+            except Exception:
+                continue
+            piece = (obj.get("message") or {}).get("content", "")
+            if piece:
+                yield piece
+            if obj.get("done"):
+                break
+
+
+def try_llm_response_stream(system_prompt, user_message, history=None):
+    """Bản STREAMING của try_llm_response: yield từng mảnh văn bản (Claude → OpenAI → Ollama).
+
+    Chịu lỗi: nếu lỗi TRƯỚC khi sinh được mảnh nào -> generator rỗng -> caller rơi về template.
+    Nếu lỗi GIỮA chừng -> dừng (người dùng đã có phần đã stream)."""
+    history_msgs = _history_msgs(history)
+
+    # 1) Claude (Anthropic) — streaming text deltas.
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
+    if anthropic_key:
+        try:
+            import anthropic
+
+            client = anthropic.Anthropic(api_key=anthropic_key)
+            with client.messages.stream(
+                model=os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-8"),
+                max_tokens=2000,
+                system=[{
+                    "type": "text",
+                    "text": system_prompt,
+                    "cache_control": {"type": "ephemeral"},
+                }],
+                messages=history_msgs + [{"role": "user", "content": user_message}],
+            ) as stream:
+                for text in stream.text_stream:
+                    if text:
+                        yield text
+        except Exception:
+            return
+        return
+
+    messages = [{"role": "system", "content": system_prompt}] + history_msgs
+    messages.append({"role": "user", "content": user_message})
+
+    # 2) OpenAI — streaming deltas.
+    openai_key = os.environ.get("OPENAI_API_KEY")
+    if openai_key:
+        try:
+            from openai import OpenAI
+
+            client = OpenAI(api_key=openai_key)
+            stream = client.chat.completions.create(
+                model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
+                messages=messages,
+                temperature=0.3,
+                max_tokens=1200,
+                stream=True,
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content
+                if delta:
+                    yield delta
+        except Exception:
+            return
+        return
+
+    # 3) Ollama (local) — streaming NDJSON.
+    try:
+        yield from _stream_ollama(messages)
+    except Exception:
+        return
+
+
 # Câu SUY LUẬN / HỘI THOẠI MỞ -> đáng gọi LLM (giải thích, vì sao, nên chọn gì...).
 # Câu định nghĩa / gợi ý khóa-tài liệu / lộ trình KHÔNG khớp -> dùng template nhanh (grounded,
 # ~1s) thay vì LLM chậm (~90s). Giữ demo nhanh mà vẫn có hội thoại AI cho câu mở.
@@ -1007,10 +1125,77 @@ QUY TẮC:
         return sources
 
     def chat(self, message, history=None):
-        """
-        Unified pipeline for any question.
+        """Trả lời ĐẦY ĐỦ (không stream): {response, intent, sources, recommendations}."""
+        kind, p = self._prepare(message, history or [])
+        if kind == "final":
+            return p
+        # Cần LLM -> gọi 1 lần, lỗi/None thì rơi về template (synthesize_answer).
+        llm_response = try_llm_response(p["sys_prompt"], p["llm_message"], history=p["history"])
+        body = self._assemble_body(llm_response, p)
+        return {
+            "response": p["prefix"] + body,
+            "intent": p["mode"],
+            "sources": [s["item"] for s in p["sources"]],
+            "recommendations": p["all_recs"],
+        }
 
-        Returns: {response, intent, sources, recommendations}
+    def _assemble_body(self, llm_response, p):
+        """Thân câu trả lời cho luồng cần-LLM: câu LLM + 'Tài nguyên tham khảo', hoặc template
+        đầy đủ khi LLM không trả (None)."""
+        if llm_response:
+            body = llm_response
+            rec_items = dedupe_items([s["item"] for s in p["sources"]] + p["recommendations"])
+            if rec_items:
+                body += "\n\n---\n### 📚 Tài nguyên tham khảo\n\n"
+                body += format_sources_inline(rec_items[:5])
+            return body
+        return synthesize_answer(
+            p["display_query"], p["sources"], p["recommendations"], p["mode"],
+            category=p["category"], item_list=self.item_list,
+        )
+
+    def chat_stream(self, message, history=None):
+        """Bản STREAMING của chat(): generator yield (event, data):
+            ("text", <str>)  — mảnh văn bản để hiển thị dần.
+            ("meta", {intent, recommendations}) — phát 1 lần ở cuối (vẽ thẻ tài nguyên).
+
+        Luồng "final" (off-topic / handler / không cần LLM) phát nguyên văn 1 lần. Luồng cần-LLM
+        phát prefix (khái niệm) trước, rồi stream token LLM; nếu LLM không trả mảnh nào -> phát
+        template -> KHÔNG bao giờ ra bong bóng rỗng/lỗi."""
+        kind, p = self._prepare(message, history or [])
+        if kind == "final":
+            yield ("text", p["response"])
+            yield ("meta", {"intent": p.get("intent"),
+                            "recommendations": p.get("recommendations", [])})
+            return
+        if p["prefix"]:
+            yield ("text", p["prefix"])
+        produced = 0
+        for chunk in try_llm_response_stream(p["sys_prompt"], p["llm_message"], history=p["history"]):
+            if chunk:
+                produced += len(chunk)
+                yield ("text", chunk)
+        if produced == 0:
+            # LLM không trả mảnh nào (tắt/lỗi/timeout sớm) -> template đầy đủ.
+            yield ("text", synthesize_answer(
+                p["display_query"], p["sources"], p["recommendations"], p["mode"],
+                category=p["category"], item_list=self.item_list,
+            ))
+        else:
+            rec_items = dedupe_items([s["item"] for s in p["sources"]] + p["recommendations"])
+            if rec_items:
+                yield ("text", "\n\n---\n### 📚 Tài nguyên tham khảo\n\n"
+                       + format_sources_inline(rec_items[:5]))
+        yield ("meta", {"intent": p["mode"], "recommendations": p["all_recs"]})
+
+    def _prepare(self, message, history=None):
+        """Chạy pipeline tới điểm SINH câu trả lời, dùng chung cho chat() và chat_stream().
+
+        Trả về:
+            ("final", result_dict)  — đã có câu trả lời đầy đủ (off-topic / handler intent /
+                                      câu tìm-liệt kê không cần LLM).
+            ("generate", ctx)       — cần sinh bằng LLM; ctx chứa sys_prompt, llm_message, prefix
+                                      (note + khái niệm), sources, recommendations, mode...
         """
         history = history or []
 
@@ -1028,7 +1213,7 @@ QUY TẮC:
         #     "machne lerning"... vẫn được nhận đúng là CNTT; KHÔNG nối lịch sử ở đây để một
         #     câu lạc đề đột ngột vẫn bị chặn dù trước đó đang nói chuyện về CNTT.
         if self._is_off_topic(search_text, raw=message):
-            return {
+            return "final", {
                 "response": OFF_TOPIC_MESSAGE,
                 "intent": "off_topic",
                 "sources": [],
@@ -1042,11 +1227,12 @@ QUY TẮC:
         #     Dùng DISPLAY (đã sửa lỗi chính tả nhưng CHƯA nối mở rộng viết tắt) để nhận
         #     diện khái niệm/nghề chính xác — tránh "sql"->"co so du lieu" làm lệch khái niệm.
         intent, slots = route_intent(display_query)
-        # Khi có LLM (Ollama/Claude): câu SUY LUẬN/HỘI THOẠI ("vì sao", "khi nào nên dùng",
-        # "hoạt động thế nào", "lợi ích/ưu nhược", "so với"...) KHÔNG ép vào template ĐỊNH
-        # NGHĨA bare (vốn chỉ in nghĩa của 1 khái niệm) -> bỏ qua để LLM trả lời TỰ NHIÊN,
-        # bám ngữ cảnh. Vẫn giữ template cho "X là gì" thuần (nhanh + chính xác + grounded).
-        if _llm_available() and intent == "definition" and _is_reasoning_query(message):
+        # Khi có LLM (Ollama/Claude): MỌI câu ĐỊNH NGHĨA/GIẢI THÍCH ("X là gì", "giải thích X",
+        # "vì sao X", "X hoạt động thế nào"...) đều để LLM trả lời TỰ NHIÊN & ĐI SÂU thay vì in
+        # template định nghĩa tĩnh (vốn chỉ in 1 đoạn nghĩa từ glossary -> nông & dễ bị coi là
+        # "không trả lời"). Định nghĩa chuẩn của glossary VẪN được chèn ở đầu câu trả lời qua
+        # concept_overview_block làm điểm tựa chính xác. KHÔNG có LLM -> giữ template nhanh & grounded.
+        if _llm_available() and intent == "definition":
             intent = None
         handler = {
             "definition": self._answer_definition,
@@ -1058,12 +1244,12 @@ QUY TẮC:
             "admin_stat": self._answer_admin_stat,
         }.get(intent)
         if handler:
-            result = handler(slots, display_query, message, history or [])
+            result = handler(slots, display_query, message, history)
             if result:
                 note0 = intent_note(understanding)
                 if note0:
                     result["response"] = note0 + result["response"]
-                return result
+                return "final", result
 
         item_type = detect_item_type(search_text)
         mode = detect_response_mode(search_text)
@@ -1124,85 +1310,84 @@ QUY TẮC:
         #  -> kéo theo mục lạc đề ở 95%. Lộ trình trong synthesize_answer đã tự lấp đầy
         #  từng giai đoạn bằng category_stage_items: đúng cấp độ + ưu tiên bám truy vấn.)
 
+        # PREFIX = (note sửa lỗi) + (khái niệm chung). Chèn TRƯỚC thân câu trả lời — giữ ĐÚNG
+        # thứ tự bản gốc (note, rồi concept, rồi body). Tách ra đây để chat_stream() phát prefix
+        # NGAY trước khi stream token LLM (người dùng thấy khái niệm tức thì, không chờ LLM).
+        prefix = ""
+        if sources:
+            all_items0 = dedupe_items([s["item"] for s in sources] + recommendations)
+            concept = concept_overview_block(display_query, all_items0, category)
+            if concept:
+                prefix = concept + prefix
+        note = intent_note(understanding)
+        if note:
+            prefix = note + prefix
+
+        all_recs = dedupe_items([s["item"] for s in sources] + recommendations)[:6]
+
         # Trả lời bằng LLM cho câu HỘI THOẠI/ĐỊNH HƯỚNG (suy luận, lộ trình, gợi ý, trả lời chung)
         # -> mỗi câu được trả lời RIÊNG, bám ngữ cảnh, thay vì cùng một template lặp lại. Câu
         # TÌM/LIỆT KÊ thuần (mode "search") giữ template (nhanh + liệt kê chính xác từ catalog).
         # use_llm TỰ PHÁT HIỆN Ollama -> không treo khi Ollama không chạy (fail nhanh -> template).
-        llm_response = None
         use_llm = _llm_available()
         want_llm = use_llm and (mode != "search" or _is_reasoning_query(message))
-        if want_llm:
-            # Cấp cho LLM cả câu hỏi gốc lẫn ý đã hiểu để bám sát + chịu lỗi chính tả.
-            llm_message = display_query if understanding["corrections"] else message
-            # Câu LỘ TRÌNH cần nhiều mục hơn để LLM dựng được các giai đoạn từ catalog thật;
-            # câu khác chỉ cần vài mục. Kèm CẤP ĐỘ để model sắp xếp cơ bản -> nâng cao.
-            n_ctx = 8 if mode == "learning_path" else 5
-            ctx = "\n".join(
-                f"- {s['item'].get('title','')} | {s['item'].get('category','')}"
-                f" | {s['item'].get('level','') or 'N/A'}"
-                for s in (sources or [])[:n_ctx]
-            )
-            # Gợi ý ĐỊNH DẠNG theo ý định -> trả lời đúng kiểu câu hỏi (lộ trình/gợi ý/so sánh),
-            # và YÊU CẦU loại bỏ khóa lạc chủ đề (tránh kiểu "WordPress" lọt vào lộ trình Deep Learning).
-            mode_hint = {
-                "learning_path": "Người dùng muốn LỘ TRÌNH HỌC. Dựa vào các khóa trong catalog ở trên, "
-                                 "sắp xếp thành 2-3 giai đoạn từ cơ bản -> nâng cao; mỗi giai đoạn chọn "
-                                 "vài khóa SÁT chủ đề (BỎ khóa lạc chủ đề) và nói ngắn gọn vì sao theo thứ tự đó.",
-                "recommend": "Người dùng muốn GỢI Ý. Chọn 2-3 khóa phù hợp nhất từ catalog và giải thích "
-                             "ngắn gọn vì sao chọn (bỏ khóa lạc chủ đề).",
-                "compare": "Người dùng muốn SO SÁNH. Nêu khác biệt chính giữa các lựa chọn liên quan.",
-                # answer = câu GIẢI THÍCH/PHÂN TÍCH (vì sao/lợi ích/khi nào...). Ưu tiên trả lời
-                # thực chất kiểu "tổng quan trên web", KHÔNG chuyển sang liệt kê khóa học.
-                "answer": "Người dùng hỏi một câu cần GIẢI THÍCH/PHÂN TÍCH. Hãy TRẢ LỜI TRỰC TIẾP, đầy "
-                          "đủ, có cấu trúc bằng kiến thức của bạn (nêu lý do/phân tích/ví dụ thực tế), "
-                          "như một đoạn giải thích tổng quan rõ ràng. KHÔNG chuyển sang liệt kê khóa học; "
-                          "phần tài nguyên đã có sẵn ở cuối.",
-            }.get(mode, "")
-            sys_prompt = self.SYSTEM_PROMPT
-            if ctx:
-                sys_prompt += f"\n\n## Khóa học liên quan trong catalog (CHỈ trích từ đây khi gợi ý cụ thể):\n{ctx}"
-            if mode_hint:
-                sys_prompt += f"\n\n## Yêu cầu cho câu trả lời:\n{mode_hint}"
-            llm_response = try_llm_response(sys_prompt, llm_message, history=history)
 
-        if llm_response:
-            response = llm_response
-            rec_items = dedupe_items(
-                [s["item"] for s in sources] + recommendations
-            )
-            if rec_items:
-                response += "\n\n---\n### 📚 Tài nguyên tham khảo\n\n"
-                response += format_sources_inline(rec_items[:5])
-        else:
-            response = synthesize_answer(
+        ctx = {
+            "display_query": display_query, "sources": sources, "recommendations": recommendations,
+            "mode": mode, "category": category, "prefix": prefix, "all_recs": all_recs,
+            "history": history,
+        }
+
+        if not want_llm:
+            # Câu tìm/liệt kê thuần (hoặc không có LLM) -> dựng câu trả lời template NGAY.
+            body = synthesize_answer(
                 display_query, sources, recommendations, mode,
                 category=category, item_list=self.item_list,
             )
+            return "final", {
+                "response": prefix + body, "intent": mode,
+                "sources": [s["item"] for s in sources], "recommendations": all_recs,
+            }
 
-        # KHÁI NIỆM TRƯỚC, phần còn lại sau: mọi câu trả lời IT mở đầu bằng khái niệm chung
-        # của từ khóa (đa khía cạnh) rồi mới tới gợi ý/lộ trình/tìm kiếm. Chỉ thêm khi đã có
-        # tài nguyên thật (sources) — tránh chèn khái niệm lên thông báo "không tìm thấy".
-        if sources:
-            all_items = dedupe_items([s["item"] for s in sources] + recommendations)
-            concept = concept_overview_block(display_query, all_items, category)
-            if concept:
-                response = concept + response
-
-        # Minh bạch hóa: nếu đã tự sửa lỗi chính tả/viết tắt, xác nhận lại ý hiểu ở đầu.
-        note = intent_note(understanding)
-        if note:
-            response = note + response
-
-        all_recs = dedupe_items(
-            [s["item"] for s in sources] + recommendations
+        # Cần LLM -> dựng system prompt (catalog + gợi ý định dạng theo ý định) để caller sinh.
+        # Cấp cho LLM cả câu hỏi gốc lẫn ý đã hiểu để bám sát + chịu lỗi chính tả.
+        llm_message = display_query if understanding["corrections"] else message
+        # Câu LỘ TRÌNH cần nhiều mục hơn để LLM gắn khóa thật vào từng giai đoạn; câu khác vài mục.
+        n_ctx = 8 if mode == "learning_path" else 5
+        ctx_lines = "\n".join(
+            f"- {s['item'].get('title','')} | {s['item'].get('category','')}"
+            f" | {s['item'].get('level','') or 'N/A'}"
+            for s in (sources or [])[:n_ctx]
         )
+        # Gợi ý ĐỊNH DẠNG theo ý định -> trả lời đúng kiểu câu hỏi (lộ trình/gợi ý/so sánh).
+        mode_hint = {
+            # LỘ TRÌNH: cho LLM DỰNG lộ trình kiến thức THẬT bằng hiểu biết của model (không bị bó
+            # vào vài khóa truy hồi được -> hết "thiếu/sai thứ tự"), rồi GẮN khóa catalog vào giai
+            # đoạn phù hợp. Giai đoạn chưa có khóa khớp thì vẫn nêu kiến thức cần học (không bỏ).
+            "learning_path": "Người dùng muốn LỘ TRÌNH HỌC. Hãy DỰNG lộ trình kiến thức THẬT theo cấp "
+                             "độ cơ bản -> nâng cao bằng hiểu biết của bạn: 3-4 giai đoạn, mỗi giai đoạn "
+                             "nêu ngắn các chủ đề/kỹ năng cần học và VÌ SAO theo thứ tự đó. Khi có khóa "
+                             "phù hợp trong catalog ở trên thì GẮN vào giai đoạn tương ứng (CHỈ trích "
+                             "tên từ catalog, KHÔNG bịa); giai đoạn nào catalog chưa có khóa khớp thì cứ "
+                             "nêu kiến thức cần học. TUYỆT ĐỐI không bỏ giai đoạn chỉ vì catalog thiếu khóa.",
+            "recommend": "Người dùng muốn GỢI Ý. Chọn 2-3 khóa phù hợp nhất từ catalog và giải thích "
+                         "ngắn gọn vì sao chọn (bỏ khóa lạc chủ đề).",
+            "compare": "Người dùng muốn SO SÁNH. Nêu khác biệt chính giữa các lựa chọn liên quan.",
+            # answer = câu GIẢI THÍCH/PHÂN TÍCH (vì sao/lợi ích/khi nào/là gì...). Ưu tiên trả lời
+            # thực chất kiểu "tổng quan trên web", KHÔNG chuyển sang liệt kê khóa học.
+            "answer": "Người dùng hỏi một câu cần GIẢI THÍCH/PHÂN TÍCH. Hãy TRẢ LỜI TRỰC TIẾP, đầy "
+                      "đủ, có cấu trúc bằng kiến thức của bạn (nêu lý do/phân tích/ví dụ thực tế), "
+                      "như một đoạn giải thích tổng quan rõ ràng. KHÔNG chuyển sang liệt kê khóa học; "
+                      "phần tài nguyên đã có sẵn ở cuối.",
+        }.get(mode, "")
+        sys_prompt = self.SYSTEM_PROMPT
+        if ctx_lines:
+            sys_prompt += f"\n\n## Khóa học liên quan trong catalog (CHỈ trích từ đây khi gợi ý cụ thể):\n{ctx_lines}"
+        if mode_hint:
+            sys_prompt += f"\n\n## Yêu cầu cho câu trả lời:\n{mode_hint}"
 
-        return {
-            "response": response,
-            "intent": mode,
-            "sources": [s["item"] for s in sources],
-            "recommendations": all_recs[:6],
-        }
+        ctx.update({"sys_prompt": sys_prompt, "llm_message": llm_message})
+        return "generate", ctx
 
     # ══════════════════ HANDLER INTENT ĐỊNH HƯỚNG ══════════════════
     # Mỗi handler trả dict {response, intent, sources, recommendations} hoặc None để

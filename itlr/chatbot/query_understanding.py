@@ -101,6 +101,10 @@ _SEED_VOCAB = {
     "cao", "nhap", "mon", "du", "lieu", "tri", "tue", "nhan", "tao", "bao", "mat",
     "mang", "may", "tinh", "dien", "toan", "dam", "may", "giai", "thuat", "cau", "truc",
     "phat", "trien", "web", "game", "kiem", "thu", "huong", "dan", "thuc", "hanh",
+    # từ chức năng / so sánh / nghi vấn tiếng Việt (bỏ dấu) — BẢO VỆ khỏi fuzzy sửa nhầm
+    # (vd "so sanh"->"sanh" từng bị sửa bậy thành "san"). Chỉ đánh dấu là "từ đúng".
+    "sanh", "khac", "nhau", "nao", "voi", "cho", "cua", "mot", "cac", "nhung", "hay",
+    "hoac", "the", "khi", "khong", "duoc", "lam", "biet", "hieu",
 }
 
 
@@ -179,6 +183,7 @@ def understand_query(query, vocab):
     corrected_tokens = []
     corrections = []
     expansions = []
+    expansion_pairs = []   # [(viết_tắt, cụm_chuẩn_đọc_được)] -> để minh bạch hóa cho người dùng
 
     single_token = len(tokens) == 1
     for tok in tokens:
@@ -193,6 +198,9 @@ def understand_query(query, vocab):
                 corrected_tokens.append(tok)
             else:
                 expansions.append(ABBREVIATIONS[bare])
+                expansion_pairs.append(
+                    (bare, _ABBR_READABLE.get(bare, ABBREVIATIONS[bare].split(",")[0]))
+                )
                 corrected_tokens.append(tok)
             continue
         fixed, changed = _correct_token(tok, vocab)
@@ -211,20 +219,46 @@ def understand_query(query, vocab):
         "display": display,
         "corrections": corrections,
         "expansions": expansions,
+        "expansion_pairs": expansion_pairs,
     }
 
 
-def intent_note(understanding):
-    """Dòng minh bạch hóa: xác nhận lại ý hiểu khi có sửa lỗi/mở rộng đáng kể.
+# Cụm mở rộng viết tắt trong ABBREVIATIONS gộp cả tiếng Việt lẫn tiếng Anh để tăng tín hiệu
+# truy hồi; khi HIỂN THỊ cho người dùng chỉ cần cụm đầu, gọn & dễ đọc.
+_ABBR_READABLE = {
+    "ml": "Machine Learning", "ai": "Trí tuệ nhân tạo (AI)", "dl": "Deep Learning",
+    "nlp": "Xử lý ngôn ngữ tự nhiên (NLP)", "cv": "Computer Vision", "llm": "Large Language Model",
+    "genai": "Generative AI", "k8s": "Kubernetes", "k8": "Kubernetes", "js": "JavaScript",
+    "ts": "TypeScript", "py": "Python", "db": "Cơ sở dữ liệu", "oop": "Lập trình hướng đối tượng",
+    "dsa": "Cấu trúc dữ liệu & giải thuật", "ds": "Khoa học dữ liệu", "fe": "Frontend",
+    "be": "Backend", "sec": "An ninh mạng", "infosec": "An ninh mạng", "pentest": "Kiểm thử xâm nhập",
+    "ctf": "Capture The Flag", "cloud": "Điện toán đám mây", "sql": "SQL", "nosql": "NoSQL",
+    "api": "API", "ui": "Giao diện người dùng (UI)", "ux": "Trải nghiệm người dùng (UX)",
+    "os": "Hệ điều hành",
+}
 
-    Trả về chuỗi markdown (kèm 2 newline) để chèn đầu câu trả lời, hoặc "" nếu
-    không có chỉnh sửa nào -> tránh làm rối câu trả lời cho truy vấn đã rõ ràng.
+
+def _as_sentence(text):
+    """Chuẩn hóa chuỗi đã sửa thành 'câu hoàn chỉnh' để hiển thị: viết hoa chữ đầu."""
+    text = str(text).strip()
+    return text[:1].upper() + text[1:] if text else text
+
+
+def intent_note(understanding):
+    """Dòng minh bạch hóa ĐẶT TRƯỚC câu trả lời: xác nhận lại Ý HIỂU khi có sửa lỗi chính tả
+    HOẶC nhận diện viết tắt. Viết lại thành CÂU HOÀN CHỈNH (viết hoa) cho người dùng, kèm chi
+    tiết đã sửa. Trả "" nếu truy vấn đã rõ ràng -> không làm rối.
     """
-    corr = understanding["corrections"]
-    if not corr:
+    corr = understanding.get("corrections") or []
+    pairs = understanding.get("expansion_pairs") or []
+    if not corr and not pairs:
         return ""
-    fixes = ", ".join(f"*{w}* → **{r}**" for w, r in corr[:5])
+    bits = []
+    if corr:
+        bits.append("tự sửa chính tả: " + ", ".join(f"*{w}* → **{r}**" for w, r in corr[:5]))
+    if pairs:
+        bits.append("hiểu viết tắt: " + ", ".join(f"**{a}** = {full}" for a, full in pairs[:5]))
     return (
-        f"> 🔎 Mình hiểu ý bạn là: **{understanding['display']}**  \n"
-        f"> _(tự sửa chính tả: {fixes})_\n\n"
+        f"> 🔎 Mình hiểu ý bạn là: **{_as_sentence(understanding['display'])}**  \n"
+        f"> _({' · '.join(bits)})_\n\n"
     )

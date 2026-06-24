@@ -9,7 +9,13 @@ trả lời định hướng; nếu không, trả (None, {}) để rơi về pip
 
 import re
 
-from itlr.chatbot.knowledge_base import clean_known, extract_skills, find_career, find_concepts
+from itlr.chatbot.knowledge_base import (
+    clean_known,
+    extract_skills,
+    find_career,
+    find_concepts,
+    find_roadmap_field,
+)
 from itlr.core.recommender import normalize_text, strip_accents
 
 
@@ -57,6 +63,19 @@ def route_intent(query):
     if career_key and re.search(r"muon tro thanh|tro thanh|muon lam|de lam|lam .*(developer|engineer|ky su)|"
                                 r"lo trinh|roadmap|theo nghe|huong nghiep|developer|engineer|ky su", q):
         return "career_path", {"career": career_key, "known": clean_known(extract_skills(query), career_key)}
+
+    # 5b) LỘ TRÌNH theo LĨNH VỰC trần — "lộ trình AI cho người mới bắt đầu", "học web từ đầu".
+    #     find_career chỉ bắt TÊN NGHỀ, không bắt lĩnh vực trần ("AI", "web"), nên map lĩnh vực
+    #     -> scaffold nghề gần nhất để trả LỘ TRÌNH có cấu trúc (đủ giai đoạn, đúng thứ tự) thay
+    #     vì rơi xuống liệt kê rời rạc. CHỈ kích hoạt khi có TỪ KHÓA lộ trình RÕ RÀNG và KHÔNG
+    #     phải câu GIẢI THÍCH ("vì sao/là gì/...") — tránh nuốt nhầm câu giải thích có "người mới".
+    roadmap_kw = re.search(r"lo trinh|roadmap|nhap mon|hoc tu dau|tu con so 0|tu co ban den", q)
+    explain_kw = re.search(r"vi sao|tai sao|\bla gi\b|giai thich|nhu the nao|hoat dong|de lam gi", q)
+    if roadmap_kw and not explain_kw:
+        field_career = find_roadmap_field(query)
+        if field_career:
+            return "career_path", {"career": field_career,
+                                   "known": clean_known(extract_skills(query), field_career)}
 
     # 6) SO SÁNH — "Java vs Python", "MongoDB khác PostgreSQL ở điểm nào?"
     if re.search(r"\bvs\b|\bversus\b|so sanh|khac nhau|khac gi|khac .* o diem|nen dung cai nao|"
