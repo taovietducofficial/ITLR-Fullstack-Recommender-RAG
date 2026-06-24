@@ -26,8 +26,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
-    # Mở cổng ra host nếu muốn dùng psql từ ngoài (tùy chọn):
-    # ports: ["5432:5432"]
+    # Mở cổng Postgres-Docker ra host ở 5433 (KHÔNG dùng 5432 để tránh đụng Postgres LOCAL).
+    # -> web chạy local (npm run dev) trỏ DATABASE_URL tới localhost:5433 sẽ dùng ĐÚNG kho dữ liệu
+    #    Docker (chứa tin nhắn/người dùng cũ).
+    ports: ["5433:5432"]
 
   recommender:
     build:

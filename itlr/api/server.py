@@ -199,6 +199,20 @@ def api_chat(req: ChatReq):
     }
 
 
+@app.post("/admin/reload")
+def admin_reload():
+    """Nạp lại artifacts NGAY mà KHÔNG cần tắt/mở lại tiến trình.
+
+    Sau khi pipeline cập nhật dữ liệu (scripts/update_data.py) ghi artifacts mới, gọi endpoint này
+    để chatbot/tìm kiếm dùng dữ liệu mới: xóa cache load_engine() rồi nạp lại từ artifacts/*.pkl.
+    Dùng bởi `scripts/update_data.py --restart`.
+    """
+    load_engine.cache_clear()
+    eng = load_engine()                       # nạp lại ngay -> request kế tiếp không phải chờ
+    n = len(eng.items) if hasattr(eng, "items") else None
+    return {"ok": True, "reloaded": True, "items": n}
+
+
 @app.get("/api/personas")
 def api_personas():
     return load_engine().personas()

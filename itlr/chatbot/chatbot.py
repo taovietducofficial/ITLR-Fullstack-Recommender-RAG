@@ -759,7 +759,9 @@ def try_llm_response(system_prompt, user_message, history=None):
         # num_predict 384: đủ cho lộ trình/giải thích mà KHÔNG quá lâu trên CPU; timeout 240 nới
         # biên rộng để câu dài KHÔNG chạm timeout rồi âm thầm rơi về template. Đổi qua env nếu cần.
         num_predict = int(os.environ.get("OLLAMA_NUM_PREDICT", "384"))
-        timeout_s = int(os.environ.get("OLLAMA_TIMEOUT", "300"))
+        # 210s < timeout web gọi chat (240s) -> recommender luôn trả (câu LLM hoặc fallback template)
+        # TRƯỚC khi web bỏ cuộc, tránh 502 "không kết nối". CPU chậm: nên dùng qwen2.5:1.5b cho kịp.
+        timeout_s = int(os.environ.get("OLLAMA_TIMEOUT", "210"))
         payload = json.dumps(
             {"model": ollama_model, "messages": messages, "stream": False,
              # keep_alive: giữ model trong RAM 2 giờ -> không cold-start giữa phiên demo.

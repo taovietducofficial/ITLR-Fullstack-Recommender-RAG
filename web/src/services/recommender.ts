@@ -36,19 +36,31 @@ export interface Persona {
   label: string;
 }
 
-async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${env.recommenderUrl}${path}`, {
-    ...init,
-    headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
-  });
-  if (!res.ok) {
-    throw new Error(`Recommender ${path} -> HTTP ${res.status}`);
+// Timeout (ms) cho gọi recommender. Chat dùng LLM cục bộ (Ollama) RẤT chậm trên CPU (có thể vài
+// phút) -> CHAT_TIMEOUT dài hơn nhiều. Các gọi khác (search/suggested) chỉ cần đủ chịu cold-start.
+const DEFAULT_TIMEOUT = Number(process.env.RECOMMENDER_TIMEOUT_MS || 60000);
+const CHAT_TIMEOUT = Number(process.env.RECOMMENDER_CHAT_TIMEOUT_MS || 240000);
+
+async function call<T>(path: string, init?: RequestInit, timeoutMs = DEFAULT_TIMEOUT): Promise<T> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${env.recommenderUrl}${path}`, {
+      ...init,
+      signal: ctrl.signal,
+      headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
+    });
+    if (!res.ok) {
+      throw new Error(`Recommender ${path} -> HTTP ${res.status}`);
+    }
+    return (await res.json()) as T;
+  } finally {
+    clearTimeout(timer);
   }
-  return (await res.json()) as T;
 }
 
-function post<T>(path: string, body: unknown): Promise<T> {
-  return call<T>(path, { method: "POST", body: JSON.stringify(body) });
+function post<T>(path: string, body: unknown, timeoutMs = DEFAULT_TIMEOUT): Promise<T> {
+  return call<T>(path, { method: "POST", body: JSON.stringify(body) }, timeoutMs);
 }
 
 export const recommender = {
@@ -56,7 +68,7 @@ export const recommender = {
     return post<SearchResult>("/api/search", { query, type: type || null, min_pct: minPct });
   },
   chat(message: string, history: { role: string; content: string }[] = []): Promise<ChatResult> {
-    return post<ChatResult>("/api/chat", { message, history });
+    return post<ChatResult>("/api/chat", { message, history }, CHAT_TIMEOUT);  // chờ lâu cho LLM
   },
   personas(): Promise<Persona[]> {
     return call<Persona[]>("/api/personas");
