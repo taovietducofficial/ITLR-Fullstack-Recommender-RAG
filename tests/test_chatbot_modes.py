@@ -101,4 +101,7 @@ def test_why_beginner_query_not_roadmap():
     "tư vấn lộ trình học Data Science",
 ])
 def test_real_roadmap_preserved(q):
-    assert effective_mode(q) == "learning_path"
+    # Câu lộ trình THẬT phải ra LỘ TRÌNH (không bị ép về 'answer'). Sau khi có kho vai trò
+    # (it_roles.json), ML/Data Science map sang scaffold Data Scientist (career_path) — vẫn là
+    # lộ trình có cấu trúc, KHÔNG phải giải thích ngắn.
+    assert effective_mode(q) in {"learning_path", "intent:career_path"}

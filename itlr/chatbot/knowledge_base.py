@@ -50,100 +50,31 @@ def _load_concepts(path=_GLOSSARY_PATH):
 CONCEPTS = _load_concepts()
 
 
-# ───────────────────────── LỘ TRÌNH NGHỀ ─────────────────────────
-# mỗi nghề: name, aliases, milestones = [(tên giai đoạn, [kỹ năng theo thứ tự])].
+# ───────────────────────── KHO VAI TRÒ (nạp từ file dữ liệu) ─────────────────────────
+# Toàn bộ vai trò IT (lộ trình + phỏng vấn + lương + tư vấn chọn nghề) tách ra file dữ liệu:
+#   itlr/chatbot/data/it_roles.json  — thêm vai trò = thêm mục JSON, KHÔNG sửa code.
+# CAREERS được DỰNG từ ROLES để giữ tương thích code cũ (name, aliases, milestones=[(stage, skills)]).
+_ROLES_PATH = Path(__file__).resolve().parent / "data" / "it_roles.json"
+
+
+def _load_roles(path=_ROLES_PATH):
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+_ROLES_DATA = _load_roles()
+ROLES = _ROLES_DATA["roles"]                       # nguồn đầy đủ: description/roadmap/interview/salary
+CAREER_GUIDANCE = _ROLES_DATA.get("career_guidance", [])  # [(sở thích, gợi ý vai trò)]
+
 CAREERS = {
-    "backend": {"name": "Backend Developer", "aliases": ["backend", "back end", "backend developer", "lap trinh vien backend"],
-        "milestones": [
-            ("Nền tảng lập trình", ["Python", "Java", "OOP", "Git"]),
-            ("Web & API", ["HTTP", "REST API", "Backend", "Framework"]),
-            ("Cơ sở dữ liệu", ["SQL", "Database", "MongoDB", "Redis"]),
-            ("Nâng cao & quy mô", ["Microservices", "Docker", "Kafka", "System Design", "CI/CD"]),
-        ]},
-    "frontend": {"name": "Frontend Developer", "aliases": ["frontend", "front end", "frontend developer", "lap trinh vien frontend"],
-        "milestones": [
-            ("Nền tảng web", ["HTML", "CSS", "JavaScript", "Git"]),
-            ("Công cụ & ngôn ngữ", ["TypeScript", "React", "State Management"]),
-            ("Chất lượng & hiệu năng", ["Testing", "Performance", "Web Security"]),
-            ("Nâng cao", ["Next.js", "Design System", "Accessibility"]),
-        ]},
-    "fullstack": {"name": "Fullstack Developer", "aliases": ["fullstack", "full stack", "fullstack developer"],
-        "milestones": [
-            ("Frontend cốt lõi", ["HTML", "CSS", "JavaScript", "React"]),
-            ("Backend cốt lõi", ["Python", "REST API", "OOP"]),
-            ("Dữ liệu", ["SQL", "Database", "MongoDB"]),
-            ("Triển khai", ["Docker", "CI/CD", "Cloud"]),
-        ]},
-    "ai engineer": {"name": "AI Engineer", "aliases": ["ai engineer", "ky su ai", "ai developer", "machine learning engineer", "ml engineer"],
-        "milestones": [
-            ("Nền tảng", ["Python", "Statistics", "Linear Algebra"]),
-            ("Machine Learning", ["Machine Learning", "Scikit-learn", "Regression", "Classification"]),
-            ("Deep Learning", ["Deep Learning", "Neural Network", "PyTorch", "TensorFlow"]),
-            ("Chuyên sâu & triển khai", ["NLP", "Computer Vision", "MLOps", "RAG"]),
-        ]},
-    "data engineer": {"name": "Data Engineer", "aliases": ["data engineer", "ky su du lieu"],
-        "milestones": [
-            ("Nền tảng", ["SQL", "Python", "Database"]),
-            ("Pipeline dữ liệu", ["ETL", "Data Warehouse", "Airflow"]),
-            ("Dữ liệu lớn", ["Spark", "Kafka", "Data Lake"]),
-            ("Hạ tầng", ["Cloud", "Docker", "Distributed System"]),
-        ]},
-    "data scientist": {"name": "Data Scientist", "aliases": ["data scientist", "khoa hoc du lieu", "nha khoa hoc du lieu"],
-        "milestones": [
-            ("Nền tảng", ["Python", "Statistics", "SQL"]),
-            ("Xử lý & trực quan", ["Pandas", "NumPy", "Data Visualization"]),
-            ("Mô hình hóa", ["Machine Learning", "Scikit-learn", "Regression"]),
-            ("Nâng cao", ["Deep Learning", "Big Data", "A/B Testing"]),
-        ]},
-    "devops": {"name": "DevOps Engineer", "aliases": ["devops", "devops engineer", "sre", "ky su devops"],
-        "milestones": [
-            ("Nền tảng hệ thống", ["Linux", "Networking", "Git", "Bash"]),
-            ("Container & điều phối", ["Docker", "Kubernetes"]),
-            ("Tự động hóa", ["CI/CD", "Terraform", "Ansible"]),
-            ("Vận hành & quan sát", ["Monitoring", "Cloud", "System Design"]),
-        ]},
-    "security": {"name": "Security Engineer", "aliases": ["security engineer", "security", "an ninh mang", "ky su bao mat", "pentester"],
-        "milestones": [
-            ("Nền tảng", ["Networking", "Linux", "TCP/IP"]),
-            ("Bảo mật ứng dụng", ["Web Security", "OWASP", "Cryptography"]),
-            ("Tấn công & phòng thủ", ["Penetration Testing", "Kali Linux", "Malware"]),
-            ("Nâng cao", ["Cloud Security", "Incident Response", "Threat Hunting"]),
-        ]},
-    "mobile": {"name": "Mobile Developer", "aliases": ["mobile", "mobile developer", "lap trinh mobile", "android developer", "ios developer"],
-        "milestones": [
-            ("Ngôn ngữ", ["Kotlin", "Swift", "Dart"]),
-            ("Nền tảng & UI", ["Android", "iOS", "Flutter"]),
-            ("Tích hợp", ["REST API", "State Management", "Database"]),
-            ("Nâng cao", ["Performance", "CI/CD", "Publishing"]),
-        ]},
-    # Vai trò NGHIỆP VỤ/QA (không thuần code) — newbie hay hỏi. aliases ở đây dùng cho find_career
-    # (khớp CHUỖI CON) nên KHÔNG để token cực ngắn dễ đụng ('ba' nằm trong 'cơ bản') — token ngắn
-    # đó để FIELD_TO_CAREER (khớp theo TỪ) xử lý an toàn hơn.
-    "business_analyst": {"name": "Business Analyst (BA)",
-        "aliases": ["business analyst", "phan tich nghiep vu", "chuyen vien phan tich nghiep vu", "ba it"],
-        "milestones": [
-            ("Nền tảng nghiệp vụ & tư duy", ["Business Analysis", "Requirements", "Critical Thinking", "Communication"]),
-            ("Mô hình hóa & quy trình", ["UML", "BPMN", "Use Case", "User Story", "Agile", "Scrum"]),
-            ("Dữ liệu & công cụ", ["SQL", "Excel", "Data Analysis", "Data Visualization"]),
-            ("Nâng cao", ["Stakeholder Management", "Documentation", "Wireframe", "Product Thinking"]),
-        ]},
-    "data_analyst": {"name": "Data Analyst",
-        "aliases": ["data analyst", "chuyen vien phan tich du lieu", "nha phan tich du lieu"],
-        "milestones": [
-            ("Nền tảng", ["Excel", "SQL", "Statistics"]),
-            ("Phân tích & trực quan", ["Data Analysis", "Data Cleaning", "Data Visualization", "Tableau", "Power BI"]),
-            ("Lập trình phân tích", ["Python", "Pandas", "NumPy"]),
-            ("Nâng cao", ["Predictive Modeling", "A/B Testing", "Dashboard"]),
-        ]},
-    "tester": {"name": "QA / Tester (Kiểm thử phần mềm)",
-        "aliases": ["kiem thu phan mem", "qa engineer", "quality assurance", "kiem thu vien", "tester"],
-        "milestones": [
-            ("Nền tảng kiểm thử", ["Software Testing", "Test Case", "Manual Testing", "SDLC"]),
-            ("Tự động hóa", ["Selenium", "Automation Testing", "API Testing", "Postman"]),
-            ("Kỹ thuật & công cụ", ["SQL", "Git", "CI/CD", "Performance Testing"]),
-            ("Nâng cao", ["Security Testing", "Test Strategy", "Agile Testing"]),
-        ]},
+    key: {
+        "name": r["name"],
+        "aliases": r["aliases"],
+        "milestones": [(s["stage"], s["skills"]) for s in r["roadmap"]],
+    }
+    for key, r in ROLES.items()
 }
+
 
 
 # ───────────────────────── ĐỒ THỊ "HỌC TIẾP" ─────────────────────────
@@ -279,19 +210,10 @@ def find_career(query):
     return (best[0], best[1]) if best else (None, None)
 
 
-# LĨNH VỰC trần (UMBRELLA, KHÔNG phải tên nghề & KHÔNG phải chủ đề cụ thể) -> scaffold nghề gần
-# nhất, DÙNG RIÊNG cho câu LỘ TRÌNH ("lộ trình AI", "học web từ đầu"). Tách khỏi find_career để
-# không làm nhiễu nhận diện nghề. CỐ Ý hẹp: KHÔNG gồm chủ đề cụ thể như "machine learning",
-# "data science" (đã có nhánh lộ trình theo chủ đề từ catalog), cũng KHÔNG gồm các từ vốn đã là
-# alias nghề ("an ninh mạng", "devops", "mobile", "backend"...) -> find_career bắt trước.
-FIELD_TO_CAREER = {
-    "ai engineer": ["ai", "tri tue nhan tao", "tri tue"],
-    "frontend": ["web", "lap trinh web"],
-    # Vai trò viết tắt/ngắn -> khớp theo TỪ (an toàn hơn substring) cho câu LỘ TRÌNH.
-    "business_analyst": ["ba", "business analyst", "phan tich nghiep vu", "nghiep vu"],
-    "data_analyst": ["data analyst", "phan tich du lieu"],
-    "tester": ["qa", "qc", "tester", "kiem thu", "kiem thu phan mem"],
-}
+# LĨNH VỰC/viết tắt -> career_key, dùng cho câu LỘ TRÌNH khi find_career (khớp tên nghề) trượt
+# ("lộ trình AI", "học web từ đầu", "lộ trình BA/QA"). Dựng từ field_aliases trong it_roles.json;
+# find_roadmap_field khớp theo TỪ cho alias ngắn (an toàn hơn substring) -> 'ai' không dính 'email'.
+FIELD_TO_CAREER = {key: r.get("field_aliases", []) for key, r in ROLES.items()}
 
 
 def find_roadmap_field(query):
@@ -320,6 +242,30 @@ def find_roadmap_field(query):
             if hit and (best is None or len(tk) > best[1]):
                 best = (career, len(tk))
     return best[0] if best else None
+
+
+def find_role_key(query):
+    """Vai trò được nhắc trong câu (cho intent phỏng vấn/lương): ưu tiên tên nghề (find_career,
+    khớp chuỗi con), rồi tới field alias (find_roadmap_field, khớp theo từ). None nếu không có."""
+    key, _ = find_career(query)
+    return key or find_roadmap_field(query)
+
+
+def role_interview(key):
+    return (ROLES.get(key) or {}).get("interview", [])
+
+
+def role_salary(key):
+    return (ROLES.get(key) or {}).get("salary", [])
+
+
+def role_description(key):
+    return (ROLES.get(key) or {}).get("description", "")
+
+
+def role_roadmap(key):
+    """Roadmap đầy đủ [{stage, duration, skills}] để handler hiển thị kèm thời lượng."""
+    return (ROLES.get(key) or {}).get("roadmap", [])
 
 
 # Vốn kỹ năng nhận diện được = mọi kỹ năng trong CAREERS + tên khái niệm + NEXT_SKILL.

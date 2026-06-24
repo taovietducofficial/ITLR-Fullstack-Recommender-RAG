@@ -1242,6 +1242,9 @@ QUY TẮC:
             "next_skill": self._answer_next_skill,
             "time_estimate": self._answer_time_estimate,
             "admin_stat": self._answer_admin_stat,
+            "interview": self._answer_interview,
+            "salary": self._answer_salary,
+            "career_guidance": self._answer_career_guidance,
         }.get(intent)
         if handler:
             result = handler(slots, display_query, message, history)
@@ -1482,12 +1485,17 @@ QUY TẮC:
         return {"response": resp, "intent": "comparison", "sources": items, "recommendations": items}
 
     def _answer_career_path(self, slots, display_query, message, history):
-        career = kb.CAREERS[slots["career"]]
+        key = slots["career"]
+        career = kb.CAREERS[key]
+        roadmap = kb.role_roadmap(key)        # [{stage, duration, skills}] để hiển thị thời lượng
+        desc = kb.role_description(key)
         known = {kb._key(s) for s in slots.get("known", [])}
         filters = detect_filters(message)
-        hours, m_lo, m_hi = kb.estimate_career_time(slots["career"])
-        resp = (
-            f"## 🗺️ Lộ trình trở thành {career['name']}\n\n"
+        hours, m_lo, m_hi = kb.estimate_career_time(key)
+        resp = f"## 🗺️ Lộ trình trở thành {career['name']}\n\n"
+        if desc:
+            resp += f"{desc}\n\n"
+        resp += (
             f"Lộ trình **{len(career['milestones'])} giai đoạn** từ nền tảng đến nâng cao, "
             f"mỗi kỹ năng kèm tài nguyên thật trong catalog. "
             f"⏱️ Ước lượng tự học: **~{m_lo}–{m_hi} tháng** (~{hours} giờ).\n"
@@ -1498,7 +1506,9 @@ QUY TẮC:
             badges = " · ".join(
                 (f"`{s}` ✅" if kb._key(s) in known else f"`{s}`") for s in skills
             )
-            resp += f"\n### {emojis[i % len(emojis)]} Giai đoạn {i + 1} — {stage}\n"
+            dur = roadmap[i].get("duration") if i < len(roadmap) else ""
+            dur_txt = f" · ⏱️ {dur}" if dur else ""
+            resp += f"\n### {emojis[i % len(emojis)]} Giai đoạn {i + 1} — {stage}{dur_txt}\n"
             resp += f"**Kỹ năng:** {badges}\n\n"
             its = self._quick_resources(" ".join(skills), k=2, filters=filters)
             items += its
@@ -1507,8 +1517,64 @@ QUY TẮC:
         if known:
             resp += f"\n> ✅ Bạn đã có: {', '.join(sorted(slots['known']))} — có thể bỏ qua phần tương ứng."
         items = dedupe_items(items)
+        resp += (
+            f"\n\n> 💡 Hỏi thêm về vai trò này: *\"phỏng vấn {career['name']}\"* · "
+            f"*\"lương {career['name']}\"*."
+        )
         resp += followup_block(display_query, career["name"], items, mode="learning_path")
         return {"response": resp, "intent": "career_path", "sources": items, "recommendations": items}
+
+    def _answer_interview(self, slots, display_query, message, history):
+        """Câu hỏi phỏng vấn thường gặp cho một vai trò + tài nguyên ôn tập từ catalog."""
+        key = slots["role"]
+        role = kb.ROLES.get(key, {})
+        qs = kb.role_interview(key)
+        if not qs:
+            return None
+        resp = f"## 🎤 Phỏng vấn {role.get('name', key)} — câu hỏi thường gặp\n\n"
+        if role.get("description"):
+            resp += f"{role['description']}\n\n"
+        resp += "\n".join(f"{i}. {q}" for i, q in enumerate(qs, 1))
+        # Tài nguyên ôn tập: tìm theo kỹ năng GIAI ĐOẠN ĐẦU của vai trò (sát phần cần ôn nhất).
+        seed = " ".join(role.get("roadmap", [{}])[0].get("skills", [])) or role.get("name", "")
+        items = dedupe_items(self._quick_resources(seed, k=3))
+        if items:
+            resp += "\n\n### 📚 Tài nguyên ôn tập\n\n" + format_sources_inline(items, 3)
+        resp += (
+            f"\n\n> 💡 Xem thêm: *\"lộ trình {role.get('name','')}\"* · "
+            f"*\"lương {role.get('name','')}\"*."
+        )
+        return {"response": resp, "intent": "interview", "sources": items, "recommendations": items}
+
+    def _answer_salary(self, slots, display_query, message, history):
+        """Mức lương tham khảo theo cấp bậc cho một vai trò."""
+        key = slots["role"]
+        role = kb.ROLES.get(key, {})
+        sal = kb.role_salary(key)
+        if not sal:
+            return None
+        resp = f"## 💰 Mức lương {role.get('name', key)} (tham khảo, VN 2024–2025)\n\n"
+        resp += "\n".join(f"- {s} VND/tháng" for s in sal)
+        resp += (
+            "\n\n> ⚠️ Đây là số liệu THAM KHẢO theo thị trường; thực tế tùy công ty, khu vực và năng lực."
+            f"\n\n> 💡 Xem thêm: *\"lộ trình {role.get('name','')}\"* · "
+            f"*\"phỏng vấn {role.get('name','')}\"*."
+        )
+        return {"response": resp, "intent": "salary", "sources": [], "recommendations": []}
+
+    def _answer_career_guidance(self, slots, display_query, message, history):
+        """Tư vấn chọn vai trò IT theo sở thích (bảng gợi ý từ it_roles.json)."""
+        rows = kb.CAREER_GUIDANCE
+        if not rows:
+            return None
+        resp = "## 🧭 Bạn hợp với vai trò IT nào?\n\nDựa trên điều bạn thích, có thể cân nhắc:\n\n"
+        resp += "| Bạn thích... | Nên xem xét |\n|---|---|\n"
+        resp += "\n".join(f"| {a} | **{b}** |" for a, b in rows)
+        resp += (
+            "\n\n> 💡 Chọn được hướng rồi? Hỏi *\"lộ trình [vai trò]\"* để xem chi tiết từng giai đoạn, "
+            "hoặc *\"phỏng vấn [vai trò]\"* / *\"lương [vai trò]\"*."
+        )
+        return {"response": resp, "intent": "career_guidance", "sources": [], "recommendations": []}
 
     def _answer_skill_gap(self, slots, display_query, message, history):
         career = kb.CAREERS[slots["career"]]

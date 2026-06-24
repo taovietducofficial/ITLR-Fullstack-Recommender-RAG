@@ -15,6 +15,7 @@ from itlr.chatbot.knowledge_base import (
     find_career,
     find_concepts,
     find_roadmap_field,
+    find_role_key,
 )
 from itlr.core.recommender import normalize_text, strip_accents
 
@@ -33,6 +34,25 @@ def route_intent(query):
     career_path, comparison, definition} hoặc None nếu không khớp -> dùng pipeline cũ."""
     q = strip_accents(normalize_text(query))
     career_key, _ = find_career(query)
+
+    # 0a) PHỎNG VẤN vai trò — "phỏng vấn Backend cần chuẩn bị gì?", "câu hỏi phỏng vấn QA"
+    if re.search(r"phong van|interview|cau hoi tuyen dung|khi di phong van|hoi gi khi phong van", q):
+        role = find_role_key(query)
+        if role:
+            return "interview", {"role": role}
+
+    # 0b) LƯƠNG vai trò — "lương Frontend bao nhiêu?", "thu nhập Data Analyst". ĐẶT TRƯỚC thống kê
+    #     ('bao nhiêu' cũng khớp admin_stat). Gate bằng có từ khóa lương + nhận ra vai trò.
+    if re.search(r"\bluong\b|muc luong|thu nhap|\bsalary\b|tra luong|luong bong", q):
+        role = find_role_key(query)
+        if role:
+            return "salary", {"role": role}
+
+    # 0c) TƯ VẤN CHỌN NGHỀ — "tôi hợp vai trò IT nào?", "nên theo nghề gì?" (KHÔNG nhắc vai trò cụ thể)
+    if re.search(r"(hop|phu hop).{0,15}(nghe|vai tro|nganh|cong viec)|"
+                 r"nen (hoc|theo|chon|lam).{0,12}(nghe|nganh|vai tro) gi|"
+                 r"\bchon nghe\b|toi nen lam (nghe )?gi", q):
+        return "career_guidance", {}
 
     # 1) THỐNG KÊ / QUẢN TRỊ — "có bao nhiêu khóa học AI?", "tài liệu nào xem nhiều nhất?"
     if re.search(r"bao nhieu|thong ke|nhieu nhat|pho bien nhat|xem nhieu|goi y nhieu|"

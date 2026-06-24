@@ -41,7 +41,7 @@ def test_category_detection_no_collision():
 
 def test_skill_gap_and_next():
     from itlr.chatbot.knowledge_base import career_skill_gap, next_skills
-    gap = career_skill_gap(["Python", "SQL"], "data engineer")
+    gap = career_skill_gap(["Python", "SQL"], "data_engineer")
     assert "Spark" in gap and "Python" not in gap
     nxt = next_skills(["Python"])
     assert "OOP" in nxt

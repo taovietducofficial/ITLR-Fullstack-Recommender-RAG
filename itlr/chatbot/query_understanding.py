@@ -234,7 +234,7 @@ _ABBR_READABLE = {
     "be": "Backend", "sec": "An ninh mạng", "infosec": "An ninh mạng", "pentest": "Kiểm thử xâm nhập",
     "ctf": "Capture The Flag", "cloud": "Điện toán đám mây", "sql": "SQL", "nosql": "NoSQL",
     "api": "API", "ui": "Giao diện người dùng (UI)", "ux": "Trải nghiệm người dùng (UX)",
-    "os": "Hệ điều hành",
+    "os": "Hệ điều hành", "devops": "DevOps",
 }
 
 

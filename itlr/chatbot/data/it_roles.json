@@ -1,0 +1,425 @@
+{
+  "_meta": {
+    "title": "Kho vai trò IT (lộ trình + phỏng vấn + lương) — tiếng Việt",
+    "description": "Nguồn dữ liệu cho chatbot: mỗi vai trò gồm name, aliases (find_career, khớp chuỗi con), field_aliases (khớp theo TỪ cho câu lộ trình), description, roadmap[stage,duration,skills], interview[], salary[]. Thêm vai trò = thêm mục JSON, không sửa code.",
+    "version": "1.0",
+    "salary_note": "Mức lương tham khảo Việt Nam 2024–2025, đơn vị: triệu VND/tháng."
+  },
+  "roles": {
+    "frontend": {
+      "name": "Frontend Developer",
+      "aliases": ["frontend developer", "front end", "lap trinh vien frontend", "lap trinh giao dien"],
+      "field_aliases": ["frontend", "fe", "web", "lap trinh web"],
+      "description": "Xây dựng giao diện người dùng — những gì người dùng thấy và tương tác trực tiếp trong trình duyệt hoặc ứng dụng.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–3 tháng", "skills": ["HTML", "CSS", "JavaScript", "Git"]},
+        {"stage": "Trung cấp", "duration": "3–9 tháng", "skills": ["ES6", "React", "Vue", "Tailwind CSS", "npm", "Vite"]},
+        {"stage": "Nâng cao", "duration": "9–18 tháng", "skills": ["TypeScript", "Redux", "Testing", "Next.js", "Performance"]},
+        {"stage": "Chuyên sâu", "duration": "18 tháng+", "skills": ["Micro-frontend", "PWA", "GraphQL", "CI/CD", "Design System"]}
+      ],
+      "interview": [
+        "Giải thích sự khác nhau giữa == và === trong JavaScript?",
+        "Virtual DOM là gì? Tại sao React dùng Virtual DOM?",
+        "Giải thích lifecycle của React/Vue component?",
+        "Sự khác nhau giữa null, undefined và undeclared?",
+        "Event bubbling và event capturing là gì?",
+        "Closure trong JavaScript là gì? Cho ví dụ.",
+        "CORS là gì và cách xử lý?"
+      ],
+      "salary": ["Fresher (0–1 năm): 8–15 triệu", "Junior (1–2 năm): 15–25 triệu", "Middle (2–4 năm): 25–40 triệu", "Senior (4+ năm): 40–70 triệu", "Lead/Architect: 70–120 triệu"]
+    },
+    "backend": {
+      "name": "Backend Developer",
+      "aliases": ["backend developer", "back end", "lap trinh vien backend", "server side"],
+      "field_aliases": ["backend", "be", "api", "may chu"],
+      "description": "Xây dựng logic nghiệp vụ, API, database và hạ tầng server — phần người dùng không thấy nhưng quyết định ứng dụng chạy đúng.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–3 tháng", "skills": ["Node.js", "Python", "REST API", "SQL", "Linux", "Git"]},
+        {"stage": "Trung cấp", "duration": "3–9 tháng", "skills": ["Express", "FastAPI", "Spring Boot", "PostgreSQL", "MongoDB", "ORM", "JWT", "OAuth2"]},
+        {"stage": "Nâng cao", "duration": "9–18 tháng", "skills": ["Redis", "RabbitMQ", "Kafka", "Docker", "Microservices", "Web Security", "Testing"]},
+        {"stage": "Chuyên sâu", "duration": "18 tháng+", "skills": ["System Design", "Kubernetes", "gRPC", "GraphQL", "Event-driven", "Monitoring"]}
+      ],
+      "interview": [
+        "REST vs GraphQL — khi nào dùng cái nào?",
+        "Giải thích ACID trong database là gì?",
+        "Index trong database hoạt động như thế nào?",
+        "SQL vs NoSQL — khi nào chọn cái nào?",
+        "Stateless vs Stateful — API nên là gì?",
+        "Giải thích N+1 problem trong ORM và cách khắc phục?",
+        "Giải thích CAP theorem? Thiết kế hệ thống URL shortener?"
+      ],
+      "salary": ["Fresher: 10–18 triệu", "Junior: 18–30 triệu", "Middle: 30–50 triệu", "Senior: 50–80 triệu", "Lead/Architect: 80–130 triệu"]
+    },
+    "fullstack": {
+      "name": "Fullstack Developer",
+      "aliases": ["fullstack developer", "full stack", "lap trinh vien fullstack"],
+      "field_aliases": ["fullstack", "full stack"],
+      "description": "Thành thạo cả Frontend lẫn Backend — có thể tự xây dựng một ứng dụng từ đầu đến cuối.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–4 tháng", "skills": ["HTML", "CSS", "JavaScript", "Node.js", "Express", "SQL", "Git"]},
+        {"stage": "Trung cấp", "duration": "4–12 tháng", "skills": ["React", "REST API", "MongoDB", "PostgreSQL", "JWT", "Deployment"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["Next.js", "TypeScript", "Testing", "Docker", "CI/CD", "Redis"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["System Design", "Cloud", "Microservices", "Monitoring"]}
+      ],
+      "interview": [
+        "Khi nào nên dùng SSR, SSG, CSR?",
+        "Luồng xử lý request từ browser đến database diễn ra như thế nào?",
+        "Bạn xử lý authentication như thế nào trong một fullstack app?",
+        "Giải thích CORS và cách fix?",
+        "Bạn tối ưu một trang web chậm như thế nào (từ frontend đến backend)?"
+      ],
+      "salary": ["Fresher: 10–20 triệu", "Junior: 20–35 triệu", "Middle: 35–55 triệu", "Senior: 55–90 triệu"]
+    },
+    "mobile": {
+      "name": "Mobile Developer",
+      "aliases": ["mobile developer", "lap trinh mobile", "lap trinh di dong", "android developer", "ios developer", "flutter developer"],
+      "field_aliases": ["mobile", "di dong", "android", "ios", "flutter"],
+      "description": "Xây dựng ứng dụng di động cho iOS và/hoặc Android (native hoặc cross-platform: Flutter, React Native).",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–2 tháng", "skills": ["Dart", "Flutter", "Widgets", "Kotlin", "Swift"]},
+        {"stage": "Trung cấp", "duration": "2–8 tháng", "skills": ["GoRouter", "Provider", "Riverpod", "Bloc", "REST API", "SQLite", "Firebase"]},
+        {"stage": "Nâng cao", "duration": "8–18 tháng", "skills": ["Clean Architecture", "Testing", "Animation", "Push Notification", "CI/CD"]},
+        {"stage": "Chuyên sâu", "duration": "18 tháng+", "skills": ["Performance", "Platform Channels", "Multi-flavor"]}
+      ],
+      "interview": [
+        "Flutter vs React Native — ưu/nhược điểm mỗi cái?",
+        "StatefulWidget vs StatelessWidget khác nhau như thế nào?",
+        "Giải thích Bloc pattern?",
+        "Widget lifecycle trong Flutter?",
+        "Cách handle deep link trong mobile app?",
+        "Cách tối ưu hiệu suất Flutter app?"
+      ],
+      "salary": ["Fresher: 10–18 triệu", "Junior: 18–30 triệu", "Middle: 30–50 triệu", "Senior: 50–80 triệu"]
+    },
+    "devops": {
+      "name": "DevOps Engineer",
+      "aliases": ["devops engineer", "sre", "ky su devops"],
+      "field_aliases": ["devops", "sre", "ci cd"],
+      "description": "Tự động hóa và tối ưu quy trình phát triển → kiểm thử → triển khai phần mềm. Cầu nối giữa Development và Operations.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–3 tháng", "skills": ["Linux", "Git", "Networking", "Bash", "Python"]},
+        {"stage": "Trung cấp", "duration": "3–9 tháng", "skills": ["Docker", "CI/CD", "AWS", "Nginx", "Monitoring"]},
+        {"stage": "Nâng cao", "duration": "9–18 tháng", "skills": ["Kubernetes", "Terraform", "Ansible", "Prometheus", "Grafana", "Vault"]},
+        {"stage": "Chuyên sâu", "duration": "18 tháng+", "skills": ["GitOps", "ArgoCD", "SRE", "Service Mesh", "Istio", "FinOps"]}
+      ],
+      "interview": [
+        "CI/CD pipeline của bạn trông như thế nào?",
+        "Sự khác nhau giữa Docker và Kubernetes?",
+        "Blue-green deployment vs Canary deployment?",
+        "Khi server down lúc 2AM, bạn làm gì?",
+        "Giải thích Infrastructure as Code là gì và tại sao quan trọng?",
+        "Zero-downtime deployment là gì? Giải thích 12-factor app?"
+      ],
+      "salary": ["Fresher: 12–20 triệu", "Junior: 20–35 triệu", "Middle: 35–60 triệu", "Senior: 60–100 triệu"]
+    },
+    "cloud_architect": {
+      "name": "Cloud Architect",
+      "aliases": ["cloud architect", "cloud engineer", "kien truc su cloud", "ky su cloud", "dien toan dam may"],
+      "field_aliases": ["cloud", "aws", "azure", "gcp"],
+      "description": "Thiết kế hạ tầng cloud — đảm bảo hệ thống scalable, secure, cost-effective và highly available.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–6 tháng", "skills": ["Cloud Computing", "AWS", "VPC", "EC2", "S3"]},
+        {"stage": "Trung cấp", "duration": "6–18 tháng", "skills": ["AWS Solutions Architect", "RDS", "DynamoDB", "Lambda", "EKS", "IAM"]},
+        {"stage": "Nâng cao", "duration": "18–36 tháng", "skills": ["Multi-region", "Disaster Recovery", "Cost Optimization", "Well-Architected"]},
+        {"stage": "Chuyên sâu", "duration": "36 tháng+", "skills": ["Multi-cloud", "Landing Zone", "FinOps", "Zero Trust"]}
+      ],
+      "interview": [
+        "Thiết kế hệ thống 3-tier architecture trên AWS?",
+        "Sự khác nhau giữa horizontal và vertical scaling?",
+        "High Availability vs Fault Tolerance?",
+        "Khi nào nên dùng SQL vs NoSQL trên cloud?",
+        "Cách bảo mật S3 bucket?",
+        "Sự khác nhau giữa Security Group và NACL trên AWS?"
+      ],
+      "salary": ["Junior Cloud Engineer: 20–35 triệu", "Middle: 35–60 triệu", "Senior Cloud Engineer: 60–100 triệu", "Cloud Architect: 100–180 triệu"]
+    },
+    "sysadmin": {
+      "name": "System Administrator (SysAdmin)",
+      "aliases": ["system administrator", "sysadmin", "quan tri he thong", "quan tri mang"],
+      "field_aliases": ["sysadmin", "he thong"],
+      "description": "Quản trị, duy trì và bảo đảm hệ thống máy chủ, mạng và hạ tầng IT hoạt động ổn định.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–3 tháng", "skills": ["Linux", "Windows Server", "Active Directory", "Networking", "Bash"]},
+        {"stage": "Trung cấp", "duration": "3–12 tháng", "skills": ["VMware", "Storage", "RAID", "Backup", "Nginx", "Firewall"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["Ansible", "Zabbix", "Nagios", "High Availability", "Cloud"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["Infrastructure as Code", "Cloud Migration", "ISO 27001"]}
+      ],
+      "interview": [
+        "Khi server không ping được, bạn troubleshoot như thế nào?",
+        "Giải thích quy trình boot của Linux?",
+        "Sự khác nhau giữa TCP và UDP?",
+        "RAID 0, 1, 5, 10 khác nhau như thế nào?",
+        "Cách kiểm tra port nào đang được lắng nghe trên Linux?",
+        "Giải thích DNS resolution?"
+      ],
+      "salary": ["Junior SysAdmin: 10–18 triệu", "Middle: 18–35 triệu", "Senior: 35–60 triệu"]
+    },
+    "embedded": {
+      "name": "Embedded / Firmware Engineer",
+      "aliases": ["embedded engineer", "firmware engineer", "lap trinh nhung", "ky su nhung", "he thong nhung", "iot"],
+      "field_aliases": ["embedded", "nhung", "firmware", "iot"],
+      "description": "Lập trình phần mềm chạy trên vi điều khiển, IoT devices, thiết bị nhúng — nơi tài nguyên (CPU, RAM) rất hạn chế.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–4 tháng", "skills": ["C", "C++", "Electronics", "Arduino", "STM32", "GPIO", "UART", "I2C", "SPI"]},
+        {"stage": "Trung cấp", "duration": "4–12 tháng", "skills": ["STM32 HAL", "FreeRTOS", "Bootloader", "ESP32", "MQTT", "BLE", "JTAG"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["Linux Embedded", "Yocto", "Device Drivers", "CAN", "Modbus"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["AUTOSAR", "Functional Safety", "FPGA", "Verilog"]}
+      ],
+      "interview": [
+        "Volatile keyword trong C dùng khi nào?",
+        "Sự khác nhau giữa stack và heap trong embedded?",
+        "Interrupt handler nên làm gì và không nên làm gì?",
+        "Giải thích SPI vs I2C vs UART?",
+        "Cách debug embedded system không có JTAG?",
+        "Big-endian vs little-endian? Watchdog timer là gì?"
+      ],
+      "salary": ["Fresher: 10–18 triệu", "Junior: 18–30 triệu", "Middle: 30–50 triệu", "Senior: 50–80 triệu"]
+    },
+    "data_engineer": {
+      "name": "Data Engineer",
+      "aliases": ["data engineer", "ky su du lieu"],
+      "field_aliases": ["data engineer", "ky su du lieu"],
+      "description": "Xây dựng và duy trì hạ tầng dữ liệu: pipeline, data warehouse, data lake — để Data Analyst và Data Scientist khai thác dữ liệu.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–3 tháng", "skills": ["SQL", "Python", "Pandas", "ETL", "Git"]},
+        {"stage": "Trung cấp", "duration": "3–12 tháng", "skills": ["Spark", "BigQuery", "Snowflake", "Airflow", "Kafka", "dbt"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["Delta Lake", "Data Modeling", "Streaming", "Flink"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["Data Mesh", "Lakehouse", "Real-time Analytics", "MLOps"]}
+      ],
+      "interview": [
+        "ETL vs ELT — sự khác nhau và khi nào dùng?",
+        "Giải thích Star Schema vs Snowflake Schema?",
+        "Làm thế nào để xử lý data skew trong Spark?",
+        "Slowly Changing Dimension (SCD) Type 1, 2, 3 là gì?",
+        "Cách handle late-arriving data trong streaming pipeline?",
+        "Partition vs Bucket trong data storage?"
+      ],
+      "salary": ["Junior Data Engineer: 15–25 triệu", "Middle: 25–45 triệu", "Senior: 45–80 triệu"]
+    },
+    "data_analyst": {
+      "name": "Data Analyst / BI",
+      "aliases": ["data analyst", "business intelligence", "bi analyst", "phan tich du lieu", "chuyen vien phan tich du lieu"],
+      "field_aliases": ["data analyst", "bi", "phan tich du lieu"],
+      "description": "Phân tích dữ liệu để trả lời câu hỏi kinh doanh, tạo báo cáo và dashboard hỗ trợ ra quyết định.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–2 tháng", "skills": ["Excel", "SQL", "Analytical Thinking"]},
+        {"stage": "Trung cấp", "duration": "2–8 tháng", "skills": ["Power BI", "Tableau", "Python", "Pandas", "Statistics"]},
+        {"stage": "Nâng cao", "duration": "8–18 tháng", "skills": ["DAX", "Data Modeling", "A/B Testing", "Cohort Analysis"]},
+        {"stage": "Chuyên sâu", "duration": "18 tháng+", "skills": ["Predictive Analytics", "Looker", "Metabase", "Data Storytelling"]}
+      ],
+      "interview": [
+        "Sự khác nhau giữa OLTP và OLAP?",
+        "Bạn sẽ phân tích nguyên nhân doanh thu giảm 20% như thế nào?",
+        "Giải thích window function ROW_NUMBER, RANK, DENSE_RANK?",
+        "KPI vs metric khác nhau như thế nào?",
+        "Kể về một dashboard bạn đã build và insight tìm ra?",
+        "Confirmation bias là gì và cách tránh khi phân tích?"
+      ],
+      "salary": ["Junior: 12–20 triệu", "Middle: 20–35 triệu", "Senior: 35–60 triệu", "BI Lead/Manager: 60–90 triệu"]
+    },
+    "data_scientist": {
+      "name": "Data Scientist / AI-ML Engineer",
+      "aliases": ["data scientist", "ai engineer", "machine learning engineer", "ml engineer", "ai developer", "khoa hoc du lieu", "ky su ai"],
+      "field_aliases": ["ai", "tri tue nhan tao", "machine learning", "data science"],
+      "description": "Xây dựng mô hình machine learning để dự đoán, phân loại, gợi ý; AI/ML Engineer đưa mô hình vào sản xuất.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–4 tháng", "skills": ["Python", "NumPy", "Pandas", "Scikit-learn", "Statistics", "SQL", "Machine Learning"]},
+        {"stage": "Trung cấp", "duration": "4–12 tháng", "skills": ["Regression", "Random Forest", "SVM", "Deep Learning", "TensorFlow", "PyTorch"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["NLP", "Transformers", "Computer Vision", "CNN", "MLOps", "MLflow"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["LLM", "RAG", "Reinforcement Learning", "Model Optimization"]}
+      ],
+      "interview": [
+        "Overfitting là gì? Cách phát hiện và xử lý?",
+        "Sự khác nhau giữa precision và recall? Khi nào ưu tiên cái nào?",
+        "Giải thích bias-variance tradeoff?",
+        "Random Forest hoạt động như thế nào?",
+        "Xử lý imbalanced dataset như thế nào?",
+        "Giải thích attention mechanism trong Transformer? Bagging vs boosting?"
+      ],
+      "salary": ["Junior: 15–28 triệu", "Middle: 28–55 triệu", "Senior: 55–100 triệu", "AI Lead: 100–180 triệu"]
+    },
+    "qa": {
+      "name": "QA / Software Tester",
+      "aliases": ["qa engineer", "quality assurance", "software tester", "kiem thu phan mem", "kiem thu vien", "tester"],
+      "field_aliases": ["qa", "qc", "tester", "kiem thu"],
+      "description": "Đảm bảo chất lượng phần mềm — tìm lỗi trước khi đến tay người dùng và xây dựng quy trình ngăn lỗi phát sinh.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–2 tháng", "skills": ["Software Testing", "Test Case", "Manual Testing", "SDLC", "Jira"]},
+        {"stage": "Trung cấp", "duration": "2–8 tháng", "skills": ["API Testing", "Postman", "Selenium", "Agile", "JMeter"]},
+        {"stage": "Nâng cao", "duration": "8–18 tháng", "skills": ["Automation Framework", "Cypress", "Playwright", "Appium", "CI/CD", "OWASP"]},
+        {"stage": "Chuyên sâu", "duration": "18 tháng+", "skills": ["Test Strategy", "Shift-left Testing", "Chaos Engineering"]}
+      ],
+      "interview": [
+        "Sự khác nhau giữa QA và QC?",
+        "Khi nào nên dùng manual testing, khi nào automation?",
+        "Bạn viết test case cho tính năng login như thế nào?",
+        "Regression testing là gì?",
+        "Boundary value analysis là gì? Cho ví dụ.",
+        "Smoke test vs Sanity test khác nhau? Giải thích Page Object Model?"
+      ],
+      "salary": ["Fresher Manual QA: 8–14 triệu", "Junior: 14–22 triệu", "Middle Automation QA: 22–40 triệu", "Senior/QA Lead: 40–70 triệu"]
+    },
+    "business_analyst": {
+      "name": "Business Analyst (BA)",
+      "aliases": ["business analyst", "phan tich nghiep vu", "chuyen vien phan tich nghiep vu", "ba it"],
+      "field_aliases": ["ba", "business analyst", "phan tich nghiep vu", "nghiep vu"],
+      "description": "Phân tích yêu cầu nghiệp vụ, làm cầu nối giữa khách hàng/stakeholder và đội phát triển — đảm bảo team build đúng thứ cần build.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–2 tháng", "skills": ["Business Analysis", "Requirements", "User Story", "Use Case", "SQL"]},
+        {"stage": "Trung cấp", "duration": "2–12 tháng", "skills": ["BPMN", "MoSCoW", "Figma", "Agile", "Scrum", "ERD", "DFD"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["Domain Expertise", "OpenAPI", "Gap Analysis", "Change Management"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["Business Architecture", "Enterprise Analysis", "CBAP"]}
+      ],
+      "interview": [
+        "BA làm gì trong một dự án Agile?",
+        "Bạn xử lý thế nào khi stakeholder đưa ra yêu cầu mâu thuẫn?",
+        "Sự khác nhau giữa functional và non-functional requirement?",
+        "User Story tốt trông như thế nào?",
+        "Bạn xác nhận requirement với stakeholder như thế nào?",
+        "Giải thích BPMN là gì và bạn dùng nó như thế nào?"
+      ],
+      "salary": ["Fresher BA: 10–16 triệu", "Junior: 16–28 triệu", "Middle: 28–45 triệu", "Senior/BA Lead: 45–80 triệu"]
+    },
+    "pm": {
+      "name": "Project Manager (PM)",
+      "aliases": ["project manager", "it project manager", "quan ly du an"],
+      "field_aliases": ["pm", "project manager", "quan ly du an"],
+      "description": "Lập kế hoạch, điều phối nguồn lực và đảm bảo dự án IT hoàn thành đúng thời hạn, ngân sách và chất lượng.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–3 tháng", "skills": ["Project Management", "Agile", "Waterfall", "Jira", "Risk Management"]},
+        {"stage": "Trung cấp", "duration": "3–18 tháng", "skills": ["PMP", "Scrum", "Kanban", "SAFe", "Budget Management"]},
+        {"stage": "Nâng cao", "duration": "18–36 tháng", "skills": ["Program Management", "Change Management", "ITIL"]},
+        {"stage": "Chuyên sâu", "duration": "36 tháng+", "skills": ["Portfolio Management", "Agile Transformation", "PMO"]}
+      ],
+      "interview": [
+        "Bạn xử lý thế nào khi dự án bị trễ deadline?",
+        "Giải thích Triple Constraint trong project management?",
+        "Sự khác nhau giữa PM và Scrum Master?",
+        "Cách bạn quản lý stakeholder khó tính?",
+        "Risk register là gì và bạn dùng nó như thế nào?",
+        "Critical path là gì? Kể về một dự án thất bại và bài học?"
+      ],
+      "salary": ["Junior PM: 15–25 triệu", "Middle PM: 25–50 triệu", "Senior PM: 50–90 triệu", "Program Manager: 90–150 triệu"]
+    },
+    "scrum_master": {
+      "name": "Scrum Master",
+      "aliases": ["scrum master", "agile coach"],
+      "field_aliases": ["scrum master", "scrum", "agile coach"],
+      "description": "Servant-leader của Scrum Team — loại bỏ rào cản, bảo vệ team, giúp tổ chức hiểu và áp dụng Scrum đúng cách.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–2 tháng", "skills": ["Scrum", "Agile", "Facilitation", "Jira"]},
+        {"stage": "Trung cấp", "duration": "2–12 tháng", "skills": ["PSM I", "Coaching", "Kanban", "Velocity", "Backlog Refinement"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["SAFe", "LeSS", "Nexus", "PSM II", "Agile Coaching"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["Enterprise Agile Coach", "Agile Transformation", "Workshop Design"]}
+      ],
+      "interview": [
+        "Sự khác nhau giữa Scrum Master và Project Manager?",
+        "Daily Scrum là gì và bạn tổ chức như thế nào?",
+        "Khi Product Owner và dev team có xung đột, bạn làm gì?",
+        "Kể về một retrospective hiệu quả bạn đã facilitated?",
+        "Làm thế nào để đo lường team performance trong Scrum?",
+        "Bạn xử lý impediment như thế nào? Sprint 0 là gì?"
+      ],
+      "salary": ["Junior/New SM: 15–25 triệu", "Middle SM: 25–45 triệu", "Senior SM / Agile Coach: 45–80 triệu"]
+    },
+    "uxui": {
+      "name": "UX/UI Designer",
+      "aliases": ["ux designer", "ui designer", "ux ui designer", "thiet ke trai nghiem nguoi dung", "thiet ke giao dien"],
+      "field_aliases": ["ux", "ui", "uxui", "thiet ke"],
+      "description": "UX Designer nghiên cứu người dùng và thiết kế trải nghiệm; UI Designer tạo ra giao diện trực quan. Nhiều vị trí kết hợp cả hai.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–2 tháng", "skills": ["Design Principles", "Typography", "Figma", "Wireframing"]},
+        {"stage": "Trung cấp", "duration": "2–10 tháng", "skills": ["User Research", "Usability Testing", "Prototyping", "Design System", "Accessibility"]},
+        {"stage": "Nâng cao", "duration": "10–24 tháng", "skills": ["Advanced Figma", "Motion Design", "Design Tokens", "Heuristic Evaluation"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["Strategic UX", "Design Leadership", "Service Design"]}
+      ],
+      "interview": [
+        "Giải thích UX design process của bạn?",
+        "Sự khác nhau giữa UX và UI?",
+        "Bạn validate design với user như thế nào?",
+        "Khi dev nói design không khả thi kỹ thuật, bạn làm gì?",
+        "Design system là gì và tại sao quan trọng?",
+        "Accessibility trong design nghĩa là gì?"
+      ],
+      "salary": ["Fresher: 8–15 triệu", "Junior: 15–25 triệu", "Middle: 25–45 triệu", "Senior/Lead: 45–80 triệu"]
+    },
+    "game": {
+      "name": "Game Developer",
+      "aliases": ["game developer", "lap trinh game", "lam game", "unity developer", "unreal developer"],
+      "field_aliases": ["game", "unity", "unreal"],
+      "description": "Xây dựng trò chơi điện tử — từ mechanics, graphics, physics đến networking và monetization.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–3 tháng", "skills": ["C#", "C++", "Game Math", "Unity", "Unreal Engine", "Game Loop"]},
+        {"stage": "Trung cấp", "duration": "3–12 tháng", "skills": ["Unity", "2D Game", "3D Game", "Design Patterns", "Audio", "UGUI"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["Performance Optimization", "Shader", "Multiplayer", "Game AI", "NavMesh"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["Procedural Generation", "Rendering Pipeline", "Engine Programming"]}
+      ],
+      "interview": [
+        "Giải thích game loop là gì?",
+        "Update() vs FixedUpdate() trong Unity khác nhau như thế nào?",
+        "Cách optimize draw calls?",
+        "Giải thích Quaternion và tại sao dùng thay cho Euler angles?",
+        "Object pooling là gì và khi nào nên dùng?",
+        "Garbage collection trong Unity ảnh hưởng thế nào đến performance?"
+      ],
+      "salary": ["Fresher: 10–16 triệu", "Junior: 16–28 triệu", "Middle: 28–50 triệu", "Senior: 50–90 triệu"]
+    },
+    "blockchain": {
+      "name": "Blockchain Developer",
+      "aliases": ["blockchain developer", "lap trinh blockchain", "smart contract developer", "web3 developer"],
+      "field_aliases": ["blockchain", "web3", "solidity", "smart contract"],
+      "description": "Xây dựng ứng dụng phi tập trung (dApps), smart contracts và hạ tầng blockchain.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–3 tháng", "skills": ["Blockchain", "Cryptography", "Bitcoin", "Ethereum", "EVM"]},
+        {"stage": "Trung cấp", "duration": "3–12 tháng", "skills": ["Solidity", "Hardhat", "Ethers.js", "DeFi", "NFT", "ERC-20", "ERC-721"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["Smart Contract Security", "Gas Optimization", "Layer 2", "Chainlink", "The Graph"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["Protocol Design", "ZK-proofs", "Formal Verification", "MEV"]}
+      ],
+      "interview": [
+        "Giải thích reentrancy attack và cách phòng chống?",
+        "Gas optimization trong Solidity — bạn làm gì?",
+        "Sự khác nhau giữa ERC-20 và ERC-721?",
+        "Oracle problem là gì?",
+        "Giải thích AMM (Automated Market Maker)?",
+        "Smart contract không thể sửa sau khi deploy — bạn xử lý upgrade thế nào?"
+      ],
+      "salary": ["Junior: 15–30 triệu", "Middle: 30–60 triệu", "Senior: 60–120 triệu"]
+    },
+    "cybersecurity": {
+      "name": "Cybersecurity Engineer",
+      "aliases": ["cybersecurity engineer", "cybersecurity", "security engineer", "an ninh mang", "bao mat", "an toan thong tin", "pentester", "ky su bao mat"],
+      "field_aliases": ["cybersecurity", "security", "an ninh mang", "bao mat", "pentest"],
+      "description": "Bảo vệ hệ thống khỏi tấn công và vi phạm bảo mật — từ phân tích lỗ hổng đến xây dựng cơ chế phòng thủ.",
+      "roadmap": [
+        {"stage": "Nền tảng", "duration": "0–3 tháng", "skills": ["Networking", "Linux", "OWASP", "Cryptography", "Security+"]},
+        {"stage": "Trung cấp", "duration": "3–12 tháng", "skills": ["Penetration Testing", "Kali Linux", "Metasploit", "Burp Suite", "Web Security", "Wireshark", "Nmap"]},
+        {"stage": "Nâng cao", "duration": "12–24 tháng", "skills": ["CEH", "OSCP", "CISSP", "Malware Analysis", "Cloud Security", "Threat Hunting"]},
+        {"stage": "Chuyên sâu", "duration": "24 tháng+", "skills": ["Red Team", "Exploit Development", "Security Architecture", "ISO 27001"]}
+      ],
+      "interview": [
+        "Giải thích SQL Injection và cách phòng chống?",
+        "Sự khác nhau giữa symmetric và asymmetric encryption?",
+        "Man-in-the-middle attack là gì?",
+        "Bạn phản ứng thế nào khi phát hiện hệ thống bị compromise?",
+        "Giải thích CIA Triad (Confidentiality, Integrity, Availability)?",
+        "VPN hoạt động như thế nào?"
+      ],
+      "salary": ["Junior Security Analyst: 15–25 triệu", "Middle: 25–50 triệu", "Senior Security Engineer: 50–90 triệu", "Security Architect/CISO: 90–180 triệu"]
+    }
+  },
+  "career_guidance": [
+    ["Tạo ra thứ đẹp, người dùng thấy được", "Frontend, UX/UI"],
+    ["Logic, giải quyết vấn đề kỹ thuật phức tạp", "Backend, Embedded, Blockchain"],
+    ["Cả hai — muốn làm một mình từ A-Z", "Fullstack"],
+    ["Phân tích số liệu, tìm insight từ dữ liệu", "Data Analyst, BI"],
+    ["Xây dựng AI/ML model", "Data Scientist, AI/ML Engineer"],
+    ["Tự động hóa, hệ thống, cloud", "DevOps, Cloud Architect, SysAdmin"],
+    ["Điện tử, phần cứng, IoT", "Embedded Systems"],
+    ["Kinh doanh + công nghệ", "Business Analyst, PM"],
+    ["Lãnh đạo team, điều phối", "Scrum Master, PM"],
+    ["Bảo mật hệ thống", "Cybersecurity"],
+    ["Game, đồ họa, sáng tạo", "Game Developer"],
+    ["Crypto, DeFi, Web3", "Blockchain Developer"],
+    ["Đảm bảo chất lượng phần mềm", "QA / Tester"]
+  ]
+}
