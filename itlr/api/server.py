@@ -61,12 +61,39 @@ def _log(msg):
             pass
 
 
+def _prewarm_ollama():
+    """Nạp sẵn model Ollama vào RAM (chạy NỀN) -> câu hỏi chatbot ĐẦU TIÊN không bị
+    cold-start ~90s. Bỏ qua nếu không bật USE_OLLAMA hoặc Ollama chưa sẵn sàng."""
+    if not os.environ.get("USE_OLLAMA"):
+        return
+    import json
+    import threading
+    import urllib.request
+
+    def _warm():
+        url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+        model = os.environ.get("OLLAMA_MODEL", "qwen2.5:3b")
+        payload = json.dumps({"model": model, "messages": [{"role": "user", "content": "ping"}],
+                              "stream": False, "keep_alive": "2h",
+                              "options": {"num_predict": 1}}).encode()
+        try:
+            req = urllib.request.Request(f"{url}/api/chat", data=payload,
+                                         headers={"Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=300).read()
+            _log(f"[OK] Đã pre-warm Ollama ({model}) — chatbot sẵn sàng trả lời nhanh.")
+        except Exception as e:  # noqa: BLE001
+            _log(f"[!] Pre-warm Ollama lỗi (bỏ qua): {e}")
+
+    threading.Thread(target=_warm, daemon=True).start()
+
+
 @asynccontextmanager
 async def lifespan(_app):
     """Nạp artifacts ngay khi khởi động để lỗi (thiếu artifacts) lộ sớm, request đầu nhanh."""
     try:
         load_engine()
         _log("[OK] Engine sẵn sàng — API tại http://localhost:8000")
+        _prewarm_ollama()
     except FileNotFoundError:
         _log(
             "[!] Chưa có model artifacts. Hãy build trước:\n"

@@ -16,6 +16,11 @@ jupyter
 # Truy hồi ngữ nghĩa + reranker (Sentence-Transformers / CrossEncoder)
 sentence-transformers
 
+# Cào dữ liệu web làm phong phú catalog thật (scripts/scrape/*) — HTTP tĩnh.
+# (RSS parse bằng xml.etree thư viện chuẩn; bs4 dùng parser "html.parser" sẵn có -> không cần lxml.)
+requests
+beautifulsoup4
+
 # LLM cho Chatbot (đều tùy chọn — chỉ cần khi cấu hình API key tương ứng)
 anthropic
 openai

@@ -30,3 +30,7 @@ env/
 CLAUDE.md
 structure.md
 progress.md
+
+# ── Log & rác công cụ (transient, không commit) ──
+*.log
+.playwright-mcp/

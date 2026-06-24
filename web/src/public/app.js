@@ -12,6 +12,10 @@
     var uid = parseInt(document.body.getAttribute("data-user-id") || "", 10);
     if (!uid || !window.EventSource) return { uid: 0, on: function () {} };
     var es = new EventSource("/api/realtime");
+    // Đóng SSE TƯỜNG MINH khi rời trang -> tránh kết nối cũ tích tụ. Qua Docker proxy,
+    // kết nối không tự giải phóng kịp -> sau ~6 lần chuyển tab chạm giới hạn 6 kết nối/host
+    // của HTTP/1.1 -> trang sau bị treo. pagehide chạy cả khi điều hướng lẫn đóng tab.
+    window.addEventListener("pagehide", function () { try { es.close(); } catch (_) {} });
     return {
       uid: uid,
       on: function (ev, cb) {

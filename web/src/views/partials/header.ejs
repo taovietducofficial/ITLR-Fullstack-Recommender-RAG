@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %> · IT Learning</title>
-  <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/inter-vietnamese.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/styles.css">
+  <%# Font Inter tách theo unicode-range -> KHÔNG preload (preload subset không khớp ký tự
+      đang hiển thị sẽ gây cảnh báo "preloaded but not used"). @font-face + font-display:swap
+      trong styles.css tự tải đúng subset cần. %>
+  <link rel="stylesheet" href="/styles.css?v=<%= ASSET_VER %>">
   <script>document.documentElement.classList.add('js');</script>
 </head>
 <body class="page-<%= (typeof path!=='undefined' ? ((path.split('/')[1])||'home') : 'home') %>"<% if (user) { %> data-user-id="<%= user.id %>"<% } %>>

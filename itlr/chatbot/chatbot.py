@@ -3,6 +3,7 @@
 import json
 import os
 import re
+import time
 import urllib.request
 
 import itlr.chatbot.knowledge_base as kb
@@ -62,11 +63,13 @@ def detect_item_type(message):
 def detect_response_mode(message):
     """Soft classification for response structure — not routing."""
     norm = strip_accents(message)   # bỏ dấu để khớp mẫu (vd "lộ trình" -> "lo trinh")
-    if re.search(r"lo trinh|roadmap|bat dau|co ban|nang cao|tu zero|learning path", norm):
+    # "tu dau"/"tu con so 0" = học từ con số không -> cũng là tín hiệu lộ trình (cạnh "tu zero").
+    if re.search(r"lo trinh|roadmap|bat dau|co ban|nang cao|tu zero|tu dau|tu con so 0|learning path", norm):
         return "learning_path"
     if re.search(r"so sanh|compare|khac nhau|difference", norm):
         return "compare"
-    if re.search(r"tim|search|tra cuu|co gi ve|list|show", norm):
+    # "co ... nao" = "có khóa học/tài liệu nào (về) ..." -> ý liệt kê/tìm kiếm tài nguyên.
+    if re.search(r"tim|search|tra cuu|co gi ve|\bco\b .*\bnao\b|liet ke|list|show", norm):
         return "search"
     if re.search(r"goi y|recommend|nen hoc|tu van|phu hop|tuong tu", norm):
         return "recommend"
@@ -749,21 +752,120 @@ def try_llm_response(system_prompt, user_message, history=None):
             return None
 
     ollama_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    ollama_model = os.environ.get("OLLAMA_MODEL", "llama3.2")
+    ollama_model = _ollama_model()   # OLLAMA_MODEL nếu có sẵn, ngược lại tự chọn model đã pull
     try:
+        # num_predict: đủ dài cho lộ trình/giải thích (đổi qua OLLAMA_NUM_PREDICT); để nhanh hơn
+        # trên CPU có thể dùng model nhỏ hơn (OLLAMA_MODEL=qwen2.5:1.5b) hoặc giảm num_predict.
+        # num_predict 384: đủ cho lộ trình/giải thích mà KHÔNG quá lâu trên CPU; timeout 240 nới
+        # biên rộng để câu dài KHÔNG chạm timeout rồi âm thầm rơi về template. Đổi qua env nếu cần.
+        num_predict = int(os.environ.get("OLLAMA_NUM_PREDICT", "384"))
+        timeout_s = int(os.environ.get("OLLAMA_TIMEOUT", "300"))
         payload = json.dumps(
-            {"model": ollama_model, "messages": messages, "stream": False}
+            {"model": ollama_model, "messages": messages, "stream": False,
+             # keep_alive: giữ model trong RAM 2 giờ -> không cold-start giữa phiên demo.
+             "keep_alive": "2h", "options": {"num_predict": num_predict, "temperature": 0.5}}
         ).encode()
         req = urllib.request.Request(
             f"{ollama_url.rstrip('/')}/api/chat",
             data=payload,
             headers={"Content-Type": "application/json"},
         )
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        with urllib.request.urlopen(req, timeout=timeout_s) as resp:
             data = json.loads(resp.read())
             return data["message"]["content"].strip()
     except Exception:
         return None
+
+
+# Câu SUY LUẬN / HỘI THOẠI MỞ -> đáng gọi LLM (giải thích, vì sao, nên chọn gì...).
+# Câu định nghĩa / gợi ý khóa-tài liệu / lộ trình KHÔNG khớp -> dùng template nhanh (grounded,
+# ~1s) thay vì LLM chậm (~90s). Giữ demo nhanh mà vẫn có hội thoại AI cho câu mở.
+_REASONING_RE = re.compile(
+    r"\btai sao\b|\bvi sao\b|khi nao|hoat dong|nhu the nao|the nao|ra sao|nen dung|co nen|"
+    r"nen hoc|lam sao|lam the nao|loi ich|uu diem|nhuoc diem|uu nhuoc|quan trong|so voi|"
+    r"anh huong|tu van|loi khuyen|nen chon|khac biet|tai uu|hieu qua hon"
+)
+
+
+def _is_reasoning_query(text):
+    """True nếu câu mang tính SUY LUẬN/HỘI THOẠI -> nên để LLM trả lời tự nhiên."""
+    return bool(_REASONING_RE.search(strip_accents(str(text).lower())))
+
+
+# Câu GIẢI THÍCH thuần: người dùng muốn HIỂU chủ đề (lý do / cách thức / định nghĩa / công dụng
+# / lợi ích) — chỉ cần CÂU TRẢ LỜI TRỌNG TÂM, KHÔNG phải cả lộ trình nhiều giai đoạn. Bộ mẫu này
+# BÁM theo nhóm "definition/giải thích" mà intent_router.route_intent nhận diện, để hành vi NHẤT
+# QUÁN dù khái niệm có được nhận ra hay không, và dù có/không có LLM (khi LLM lỗi -> rơi về đây).
+# CỐ Ý KHÔNG gồm nhóm KHUYÊN/CHỌN ("tư vấn", "nên học", "nên chọn", "lời khuyên") và SO SÁNH —
+# các nhóm đó vẫn hợp lý khi sinh lộ trình / gợi ý / so sánh, không ép về trả lời ngắn.
+_EXPLAIN_RE = re.compile(
+    r"\bvi sao\b|\btai sao\b|\bsao lai\b|"                                  # vì sao / tại sao
+    r"nhu the nao|\bthe nao\b|ra sao|hoat dong|van hanh|\bco che\b|"        # như thế nào / hoạt động
+    r"\bla gi\b|\bdinh nghia\b|nghia la|y nghia|khai niem|giai thich|tim hieu ve|"  # là gì / định nghĩa / giải thích
+    r"khi nao (nen )?dung|\bde lam gi\b|dung de lam gi|"                    # khi nào dùng / để làm gì
+    r"loi ich|uu diem|nhuoc diem|uu nhuoc|ban chat"                        # lợi ích / ưu nhược điểm / bản chất
+)
+
+
+def _is_explanation_query(text):
+    """True nếu câu là hỏi GIẢI THÍCH (lý do/cách thức/định nghĩa/công dụng/lợi ích) -> trả lời
+    ngắn trọng tâm, KHÔNG gen lộ trình template; KHÔNG bao gồm câu khuyên-chọn/so sánh."""
+    return bool(_EXPLAIN_RE.search(strip_accents(str(text).lower())))
+
+
+_OLLAMA_CACHE = {}  # {"t": <thời điểm probe>, "v": <reachable?>, "models": [<tên model đã pull>]}
+
+
+def _ollama_reachable():
+    """Ollama có đang chạy & gọi được không? Probe /api/tags (timeout NGẮN) + CACHE (TTL 30s),
+    đồng thời nhớ danh sách model đã `pull`.
+
+    Mục đích: TRÁNH TREO ~120s mỗi câu khi cấu hình trỏ tới Ollama nhưng không tới được (vd chạy
+    trong Docker mà host.docker.internal bị chặn) — phát hiện sớm rồi rơi về template NGAY.
+    """
+    now = time.time()
+    if now - _OLLAMA_CACHE.get("t", 0) > 30:
+        base = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+        try:
+            with urllib.request.urlopen(base + "/api/tags", timeout=3) as r:
+                data = json.loads(r.read())
+            _OLLAMA_CACHE["models"] = [m.get("name", "") for m in data.get("models", [])]
+            _OLLAMA_CACHE["v"] = True
+        except Exception:
+            _OLLAMA_CACHE["models"] = []
+            _OLLAMA_CACHE["v"] = False
+        _OLLAMA_CACHE["t"] = now
+    return _OLLAMA_CACHE["v"]
+
+
+def _ollama_model():
+    """Chọn model Ollama: OLLAMA_MODEL nếu đặt VÀ có sẵn; nếu không, tự lấy model đã `pull` (ưu
+    tiên qwen2.5). Tránh mặc định cũ 'llama3.2' (thường CHƯA pull) -> request hỏng -> rơi template."""
+    env_model = os.environ.get("OLLAMA_MODEL")
+    _ollama_reachable()  # đảm bảo danh sách model đã được cache
+    models = _OLLAMA_CACHE.get("models", [])
+    if env_model and (not models or env_model in models):
+        return env_model
+    if not models:
+        return env_model or "qwen2.5:3b"
+    for pref in ("qwen2.5:3b", "qwen2.5:1.5b"):
+        if pref in models:
+            return pref
+    return next((m for m in models if "qwen2.5" in m), models[0])
+
+
+def _llm_available():
+    """Có LLM dùng được không: có API key (Claude/OpenAI) HOẶC Ollama đang chạy (TỰ PHÁT HIỆN).
+
+    Nhờ tự phát hiện, chạy recommender NGOÀI Docker (Ollama ở localhost:11434) là LLM tự bật,
+    không cần đặt cờ; trong Docker không tới được host -> trả False -> dùng template nhanh (không
+    treo). Đặt USE_OLLAMA=0/false để TẮT hẳn nhánh Ollama nếu muốn ép dùng template.
+    """
+    if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY"):
+        return True
+    if str(os.environ.get("USE_OLLAMA", "")).lower() in ("0", "false", "no"):
+        return False
+    return _ollama_reachable()
 
 
 class EducationalChatbot:
@@ -773,15 +875,23 @@ class EducationalChatbot:
 
 QUY TẮC:
 1. Trả lời bằng tiếng Việt, rõ ràng, có cấu trúc (dùng markdown: ##, **, danh sách).
-2. CHỈ dựa trên ngữ cảnh catalog được cung cấp — KHÔNG bịa thông tin.
-3. Luôn trích dẫn tên khóa học/tài liệu cụ thể từ catalog khi gợi ý.
+2. DÙNG kiến thức Công nghệ thông tin của bạn để GIẢI THÍCH khái niệm, thuật ngữ, viết tắt
+   và trò chuyện TỰ NHIÊN với người dùng ở mọi ngữ cảnh trong ngành (lập trình, web, AI/ML,
+   dữ liệu, cloud, DevOps, an ninh mạng, mobile, cơ sở dữ liệu, mạng, hệ điều hành, phần cứng...).
+2b. CHỈ trả lời trong phạm vi CÔNG NGHỆ THÔNG TIN. Nếu câu hỏi ngoài CNTT, từ chối lịch sự
+    và mời người dùng quay lại chủ đề IT. TUYỆT ĐỐI không trả lời chính trị, đời sống, y tế...
+3. Khi GỢI Ý khóa học/tài liệu cụ thể: CHỈ trích từ catalog được cung cấp (không bịa tên khóa
+   học). Còn phần giải thích kiến thức thì dùng hiểu biết IT của bạn, chính xác và trung thực.
 4. Nếu câu hỏi mơ hồ, trả lời dựa trên nguồn liên quan nhất và gợi ý làm rõ.
 5. Với câu hỏi về lộ trình: sắp xếp theo thứ tự cơ bản → nâng cao.
 6. Với câu hỏi so sánh: nêu điểm khác biệt giữa các tài nguyên.
 7. Giữ câu trả lời súc tích nhưng đầy đủ (200-400 từ).
-8. Phần KHÁI NIỆM tổng quan về từ khóa ĐÃ được hiển thị riêng ở ĐẦU câu trả lời —
-   bạn KHÔNG cần định nghĩa lại, hãy đi thẳng vào phần tiếp theo (gợi ý tài nguyên,
-   phân tích, lộ trình...) cho câu hỏi của người dùng."""
+8. Một ĐỊNH NGHĨA ngắn về từ khóa đã hiển thị ở ĐẦU câu trả lời — ĐỪNG lặp lại định nghĩa.
+   Hãy TRẢ LỜI TRỰC TIẾP và đi SÂU vào ĐÚNG câu hỏi bằng kiến thức của bạn, như một bài giải
+   thích tổng quan rõ ràng (kiểu tóm tắt kiến thức trên web): nếu hỏi "vì sao / lợi ích / khi nào
+   / khác gì" thì nêu các LÝ DO, PHÂN TÍCH cụ thể, có VÍ DỤ thực tế; trình bày CÓ CẤU TRÚC (đoạn
+   ngắn hoặc gạch đầu dòng). CHỈ nhắc tới khóa học/tài liệu khi người dùng hỏi gợi ý — và khi nhắc
+   thì chỉ trích từ catalog được cung cấp. Tuyệt đối KHÔNG né câu hỏi bằng cách liệt kê khóa học."""
 
     WELCOME_MESSAGE = (
         "Xin chào! Tôi là **IT Learning Assistant** — trợ lý học tập CNTT thông minh.\n\n"
@@ -812,7 +922,7 @@ QUY TẮC:
         # Vốn từ CNTT để sửa lỗi chính tả / mở rộng viết tắt cho lớp hiểu truy vấn.
         self.vocab = build_query_vocab(retrieval_model, item_list)
 
-    def _is_off_topic(self, query):
+    def _is_off_topic(self, query, raw=None):
         """True nếu truy vấn nằm NGOÀI lĩnh vực CNTT (không có mục nào trong catalog đủ liên quan).
 
         Cổng TẬP TRUNG: chạy SỚM trong chat() -> bao trùm MỌI nhánh (định nghĩa, so sánh,
@@ -823,6 +933,28 @@ QUY TẮC:
         Nếu embeddings chưa nạp -> không chấm được điểm ngữ nghĩa -> trả False (không chặn)
         để tránh chặn oan; lúc đó nhánh BM25 vẫn xử lý như cũ.
         """
+        # WHITELIST: câu hỏi khớp KHÁI NIỆM trong glossary CNTT (vd "CNTT là gì",
+        # "Docker là gì", "BA, SE") luôn TRONG lĩnh vực -> không chặn. Câu meta/định nghĩa
+        # khớp catalog khóa-học kém về ngữ nghĩa nên hay bị cổng chặn oan.
+        #  - Alias >= 3 ký tự: khớp thường (token cho từ đơn, chuỗi con cho cụm).
+        #  - Alias 1-2 ký tự (viết tắt nghề BA/SE/QA/BI/ML/AI): CHỈ nhận khi xuất hiện dạng
+        #    CHỮ HOA trong câu gốc -> phân biệt với từ tiếng Việt thường ("ba"=bố, "se"=sẽ,
+        #    "ai"=ai) để câu lạc đề không lọt.
+        # Chữ HOA lấy từ CÂU GỐC (raw) — search_text đã bị viết thường nên mất tín hiệu này.
+        _upper = set(re.findall(r"[A-Z]{2,}", str(raw if raw is not None else query)))
+        _pre = str(query).lower().replace("c++", "cpp").replace("c#", "csharp")
+        _qn = kb._key(_pre)
+        _qn_tokens = _qn.split()
+        for ckey in kb.find_concepts(query):
+            for a in kb.CONCEPTS.get(ckey, {}).get("aliases", []):
+                ka = kb._key(a)
+                if not ka:
+                    continue
+                if len(ka) >= 3:
+                    if (ka in _qn) if " " in ka else (ka in _qn_tokens):
+                        return False
+                elif ka.upper() in _upper:   # viết tắt ngắn -> chỉ nhận khi câu gốc viết HOA
+                    return False
         if self.embed_model is None or not self.search_index:
             return False
         smax = query_relevance_max(
@@ -893,7 +1025,7 @@ QUY TẮC:
         #     khớp mẫu "X là gì". Dùng search_text (đã sửa lỗi + mở rộng viết tắt) để "k8s",
         #     "machne lerning"... vẫn được nhận đúng là CNTT; KHÔNG nối lịch sử ở đây để một
         #     câu lạc đề đột ngột vẫn bị chặn dù trước đó đang nói chuyện về CNTT.
-        if self._is_off_topic(search_text):
+        if self._is_off_topic(search_text, raw=message):
             return {
                 "response": OFF_TOPIC_MESSAGE,
                 "intent": "off_topic",
@@ -908,6 +1040,12 @@ QUY TẮC:
         #     Dùng DISPLAY (đã sửa lỗi chính tả nhưng CHƯA nối mở rộng viết tắt) để nhận
         #     diện khái niệm/nghề chính xác — tránh "sql"->"co so du lieu" làm lệch khái niệm.
         intent, slots = route_intent(display_query)
+        # Khi có LLM (Ollama/Claude): câu SUY LUẬN/HỘI THOẠI ("vì sao", "khi nào nên dùng",
+        # "hoạt động thế nào", "lợi ích/ưu nhược", "so với"...) KHÔNG ép vào template ĐỊNH
+        # NGHĨA bare (vốn chỉ in nghĩa của 1 khái niệm) -> bỏ qua để LLM trả lời TỰ NHIÊN,
+        # bám ngữ cảnh. Vẫn giữ template cho "X là gì" thuần (nhanh + chính xác + grounded).
+        if _llm_available() and intent == "definition" and _is_reasoning_query(message):
+            intent = None
         handler = {
             "definition": self._answer_definition,
             "comparison": self._answer_comparison,
@@ -927,6 +1065,12 @@ QUY TẮC:
 
         item_type = detect_item_type(search_text)
         mode = detect_response_mode(search_text)
+        # Hỏi "vì sao / như thế nào / hoạt động ra sao": người dùng chỉ muốn câu trả lời
+        # TRỌNG TÂM, không phải cả lộ trình. Ép về chế độ "answer" (ngắn, có khái niệm + 1
+        # tài nguyên sát nhất) dù câu có chứa "bắt đầu/cơ bản" làm detect_response_mode hiểu
+        # nhầm thành lộ trình. (Khi có LLM, câu suy luận đã đi nhánh LLM nên override này vô hại.)
+        if _is_explanation_query(message):
+            mode = "answer"
         category = self.rag.detect_category(search_text)
 
         # 1) Ưu tiên truy hồi NGỮ NGHĨA (embeddings) — khớp ý nghĩa, chịu lỗi chính tả,
@@ -978,22 +1122,46 @@ QUY TẮC:
         #  -> kéo theo mục lạc đề ở 95%. Lộ trình trong synthesize_answer đã tự lấp đầy
         #  từng giai đoạn bằng category_stage_items: đúng cấp độ + ưu tiên bám truy vấn.)
 
-        # Mặc định trả lời CỤC BỘ từ catalog (không cần API, không treo).
-        # Chỉ gọi LLM khi người dùng chủ động cấu hình OPENAI_API_KEY hoặc USE_OLLAMA=1.
+        # Trả lời bằng LLM cho câu HỘI THOẠI/ĐỊNH HƯỚNG (suy luận, lộ trình, gợi ý, trả lời chung)
+        # -> mỗi câu được trả lời RIÊNG, bám ngữ cảnh, thay vì cùng một template lặp lại. Câu
+        # TÌM/LIỆT KÊ thuần (mode "search") giữ template (nhanh + liệt kê chính xác từ catalog).
+        # use_llm TỰ PHÁT HIỆN Ollama -> không treo khi Ollama không chạy (fail nhanh -> template).
         llm_response = None
-        use_llm = bool(
-            os.environ.get("ANTHROPIC_API_KEY")
-            or os.environ.get("OPENAI_API_KEY")
-            or os.environ.get("USE_OLLAMA")
-        )
-        if context and use_llm:
+        use_llm = _llm_available()
+        want_llm = use_llm and (mode != "search" or _is_reasoning_query(message))
+        if want_llm:
             # Cấp cho LLM cả câu hỏi gốc lẫn ý đã hiểu để bám sát + chịu lỗi chính tả.
             llm_message = display_query if understanding["corrections"] else message
-            llm_response = try_llm_response(
-                f"{self.SYSTEM_PROMPT}\n\n## Catalog context:\n{context}",
-                llm_message,
-                history=history,
+            # Câu LỘ TRÌNH cần nhiều mục hơn để LLM dựng được các giai đoạn từ catalog thật;
+            # câu khác chỉ cần vài mục. Kèm CẤP ĐỘ để model sắp xếp cơ bản -> nâng cao.
+            n_ctx = 8 if mode == "learning_path" else 5
+            ctx = "\n".join(
+                f"- {s['item'].get('title','')} | {s['item'].get('category','')}"
+                f" | {s['item'].get('level','') or 'N/A'}"
+                for s in (sources or [])[:n_ctx]
             )
+            # Gợi ý ĐỊNH DẠNG theo ý định -> trả lời đúng kiểu câu hỏi (lộ trình/gợi ý/so sánh),
+            # và YÊU CẦU loại bỏ khóa lạc chủ đề (tránh kiểu "WordPress" lọt vào lộ trình Deep Learning).
+            mode_hint = {
+                "learning_path": "Người dùng muốn LỘ TRÌNH HỌC. Dựa vào các khóa trong catalog ở trên, "
+                                 "sắp xếp thành 2-3 giai đoạn từ cơ bản -> nâng cao; mỗi giai đoạn chọn "
+                                 "vài khóa SÁT chủ đề (BỎ khóa lạc chủ đề) và nói ngắn gọn vì sao theo thứ tự đó.",
+                "recommend": "Người dùng muốn GỢI Ý. Chọn 2-3 khóa phù hợp nhất từ catalog và giải thích "
+                             "ngắn gọn vì sao chọn (bỏ khóa lạc chủ đề).",
+                "compare": "Người dùng muốn SO SÁNH. Nêu khác biệt chính giữa các lựa chọn liên quan.",
+                # answer = câu GIẢI THÍCH/PHÂN TÍCH (vì sao/lợi ích/khi nào...). Ưu tiên trả lời
+                # thực chất kiểu "tổng quan trên web", KHÔNG chuyển sang liệt kê khóa học.
+                "answer": "Người dùng hỏi một câu cần GIẢI THÍCH/PHÂN TÍCH. Hãy TRẢ LỜI TRỰC TIẾP, đầy "
+                          "đủ, có cấu trúc bằng kiến thức của bạn (nêu lý do/phân tích/ví dụ thực tế), "
+                          "như một đoạn giải thích tổng quan rõ ràng. KHÔNG chuyển sang liệt kê khóa học; "
+                          "phần tài nguyên đã có sẵn ở cuối.",
+            }.get(mode, "")
+            sys_prompt = self.SYSTEM_PROMPT
+            if ctx:
+                sys_prompt += f"\n\n## Khóa học liên quan trong catalog (CHỈ trích từ đây khi gợi ý cụ thể):\n{ctx}"
+            if mode_hint:
+                sys_prompt += f"\n\n## Yêu cầu cho câu trả lời:\n{mode_hint}"
+            llm_response = try_llm_response(sys_prompt, llm_message, history=history)
 
         if llm_response:
             response = llm_response

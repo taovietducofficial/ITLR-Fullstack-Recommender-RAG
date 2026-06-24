@@ -13,6 +13,9 @@ import { socialRouter } from "./routes/social.routes";
 
 const app = express();
 app.disable("x-powered-by"); // không lộ "Express" trong header (an toàn hơn khi deploy)
+// Phiên bản asset đổi mỗi lần khởi động -> cache-busting: trình duyệt tự tải lại CSS/JS mới
+// sau khi deploy (kết hợp maxAge dài để chuyển trang mượt mà vẫn nhận bản mới).
+app.locals.ASSET_VER = Date.now();
 app.set("trust proxy", 1);   // sau reverse proxy (Heroku) -> rate-limit lấy đúng IP, cookie secure đúng
 
 // Security headers (helmet + CSP) — đặt SỚM để áp cho mọi phản hồi.
@@ -21,7 +24,10 @@ app.use(securityHeaders);
 // View engine EJS (templates trong src/views, asset tĩnh trong src/public).
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "public"), { maxAge: env.isProd ? "7d" : 0 }));
+// Cache asset tĩnh để chuyển trang MƯỢT (không revalidate CSS/JS/font mỗi lần điều hướng).
+// Dev/demo dùng 1h (vẫn nhận thay đổi sau 1 giờ); prod 7d. maxAge=0 cũ khiến mỗi navigation
+// phải revalidate -> giật khi chạy qua Docker.
+app.use(express.static(path.join(__dirname, "public"), { maxAge: env.isProd ? "7d" : "1h" }));
 
 // Parsers (giới hạn kích thước body chống lạm dụng).
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
