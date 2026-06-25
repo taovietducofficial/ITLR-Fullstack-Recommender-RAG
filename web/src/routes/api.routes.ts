@@ -3,7 +3,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import multer from "multer";
 import { z } from "zod";
 import { query } from "../db/pool";
-import { requireAuth, hasAdminAccess } from "../middleware/auth";
+import { requireAuth } from "../middleware/auth";
 import { recommender } from "../services/recommender";
 import { renderMd, googleRefs } from "../services/markdown";
 import { extractText, appendCatalogRow } from "../services/dataset";
@@ -183,8 +183,9 @@ apiRouter.post("/courses/:id/attachments", requireAuth, upload.single("file"), a
 
   const original = utf8name(req.file.originalname);
   const text = await extractText(req.file.buffer, extOf(original));
-  // Admin đăng ngay (approved); user thường = đóng góp chờ admin duyệt (pending).
-  const approved = hasAdminAccess(req);
+  // Tài khoản admin (role) đăng ngay; mọi tài khoản khác = đóng góp chờ duyệt (pending).
+  // Auto-duyệt gắn theo TÀI KHOẢN, KHÔNG theo cookie admin-passcode (chế độ duyệt toàn trình duyệt).
+  const approved = req.user!.role === "admin";
   const rows = await query(
     `INSERT INTO attachments (course_id, user_id, filename, mime, size, data, extracted_text, approved)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, filename, mime, size, created_at`,
@@ -407,7 +408,7 @@ apiRouter.delete("/posts/:id", requireAuth, async (req, res) => {
 // ── Bài học video (YouTube) trong khóa học + tiến độ theo bài ──────────────────
 // Tính lại % tiến độ của user cho 1 khóa = số bài đã xem / tổng số bài.
 async function recomputeProgress(userId: number, courseId: number): Promise<{ progress: number; status: string }> {
-  const [{ total }] = await query<{ total: number }>("SELECT count(*)::int AS total FROM lessons WHERE course_id = $1", [courseId]);
+  const [{ total }] = await query<{ total: number }>("SELECT count(*)::int AS total FROM lessons WHERE course_id = $1 AND approved", [courseId]);
   const [{ done }] = await query<{ done: number }>(
     `SELECT count(*)::int AS done FROM lesson_progress lp JOIN lessons l ON l.id = lp.lesson_id
       WHERE l.course_id = $1 AND lp.user_id = $2`, [courseId, userId]
@@ -431,8 +432,9 @@ apiRouter.post("/courses/:id/lessons", requireAuth, async (req, res) => {
   if (Number.isNaN(courseId) || !ytId) return res.status(400).json({ error: "Link YouTube không hợp lệ." });
   const exists = await query("SELECT 1 FROM courses WHERE item_id = $1", [courseId]);
   if (!exists.length) return res.status(404).json({ error: "Khóa học không tồn tại." });
-  // Admin đăng ngay (approved); user thường = đóng góp chờ admin duyệt (pending).
-  const approved = hasAdminAccess(req);
+  // Tài khoản admin (role) đăng ngay; mọi tài khoản khác = đóng góp chờ duyệt (pending).
+  // Auto-duyệt gắn theo TÀI KHOẢN, KHÔNG theo cookie admin-passcode (chế độ duyệt toàn trình duyệt).
+  const approved = req.user!.role === "admin";
   const rows = await query<{ id: number }>(
     "INSERT INTO lessons (course_id, title, youtube_id, added_by, approved) VALUES ($1,$2,$3,$4,$5) RETURNING id",
     [courseId, title, ytId, req.user!.id, approved]

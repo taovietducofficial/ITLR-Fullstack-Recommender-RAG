@@ -1,5 +1,8 @@
 <%- include('partials/header') %>
 
+<%# Auto-duyệt đóng góp gắn theo TÀI KHOẢN (role='admin'), không theo cookie admin-passcode. %>
+<% var isContentAdmin = !!(user && user.role === 'admin'); %>
+
 <a class="back" href="javascript:history.back()">← Quay lại</a>
 
 <article class="course-detail">
@@ -67,7 +70,7 @@
         <div class="lesson <%= l.done ? 'done' : '' %>" data-lesson="<%= l.id %>" data-course="<%= course.item_id %>">
           <div class="lesson-head">
             <b><%= i+1 %>. <%= l.title %></b>
-            <% if (user && (l.added_by === user.id || isAdmin)) { %><button class="lesson-del" type="button" data-lesson="<%= l.id %>" title="Xóa bài học">×</button><% } %>
+            <% if (user && (l.added_by === user.id || isContentAdmin)) { %><button class="lesson-del" type="button" data-lesson="<%= l.id %>" title="Xóa bài học">×</button><% } %>
           </div>
           <div class="lesson-embed"><iframe src="https://www.youtube.com/embed/<%= l.youtube_id %>" title="<%= l.title %>" allowfullscreen loading="lazy"></iframe></div>
           <button class="lesson-done btn-ghost" type="button" data-lesson="<%= l.id %>" data-done="<%= l.done %>"><%= l.done ? '✓ Đã xem xong' : 'Đánh dấu đã xem xong' %></button>
@@ -78,13 +81,13 @@
     <p class="muted">Chưa có bài học video nào. Dán link YouTube bên dưới để thêm.</p>
   <% } %>
   <% if (user) { %>
-    <form id="lesson-form" class="attach-form" data-course="<%= course.item_id %>" data-admin="<%= isAdmin ? '1' : '0' %>">
+    <form id="lesson-form" class="attach-form" data-course="<%= course.item_id %>" data-admin="<%= isContentAdmin ? '1' : '0' %>">
       <input type="text" id="lesson-title" placeholder="Tên bài học (tùy chọn)">
       <input type="url" id="lesson-url" placeholder="Dán link YouTube (vd https://youtu.be/...)" required style="flex:2;min-width:220px">
-      <button class="btn-primary" type="submit"><%= isAdmin ? 'Thêm bài học' : 'Đóng góp link (chờ duyệt)' %></button>
+      <button class="btn-primary" type="submit"><%= isContentAdmin ? 'Thêm bài học' : 'Đóng góp link (chờ duyệt)' %></button>
     </form>
     <p class="muted small">
-      <% if (isAdmin) { %>Bạn là quản trị viên — link được đăng ngay.
+      <% if (isContentAdmin) { %>Bạn là quản trị viên — link được đăng ngay.
       <% } else { %>🙌 Đóng góp link bài giảng — sẽ hiển thị sau khi quản trị viên phê duyệt.<% } %>
     </p>
   <% } else { %>
@@ -108,14 +111,14 @@
   </ul>
   <p class="muted" id="attach-empty" <%= attachments.length ? 'style="display:none"' : '' %>>Chưa có tài liệu đính kèm.</p>
   <% if (user) { %>
-    <form id="attach-form" class="attach-form" data-course="<%= course.item_id %>" data-admin="<%= isAdmin ? '1' : '0' %>">
+    <form id="attach-form" class="attach-form" data-course="<%= course.item_id %>" data-admin="<%= isContentAdmin ? '1' : '0' %>">
       <input type="file" id="attach-file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
-      <button class="btn-primary" type="submit"><%= isAdmin ? 'Tải lên' : 'Đóng góp tài liệu (chờ duyệt)' %></button>
+      <button class="btn-primary" type="submit"><%= isContentAdmin ? 'Tải lên' : 'Đóng góp tài liệu (chờ duyệt)' %></button>
       <span class="muted" id="attach-msg"></span>
     </form>
     <p class="muted small">
       Hỗ trợ PDF · DOCX · XLS/XLSX — tối đa 10MB.
-      <% if (isAdmin) { %>Bạn là quản trị viên — tài liệu đăng ngay.
+      <% if (isContentAdmin) { %>Bạn là quản trị viên — tài liệu đăng ngay.
       <% } else { %>🙌 Tài liệu đóng góp sẽ hiển thị sau khi quản trị viên phê duyệt.<% } %>
     </p>
   <% } else { %>

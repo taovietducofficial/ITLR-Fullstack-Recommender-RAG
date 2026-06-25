@@ -173,8 +173,12 @@ CREATE TABLE IF NOT EXISTS lesson_progress (
 );
 
 -- ── Duyệt đóng góp: admin thêm trực tiếp = approved; user đóng góp = chờ duyệt ──
--- approved=true cho dữ liệu cũ (grandfather) và mục do admin tạo; false = chờ admin duyệt.
+-- Khi thêm cột LẦN ĐẦU dùng DEFAULT true để grandfather dữ liệu CŨ (đã có sẵn) thành approved;
+-- ngay sau đó hạ DEFAULT về false để mọi bản ghi MỚI mặc định = chờ duyệt (fail-closed).
+-- => Dù có đường insert nào quên truyền 'approved', nội dung user vẫn KHÔNG tự lên công khai.
 ALTER TABLE lessons     ADD COLUMN IF NOT EXISTS approved BOOLEAN NOT NULL DEFAULT true;
 ALTER TABLE attachments ADD COLUMN IF NOT EXISTS approved BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE lessons     ALTER COLUMN approved SET DEFAULT false;
+ALTER TABLE attachments ALTER COLUMN approved SET DEFAULT false;
 CREATE INDEX IF NOT EXISTS idx_lessons_pending     ON lessons (course_id)     WHERE approved = false;
 CREATE INDEX IF NOT EXISTS idx_attachments_pending ON attachments (course_id) WHERE approved = false;

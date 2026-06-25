@@ -25,6 +25,8 @@ env/
 .vscode/
 .idea/
 .DS_Store
+# cấu hình công cụ cục bộ theo máy — không commit
+.claude/
 
 # ── Tài liệu nội bộ (giữ ngoài VCS theo cấu hình hiện có) ──
 CLAUDE.md
