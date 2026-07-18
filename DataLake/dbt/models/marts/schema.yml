@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: monthly_revenue
+    description: Orders, revenue and freight aggregated per month.
+    columns:
+      - name: revenue
+        tests:
+          - not_null
+  - name: revenue_by_category
+    description: Orders and revenue per product category (English names).
+    columns:
+      - name: category
+        tests:
+          - not_null
+          - unique

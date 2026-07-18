@@ -1,0 +1,8 @@
+name: lakehouse
+version: "1.0.0"
+profile: lakehouse
+model-paths: ["models"]
+
+models:
+  lakehouse:
+    +materialized: table

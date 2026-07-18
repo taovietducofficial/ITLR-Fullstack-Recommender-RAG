@@ -1,0 +1,8 @@
+dagster==1.5.9
+dagit==1.5.9
+dagster-postgres==0.21.9
+dagster-dbt==0.21.9
+dagster-docker
+PyHive==0.6.5
+dagster-mlflow==0.21.9
+dagstermill==0.21.9 # for using Jupyter notebooks as solids

@@ -1,0 +1,16 @@
+{
+  "name": "olist-cdc",
+  "config": {
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "database.hostname": "mysql",
+    "database.port": "3306",
+    "database.user": "root",
+    "database.password": "admin",
+    "database.server.id": "184054",
+    "topic.prefix": "olist",
+    "database.include.list": "olist",
+    "driver.allowPublicKeyRetrieval": "true",
+    "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+    "schema.history.internal.kafka.topic": "schema-changes.olist"
+  }
+}

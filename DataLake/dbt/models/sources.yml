@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: gold
+    description: Star schema produced by the Dagster gold-layer assets (Delta tables on MinIO).
+    schema: gold
+    tables:
+      - name: fact_table
+      - name: dim_product
+      - name: dim_date

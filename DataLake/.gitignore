@@ -1,0 +1,33 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+Untitled*.ipynb
+
+# Dagster runtime
+dagster_home/.nux/
+dagster_home/.telemetry/
+dagster_home/compute_logs/
+dagster_home/logs/
+dagster_home/storage/
+dagster_home/schedules/
+
+# dbt artifacts
+dbt/target/
+dbt/logs/
+
+# Local data
+minio/
+
+# dbt anonymous user id
+dbt/.user.yml
+
+etl_pipeline/classification_report.txt
+etl_pipeline/confusion_matrix.png
