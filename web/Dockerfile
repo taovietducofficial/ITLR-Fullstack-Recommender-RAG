@@ -5,7 +5,7 @@
 #               (không còn tsx/typescript/@types trong image cuối).
 # Entrypoint tự migrate + seed (idempotent) rồi chạy server.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM node:20-bookworm-slim AS builder
+FROM node:26-bookworm-slim AS builder
 WORKDIR /app
 # Cài full deps trước (cache theo package*.json).
 COPY package*.json ./
@@ -19,7 +19,7 @@ RUN npm run build \
  && cp src/db/schema.sql dist/db/schema.sql
 
 # ── Image runtime gọn ──────────────────────────────────────────────────────────
-FROM node:20-bookworm-slim AS runtime
+FROM node:26-bookworm-slim AS runtime
 # KHÔNG bake NODE_ENV=production: khi =production, app bắt buộc JWT_SECRET >=32 ký tự,
 # cấm ADMIN_PASSCODE="1", và đặt cookie secure (cần HTTPS). Để compose/.env bật khi
 # chạy sau HTTPS/reverse-proxy — mặc định chạy HTTP localhost vẫn đăng nhập được.
