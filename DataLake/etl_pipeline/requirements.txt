@@ -33,7 +33,7 @@ streamlit
 streamlit-pandas-profiling
 streamlit-elements
 dagster-docker
-pydantic == 1.10.10
+pydantic == 2.13.4
 # pendulum<3.0
 scikit-learn==1.0.2
 mlflow==2.6.0
