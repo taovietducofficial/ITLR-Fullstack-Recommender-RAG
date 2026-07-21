@@ -117,15 +117,6 @@ make stream_cdc          # raw events -> append-only Delta table bronze.cdc_even
 make stream_cdc_tables   # parse payload.after per source table -> bronze.cdc_<table> (typed, schema drift merged)
 ```
 
-## Data quality
-
-Dagster asset checks ([etl_pipeline/quality.py](etl_pipeline/etl_pipeline/quality.py)) run against the lake and surface pass/fail directly in the Dagster UI:
-
-- `fact_table_valid` — no null keys, no negative prices or freight in the fact table
-- `dim_customer_unique` — `customer_id` unique and not null in the customer dimension
-
-Unit tests for the ML text pipeline live in [etl_pipeline_tests/](etl_pipeline/etl_pipeline_tests/) and run in CI on every push.
-
 ## dbt transformations
 
 The [dbt/](dbt/) project builds Platinum-layer marts on Trino from the Gold star schema (`monthly_revenue`, `revenue_by_category`), with schema tests:
@@ -186,7 +177,7 @@ The CSVs are **not committed to the repo** (~120MB, gitignored). Download the da
 
 **Tào Việt Đức** — [@taovietducofficial](https://github.com/taovietducofficial) · taovietduc.work@gmail.com
 
-Originally built as my university thesis project (Tiểu Luận Chuyên Ngành), then developed further: repository cleanup and CI, Trino integration, Kafka + Debezium CDC streaming, and the dbt layer, with the roadmap above in progress.
+Originally built as my university thesis project, then developed further: repository cleanup and CI, Trino integration, Kafka + Debezium CDC streaming, and the dbt layer, with the roadmap above in progress.
 
 ## License
 
