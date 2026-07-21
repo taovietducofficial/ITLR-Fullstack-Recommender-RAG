@@ -1,4 +1,4 @@
-"""Adapter dữ liệu THẬT về schema catalog + đối chứng phân phối synthetic vs thật (Trụ cột I).
+"""Adapter dữ liệu THẬT về schema catalog + đối chứng phân phối synthetic vs thật.
 
 Chống chất vấn "dữ liệu giả": nạp các dataset khóa học CÔNG KHAI (Kaggle "Coursera/Udemy/Online
 Courses" — tải tay, không cần crawl) rồi map sang schema hiện tại, LỌC riêng lĩnh vực CNTT/IT,
@@ -10,10 +10,10 @@ Schema đích: item_id,title,type,level,description,category,topics,instructor,p
 Cách chạy:
     # chỉ thống kê phân phối catalog synthetic hiện tại:
     python scripts/eval/adapt_real_data.py --compare-only
-    # map MỘT dataset thật -> data/it_learning_items_real.csv + đối chứng:
+    # map MỘT dataset thật -> var/data/it_learning_items_real.csv + đối chứng:
     python scripts/eval/adapt_real_data.py --source path/to/coursera.csv
     # HỢP NHẤT cả thư mục Kaggle (lọc IT + khử trùng lặp) -> catalog thật:
-    python scripts/eval/adapt_real_data.py --source-dir data_real_kaggle
+    python scripts/eval/adapt_real_data.py --source-dir var/data_real_kaggle
 
 Đầu ra ghi vào FILE RIÊNG (it_learning_items_real.csv) — KHÔNG đụng synthetic gốc.
 Rebuild trên dữ liệu thật:
@@ -36,7 +36,6 @@ import pandas as pd  # noqa: E402
 
 from itlr import config  # noqa: E402
 
-# Heuristic ánh xạ tên cột nguồn -> trường schema (bao các dataset Coursera/Udemy/Online phổ biến).
 COLUMN_ALIASES = {
     "title": ["course_title", "course title", "title", "name", "course_name", "course", "clean_title"],
     "description": ["description", "course_description", "short intro", "course short intro",
@@ -52,7 +51,6 @@ COLUMN_ALIASES = {
     "level": ["level", "difficulty", "course_level"],
 }
 
-# Từ khóa nhận diện lĩnh vực CNTT/IT (so khớp chuỗi con, viết thường) trên category + sub-category.
 IT_CATEGORY_TERMS = [
     "computer science", "data science", "datascience", "information technology", "it &",
     "web development", "software development", "software", "programming", "machine learning",
@@ -61,13 +59,11 @@ IT_CATEGORY_TERMS = [
     "databases", "database", "devops", "mobile development", "game development", "blockchain",
     "computer", "coding", "developer", "it certifications",
 ]
-# Mặc định nền tảng suy từ tên file (khi nguồn không có cột platform).
 PLATFORM_BY_FILE = {
     "udemy": "Udemy", "coursera": "Coursera", "online_courses": "Multi-platform",
     "all_courses": "Multi-platform",
 }
 
-# Map cấp độ tiếng Anh -> nhãn tiếng Việt cho đồng nhất với catalog hiện tại.
 LEVEL_VI = {
     "beginner": "Cơ bản", "introductory": "Cơ bản", "basic": "Cơ bản", "all": "Cơ bản",
     "intermediate": "Trung cấp", "mixed": "Trung cấp",
@@ -119,7 +115,6 @@ def norm_title(s: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^\w\s]", " ", str(s).lower())).strip()
 
 
-# Gộp các biến thể tên chuyên mục về một nhãn chuẩn.
 CATEGORY_NORMALIZE = {
     "datascience": "Data Science", "data science": "Data Science",
     "computer science": "Computer Science", "information technology": "Information Technology",
@@ -175,11 +170,9 @@ def adapt(source_path: str, platform_default: str, it_only: bool) -> pd.DataFram
     out["platform"] = out["platform"].replace("", plat)
     out["link"] = raw[mapping["link"]].astype(str) if mapping["link"] else ""
 
-    # Mô tả rỗng/nan -> tổng hợp từ tiêu đề + chủ đề để TF-IDF/embeddings có nội dung.
     empty_desc = out["description"].str.lower().isin(["", "nan"])
     out.loc[empty_desc, "description"] = (out["title"] + ". " + out["topics"]).str[:400]
 
-    # Lọc CNTT/IT theo category + sub-category.
     if it_only:
         hay = (out["category"].astype(str).str.lower() + " " + out["_subcat"].astype(str).str.lower()).fillna("")
         mask = hay.apply(lambda h: any(t in str(h) for t in IT_CATEGORY_TERMS))
@@ -195,15 +188,13 @@ def build_catalog(sources: list[str], platform_default: str, it_only: bool) -> p
     df = pd.concat(frames, ignore_index=True)
     before = len(df)
     df["_key"] = df["title"].map(norm_title)
-    df = df.sort_values("description", key=lambda s: s.str.len(), ascending=False)  # giữ bản mô tả dài nhất
+    df = df.sort_values("description", key=lambda s: s.str.len(), ascending=False)
     df = df.drop_duplicates(subset="_key").drop(columns="_key").reset_index(drop=True)
     print(f"  Khử trùng lặp: {before} -> {len(df)} (loại {before - len(df)} tiêu đề trùng)")
     df.insert(0, "item_id", range(1, len(df) + 1))
     cols = ["item_id", "title", "type", "level", "description", "category", "topics",
             "instructor", "platform", "link"]
     df = df[cols]
-    # build_model.py dùng dropna() -> mọi ô PHẢI có giá trị (NaN/"nan" -> điền mặc định).
-    # Tránh các token pandas coi là NaN khi đọc lại ("N/A", "NA", "", ...) -> build_model.dropna() rớt dòng.
     defaults = {"title": "Khóa học", "description": "Đang cập nhật", "topics": "Tổng quát",
                 "instructor": "Đang cập nhật", "platform": "Đang cập nhật", "link": "Đang cập nhật",
                 "category": "CNTT", "level": "Trung cấp"}
@@ -231,7 +222,7 @@ def distribution_stats(df: pd.DataFrame, name: str) -> dict:
 
 
 def write_compare(syn: dict, real: dict | None):
-    lines = ["# Đối chứng phân phối dữ liệu synthetic vs thật (Trụ cột I)\n",
+    lines = ["# Đối chứng phân phối dữ liệu synthetic vs thật\n",
              "| Thuộc tính | Synthetic | Thật |", "|---|---|---|"]
     for k, label in [("n", "Số item"), ("n_categories", "Số chuyên mục"),
                      ("desc_len_mean", "Độ dài mô tả TB"), ("desc_len_median", "Độ dài mô tả trung vị"),

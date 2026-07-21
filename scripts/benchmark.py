@@ -3,7 +3,6 @@ import os
 import pickle
 import sys
 
-# Đưa thư mục gốc dự án vào sys.path để import package `itlr` khi chạy trực tiếp.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 if hasattr(sys.stdout, "reconfigure"):

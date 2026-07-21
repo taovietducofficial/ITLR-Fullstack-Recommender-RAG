@@ -1,4 +1,4 @@
-"""Đánh giá counterfactual / off-policy (Trụ cột D — WOW factor).
+"""Đánh giá counterfactual / off-policy.
 
 Bài toán: từ LOG cũ (sinh bởi policy logging cũ), ước lượng KHÔNG THIÊN LỆCH phần thưởng
 (reward/CTR) mà một policy MỚI sẽ đạt — mà không cần triển khai thật. Đây là chuẩn vàng

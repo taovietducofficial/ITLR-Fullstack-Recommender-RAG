@@ -11,9 +11,8 @@ caller giữ nguyên thứ tự embeddings (hệ thống vẫn chạy bình thư
 
 import os
 
-_RERANKER = None  # cache tiến trình: None=chưa thử, False=không khả dụng, đối tượng=sẵn sàng
+_RERANKER = None
 
-# Mặc định reranker đa ngữ (hỗ trợ tiếng Việt). Đổi qua RERANKER_MODEL.
 DEFAULT_RERANKER = "BAAI/bge-reranker-base"
 
 
@@ -21,7 +20,7 @@ def get_reranker():
     """Nạp (lười, một lần) CrossEncoder. Trả về model hoặc None nếu không khả dụng."""
     global _RERANKER
     if _RERANKER is not None:
-        return _RERANKER or None  # False -> None
+        return _RERANKER or None
 
     if os.environ.get("DISABLE_RERANKER"):
         _RERANKER = False
@@ -66,7 +65,7 @@ def rerank(query, candidates, text_of, top_k=None, reranker=None):
     except Exception:
         return [(c, None) for c in (candidates if top_k is None else candidates[:top_k])]
 
-    scores = _sigmoid(raw)  # logit -> (0,1) để hiển thị/ổn định
+    scores = _sigmoid(raw)
     ranked = sorted(zip(candidates, scores), key=lambda x: float(x[1]), reverse=True)
     if top_k is not None:
         ranked = ranked[:top_k]

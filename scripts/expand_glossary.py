@@ -9,8 +9,6 @@ from pathlib import Path
 
 GLOSSARY = Path(__file__).resolve().parent.parent / "itlr" / "chatbot" / "data" / "it_glossary.json"
 
-# Mỗi mục theo schema hiện có: name, aliases (có/không dấu + viết tắt), category, level,
-# definition (tiếng Việt, chính xác, súc tích), topics (khớp tên topic catalog), related.
 NEW = {
     "data_analysis": {
         "name": "Phân tích dữ liệu (Data Analysis)",
@@ -184,7 +182,6 @@ def main():
             continue
         concepts[key] = entry
         added.append(key)
-    # Lọc related về key TỒN TẠI (sau khi đã merge cả batch) -> không trỏ key ma.
     for key in added:
         concepts[key]["related"] = [r for r in concepts[key]["related"] if r in concepts]
 

@@ -1,8 +1,6 @@
 import importlib.util
 from pathlib import Path
 
-# Load the module directly: importing the etl_pipeline package would pull in
-# dagster/pyspark, which the text utilities do not need.
 _spec = importlib.util.spec_from_file_location(
     "text", Path(__file__).resolve().parent.parent / "etl_pipeline" / "utils" / "text.py"
 )

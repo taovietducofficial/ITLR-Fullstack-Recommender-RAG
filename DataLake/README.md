@@ -38,10 +38,10 @@ flowchart LR
 
 | Layer | Content | Write strategy |
 |---|---|---|
-| 🥉 Bronze | Raw data, exactly as extracted from MySQL | `append` — never mutate the source of truth |
-| 🥈 Silver | Cleaned, validated, schema-conformed tables | `overwrite` — rebuilt from Bronze each run |
-| 🥇 Gold | Star schema: dimensions + fact table | `upsert` — update existing keys, insert new ones |
-| 💎 Platinum | Aggregated business marts (sales cube) | `upsert` |
+| Bronze | Raw data, exactly as extracted from MySQL | `append` — never mutate the source of truth |
+| Silver | Cleaned, validated, schema-conformed tables | `overwrite` — rebuilt from Bronze each run |
+| Gold | Star schema: dimensions + fact table | `upsert` — update existing keys, insert new ones |
+| Platinum | Aggregated business marts (sales cube) | `upsert` |
 
 All lake tables are stored as **Delta/Parquet** on MinIO.
 
@@ -169,6 +169,8 @@ The Streamlit app serves the model: browse reviews, predict sentiment for new co
 
 [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) — ~100k orders (2016–2018) across 9 relational tables: orders, order items, payments, reviews, customers, sellers, products, geolocation, and category translations.
 
+The CSVs are **not committed to the repo** (~120MB, gitignored). Download the dataset from Kaggle and extract the 9 CSVs into `DataLake/dataset/` before running `make mysql_load`.
+
 ## Roadmap
 
 - [x] Trino for interactive SQL over the lake
@@ -188,4 +190,4 @@ Originally built as my university thesis project (Tiểu Luận Chuyên Ngành),
 
 ## License
 
-[MIT](LICENSE)
+Proprietary — all rights reserved. See [LICENSE](../LICENSE).

@@ -10,19 +10,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 STEMMER = PorterStemmer()
 
-# Ngưỡng tuyệt đối cho điểm hybrid (max của kênh embeddings & char n-gram).
-# Đo lại trên dataset 50k mới: off-topic tiếng Việt (kể cả "cách nấu phở"=0.474,
-# "học tiếng anh"=0.460) <= ~0.48; truy vấn IT tiếng Việt >= 0.61, token IT tiếng Anh
-# thấp nhất (git) = 0.506. 0.48 nằm trong khoảng trống -> ưu tiên CHẶN off-topic mạnh
-# (theo yêu cầu) mà vẫn giữ git/css/sql... và viết tắt (đã mở rộng -> điểm cao).
-ABS_RELEVANCE_GATE = 0.48   # điểm cao nhất < ngưỡng này -> ngoài lĩnh vực -> không hiện gì
-ABS_ITEM_FLOOR = 0.42       # mục dưới sàn này coi như không liên quan (cắt phần nhiễu)
+ABS_RELEVANCE_GATE = 0.48
+ABS_ITEM_FLOOR = 0.42
 
-# Hiệu chỉnh "% phù hợp" hiển thị. Điểm thô (cosine/char) được chuẩn hóa theo truy vấn
-# (score/best) rồi ánh xạ qua đường cong lõm vào dải tin cậy cao: mục THỰC SỰ liên quan
-# đọc lên 90-100%, đúng kỳ vọng người dùng, trong khi THỨ TỰ xếp hạng vẫn theo điểm thô.
-CONFIDENCE_FLOOR = 0.90     # mục trong-lĩnh-vực kém nhất vẫn hiển thị ~90%
-CONFIDENCE_BAND_LO = 0.50   # norm <= mức này coi như đáy dải hiển thị
+CONFIDENCE_FLOOR = 0.90
+CONFIDENCE_BAND_LO = 0.50
 
 
 def calibrate_confidence(norm):
@@ -53,7 +45,6 @@ QUERY_STOP_WORDS = STOP_WORDS | {
     "recommend", "search", "find", "show", "list", "best", "top",
 }
 
-# Related category groups for partial category bonus
 RELATED_CATEGORIES = {
     "lập trình": {"lập trình web", "lập trình mobile", "công cụ lập trình"},
     "lập trình web": {"lập trình", "lập trình mobile"},
@@ -67,7 +58,6 @@ RELATED_CATEGORIES = {
     "cơ sở dữ liệu": {"khoa học dữ liệu"},
 }
 
-# Tunable fusion weights (optimized for educational catalog)
 SCORE_WEIGHTS = {
     "tfidf": 0.42,
     "bm25": 0.18,
@@ -112,15 +102,15 @@ def _collapse_repeats(text):
     changed = True
     while changed:
         changed = False
-        for k in range(4, 0, -1):  # cụm dài trước (4 từ) -> từ đơn
+        for k in range(4, 0, -1):
             i, res, n = 0, [], len(toks)
             while i < n:
                 seg = [t.lower() for t in toks[i:i + k]]
                 if i + 2 * k <= n and seg == [t.lower() for t in toks[i + k:i + 2 * k]]:
-                    res.extend(toks[i:i + k])                       # giữ 1 bản
+                    res.extend(toks[i:i + k])
                     j = i + k
                     while j + k <= len(toks) and [t.lower() for t in toks[j:j + k]] == seg:
-                        j += k                                      # bỏ các bản lặp còn lại
+                        j += k
                     i = j
                     changed = True
                 else:
@@ -130,16 +120,9 @@ def _collapse_repeats(text):
     return " ".join(toks)
 
 
-# Bỏ KHOẢNG TRẮNG THỪA trước dấu câu. Tách riêng dấu chấm: CHỈ bỏ cách trước '.' khi nó là dấu
-# chấm KẾT câu (theo sau là khoảng trắng/hết chuỗi) -> KHÔNG phá " .NET" / " .js" (theo sau là chữ).
 _SPACE_BEFORE_PUNCT_RE = re.compile(r"\s+([,;:!?])")
 _SPACE_BEFORE_PERIOD_RE = re.compile(r"\s+\.(?=\s|$)")
-# Thêm cách SAU dấu phẩy/chấm-phẩy/hai-chấm dính chữ: "câu,Xác" -> "câu, Xác" (số thập phân an toàn
-# vì yêu cầu CHỮ cái ngay sau, không phải chữ số).
 _SPACE_AFTER_COMMA_RE = re.compile(r"([,;:])(?=[A-Za-zÀ-ỹ])")
-# Tách CÂU bị dính: <chữ thường>.<Chữ HOA + thường> -> thêm cách. Lookbehind 2 ký tự thường +
-# yêu cầu sau dấu chấm là Hoa-rồi-thường (một từ viết hoa bình thường) nên KHÔNG đụng ".NET",
-# ".JS", từ viết tắt toàn hoa, hay phần mở rộng file.
 _SENTENCE_GLUE_RE = re.compile(r"(?<=[a-zà-ỹ]{2})([.!?])(?=[A-ZÀ-Ỹ][a-zà-ỹ])")
 
 
@@ -367,13 +350,7 @@ def query_item_score(
     return min(score, 1.0)
 
 
-# Ánh xạ TỪ KHÓA (đã bỏ dấu, viết thường) -> ĐÚNG tên chuyên mục trong catalog.
-# Cần thiết vì tên chuyên mục là tiếng Việt nhưng người dùng hay gõ thuật ngữ tiếng Anh
-# ("machine learning", "docker"...) -> khớp theo tên thuần túy sẽ trượt. Đây là TÍN HIỆU
-# MẠNH, ưu tiên hơn khớp tên. Cụm nhiều từ (có dấu cách) khớp theo chuỗi con; từ đơn
-# khớp đúng token (để "java" không dính "javascript").
 KEYWORD_CATEGORY = {
-    # Trí tuệ nhân tạo / Machine Learning
     "machine learning": "Trí tuệ nhân tạo", "deep learning": "Trí tuệ nhân tạo",
     "hoc may": "Trí tuệ nhân tạo", "hoc sau": "Trí tuệ nhân tạo",
     "neural network": "Trí tuệ nhân tạo", "mang neuron": "Trí tuệ nhân tạo",
@@ -382,76 +359,51 @@ KEYWORD_CATEGORY = {
     "tensorflow": "Trí tuệ nhân tạo", "pytorch": "Trí tuệ nhân tạo",
     "keras": "Trí tuệ nhân tạo", "scikit": "Trí tuệ nhân tạo",
     "transformer": "Trí tuệ nhân tạo", "nlp": "Trí tuệ nhân tạo",
-    # MLOps & AI Engineering
     "mlops": "MLOps & AI Engineering", "ai engineering": "MLOps & AI Engineering",
-    # Khoa học dữ liệu
     "data science": "Khoa học dữ liệu", "khoa hoc du lieu": "Khoa học dữ liệu",
     "phan tich du lieu": "Khoa học dữ liệu", "data analysis": "Khoa học dữ liệu",
     "pandas": "Khoa học dữ liệu", "truc quan hoa": "Khoa học dữ liệu",
-    # Dữ liệu lớn
     "big data": "Dữ liệu lớn", "du lieu lon": "Dữ liệu lớn",
     "spark": "Dữ liệu lớn", "hadoop": "Dữ liệu lớn", "kafka": "Dữ liệu lớn",
-    # DevOps
     "devops": "DevOps", "docker": "DevOps", "kubernetes": "DevOps",
     "ci cd": "DevOps", "jenkins": "DevOps", "terraform": "DevOps", "ansible": "DevOps",
-    # Điện toán đám mây
     "dien toan dam may": "Điện toán đám mây", "cloud computing": "Điện toán đám mây",
     "serverless": "Điện toán đám mây",
-    # An ninh mạng
     "an ninh mang": "An ninh mạng", "bao mat": "An ninh mạng",
     "cybersecurity": "An ninh mạng", "security": "An ninh mạng",
     "pentest": "An ninh mạng", "penetration testing": "An ninh mạng", "owasp": "An ninh mạng",
-    # Lập trình Web
     "lap trinh web": "Lập trình Web", "frontend": "Lập trình Web", "backend": "Lập trình Web",
     "react": "Lập trình Web", "angular": "Lập trình Web", "django": "Lập trình Web",
     "flask": "Lập trình Web",
-    # Lập trình Mobile
     "lap trinh mobile": "Lập trình Mobile", "android": "Lập trình Mobile",
     "ios": "Lập trình Mobile", "flutter": "Lập trình Mobile", "react native": "Lập trình Mobile",
-    # Cơ sở dữ liệu
     "co so du lieu": "Cơ sở dữ liệu", "database": "Cơ sở dữ liệu",
     "mongodb": "Cơ sở dữ liệu", "postgresql": "Cơ sở dữ liệu", "mysql": "Cơ sở dữ liệu",
-    # Cấu trúc dữ liệu & Giải thuật
     "cau truc du lieu": "Cấu trúc dữ liệu & Giải thuật", "giai thuat": "Cấu trúc dữ liệu & Giải thuật",
     "thuat toan": "Cấu trúc dữ liệu & Giải thuật", "algorithm": "Cấu trúc dữ liệu & Giải thuật",
     "data structure": "Cấu trúc dữ liệu & Giải thuật",
-    # Mạng máy tính
     "mang may tinh": "Mạng máy tính", "networking": "Mạng máy tính",
-    # Kiểm thử phần mềm
     "kiem thu": "Kiểm thử phần mềm", "testing": "Kiểm thử phần mềm",
     "automation test": "Kiểm thử phần mềm",
-    # Thiết kế UI/UX
     "ui ux": "Thiết kế UI/UX", "thiet ke giao dien": "Thiết kế UI/UX", "figma": "Thiết kế UI/UX",
-    # Blockchain & Web3
     "blockchain": "Blockchain & Web3", "web3": "Blockchain & Web3",
     "ethereum": "Blockchain & Web3", "smart contract": "Blockchain & Web3",
-    # IoT & Hệ thống nhúng
     "iot": "IoT & Hệ thống nhúng", "he thong nhung": "IoT & Hệ thống nhúng",
     "embedded": "IoT & Hệ thống nhúng", "arduino": "IoT & Hệ thống nhúng",
-    # Quản trị hệ thống & Linux
     "linux": "Quản trị hệ thống & Linux", "quan tri he thong": "Quản trị hệ thống & Linux",
     "sysadmin": "Quản trị hệ thống & Linux",
-    # Quản lý dự án CNTT
     "quan ly du an": "Quản lý dự án CNTT", "project management": "Quản lý dự án CNTT",
     "agile": "Quản lý dự án CNTT", "scrum": "Quản lý dự án CNTT",
-    # AR/VR & Thực tế ảo
     "ar vr": "AR/VR & Thực tế ảo", "thuc te ao": "AR/VR & Thực tế ảo",
     "virtual reality": "AR/VR & Thực tế ảo",
-    # Đồ họa máy tính
     "do hoa may tinh": "Đồ họa máy tính", "computer graphics": "Đồ họa máy tính", "opengl": "Đồ họa máy tính",
-    # Phân tích nghiệp vụ (BA)
     "phan tich nghiep vu": "Phân tích nghiệp vụ (BA)", "business analyst": "Phân tích nghiệp vụ (BA)",
-    # Điện toán lượng tử
     "luong tu": "Điện toán lượng tử", "quantum": "Điện toán lượng tử",
-    # Phát triển Game
     "phat trien game": "Phát triển Game", "game development": "Phát triển Game",
     "unity": "Phát triển Game", "unreal": "Phát triển Game",
-    # Khoa học máy tính
     "khoa hoc may tinh": "Khoa học máy tính", "computer science": "Khoa học máy tính",
-    # Kỹ thuật phần mềm
     "ky thuat phan mem": "Kỹ thuật phần mềm", "software engineering": "Kỹ thuật phần mềm",
     "design pattern": "Kỹ thuật phần mềm",
-    # Lập trình (tổng quát / ngôn ngữ)
     "lap trinh": "Lập trình", "python": "Lập trình", "golang": "Lập trình", "rust": "Lập trình",
 }
 
@@ -470,7 +422,6 @@ def detect_category_from_query(query, categories):
     bare = strip_accents(normalize_text(query))
     q_tokens_bare = set(bare.split())
 
-    # 1) Bản đồ từ khóa (ưu tiên) — chấm điểm theo số cụm khớp, cụm dài thắng.
     cat_score = {}
     for phrase, cat in KEYWORD_CATEGORY.items():
         if cat not in cat_set:
@@ -481,7 +432,6 @@ def detect_category_from_query(query, categories):
     if cat_score:
         return max(cat_score, key=cat_score.get)
 
-    # 2) Khớp tên chuyên mục — bỏ dấu hai phía, loại stopword bên truy vấn.
     query_tokens = {t for t in q_tokens_bare if t not in QUERY_STOP_WORDS}
     if not query_tokens:
         return None
@@ -555,7 +505,7 @@ def row_to_dict(row, score=None, tfidf_score=None):
         "platform": row["platform"],
         "link": clean_link(row["link"]),
     }
-    if "level" in row and str(row["level"]).strip():   # trường cấp độ (mới), nếu có
+    if "level" in row and str(row["level"]).strip():
         result["level"] = row["level"]
     if score is not None:
         result["score"] = round(float(score) * 100, 1)
@@ -625,7 +575,6 @@ def search_by_query(
     candidates.sort(key=lambda x: x[1], reverse=True)
 
     if use_mmr and len(candidates) > top_n:
-        # MMR trên một tập ứng viên nhỏ -> chỉ cần ma trận con, tính tại chỗ từ TF-IDF
         pool = candidates[: top_n * 4]
         pool_idx = [i for i, _, _ in pool]
         sub_sim = cosine_similarity(matrices["full"][pool_idx])
@@ -712,7 +661,7 @@ def recommend(item_list, similarity, title, top_n=5):
     ]
 
 
-RERANK_POOL = 32            # số ứng viên đưa vào cross-encoder (tầng 2); cân bằng tốc độ/chất lượng
+RERANK_POOL = 32
 
 
 def _rerank_doc(row):
@@ -794,7 +743,7 @@ def _apply_mmr(scored, embeddings, top_n=8, lambda_param=0.7):
         return scored
     idxs = [i for i, _ in pool]
     rels = [c for _, c in pool]
-    sub = embeddings[idxs] @ embeddings[idxs].T      # cosine (vector đã chuẩn hóa)
+    sub = embeddings[idxs] @ embeddings[idxs].T
     selected = mmr_rerank([(k, rels[k]) for k in range(len(pool))],
                           sub, top_n=top_n, lambda_param=lambda_param)
     chosen = [k for k, _ in selected]
@@ -867,7 +816,7 @@ def multi_query_search(
     Trả list item dict (có 'score' %). Rỗng nếu ngoài lĩnh vực.
     """
     seen, qs = set(), []
-    for q in queries:                                 # bỏ trùng, giữ thứ tự
+    for q in queries:
         q = (q or "").strip()
         if q and q.lower() not in seen:
             seen.add(q.lower())
@@ -875,8 +824,6 @@ def multi_query_search(
     if not qs:
         return []
 
-    # Cổng off-topic: quyết định bằng truy vấn tự nhiên (gate_query) nếu có, để biến
-    # thể mở rộng (lặp từ) không vô tình kéo câu ngoài lĩnh vực qua cổng.
     gate_src = gate_query if gate_query and gate_query.strip() else qs[0]
     _, gate_smax = _combined_scores(
         gate_src, item_list, model, embeddings, char_vectorizer, char_matrix, query_prefix, ann
@@ -891,7 +838,7 @@ def multi_query_search(
         )
         rankings.append([i for i, _ in _gather_candidates(score, item_list, item_type, limit=RERANK_POOL)])
 
-    fused = reciprocal_rank_fusion(rankings)          # [(idx, rrf_score)] giảm dần
+    fused = reciprocal_rank_fusion(rankings)
     if not fused:
         return []
     rrf_max = fused[0][1] or 1.0
@@ -934,7 +881,7 @@ def recommend_for_user(history_positions, cf_model, item_list, top_n=12, exclude
     if history_positions:
         scores = np.asarray(sim[list(history_positions)].sum(axis=0)).ravel()
     else:
-        scores = pop.copy()  # người mới: gợi ý phổ biến
+        scores = pop.copy()
 
     for p in seen:
         if 0 <= p < n:

@@ -1,11 +1,6 @@
-# ── Dữ liệu & artifacts (nặng, không commit) ── (neo về GỐC để không nuốt
-#    itlr/chatbot/data/ chứa glossary nguồn cần commit)
-/artifacts/
-/data/
-# backup artifacts synthetic (~550MB) — chỉ giữ local
-/artifacts_synthetic_backup/
-# data thô Kaggle tải tay (~40MB) — chỉ giữ local
-/data_real_kaggle/
+# ── Dữ liệu & artifacts (nặng, không commit) ── gom hết vào var/ ở GỐC (không đụng
+#    itlr/chatbot/data/ — đó là glossary nguồn cần commit)
+/var/
 
 # ── Python ──
 __pycache__/
@@ -25,13 +20,6 @@ env/
 .vscode/
 .idea/
 .DS_Store
-# cấu hình công cụ cục bộ theo máy — không commit
-.claude/
-
-# ── Tài liệu nội bộ (giữ ngoài VCS theo cấu hình hiện có) ──
-CLAUDE.md
-structure.md
-progress.md
 
 # ── Log & rác công cụ (transient, không commit) ──
 *.log

@@ -12,16 +12,13 @@ import os
 
 import numpy as np
 
-# Registry các preset. query_prefix/passage_prefix theo đúng yêu cầu từng họ model.
 PRESETS = {
-    # 2021 — nhẹ, mặc định cũ (giữ để tương thích ngược)
     "minilm": {
         "model_name": "paraphrase-multilingual-MiniLM-L12-v2",
         "query_prefix": "",
         "passage_prefix": "",
         "dim": 384,
     },
-    # 2024 — multilingual E5 (CẦN tiền tố query:/passage:), tiếng Việt tốt hơn hẳn
     "e5-base": {
         "model_name": "intfloat/multilingual-e5-base",
         "query_prefix": "query: ",
@@ -34,7 +31,6 @@ PRESETS = {
         "passage_prefix": "passage: ",
         "dim": 1024,
     },
-    # 2024 — BGE-M3 (không cần tiền tố), đa ngữ rất mạnh, 1024 chiều
     "bge-m3": {
         "model_name": "BAAI/bge-m3",
         "query_prefix": "",
@@ -43,7 +39,6 @@ PRESETS = {
     },
 }
 
-# Mặc định: e5-base (cân bằng chất lượng/độ nặng). Đổi qua EMBEDDING_MODEL.
 DEFAULT_PRESET = "e5-base"
 
 
@@ -52,7 +47,6 @@ def resolve_preset(name=None):
     name = name or os.environ.get("EMBEDDING_MODEL", DEFAULT_PRESET)
     if name in PRESETS:
         return dict(PRESETS[name])
-    # Cho phép truyền thẳng tên model HuggingFace (không tiền tố)
     return {"model_name": name, "query_prefix": "", "passage_prefix": "", "dim": None}
 
 

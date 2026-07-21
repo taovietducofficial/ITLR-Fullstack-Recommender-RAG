@@ -20,7 +20,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 try:
-    sys.stdout.reconfigure(encoding="utf-8")  # console Windows cp1252 -> UTF-8
+    sys.stdout.reconfigure(encoding="utf-8")
 except Exception:
     pass
 
@@ -45,19 +45,19 @@ def main():
         try:
             cls = get_scraper(name)
         except KeyError as e:
-            print(f"⚠️  {e}", flush=True)
+            print(f"{e}", flush=True)
             continue
         scraper = cls(max_items=args.max, delay=args.delay)
-        print(f"▶ Cào '{name}' (lang={scraper.lang}, tối đa {args.max}) ...", flush=True)
+        print(f"Cào '{name}' (lang={scraper.lang}, tối đa {args.max}) ...", flush=True)
         try:
             rows = scraper.scrape()
-        except Exception as e:  # 1 nguồn lỗi không làm hỏng cả mẻ
-            print(f"  ✗ lỗi khi cào '{name}': {e}", flush=True)
+        except Exception as e:
+            print(f"  lỗi khi cào '{name}': {e}", flush=True)
             continue
         dest = os.path.join(args.out_dir, scraper.lang, f"{name}.csv")
         n = scraper.to_csv(rows, dest)
         total += n
-        print(f"  ✅ {n} bản ghi -> {dest}", flush=True)
+        print(f"  {n} bản ghi -> {dest}", flush=True)
 
     print(f"\nXong: tổng {total} bản ghi. Tiếp theo:\n"
           f"  python scripts/scrape/build_scraped_catalog.py --merge-synthetic", flush=True)

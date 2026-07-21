@@ -1,20 +1,14 @@
-/* Client JS: scroll-reveal · nav elevate · toast · lưu khóa học · chat · blog. */
 (function () {
   "use strict";
 
   var REDUCE = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // Các trang đã yêu cầu giảm hiệu ứng động dư thừa (Cộng đồng · Bạn bè · Tin nhắn).
   var CALM = document.body.matches(".page-blog, .page-friends, .page-messages");
 
-  /* ── Realtime (SSE): 1 kết nối/tab khi đã đăng nhập, phát sự kiện qua RT.on() ── */
   var RT = (function () {
     var uid = parseInt(document.body.getAttribute("data-user-id") || "", 10);
     if (!uid || !window.EventSource) return { uid: 0, on: function () {} };
     var es = new EventSource("/api/realtime");
-    // Đóng SSE TƯỜNG MINH khi rời trang -> tránh kết nối cũ tích tụ. Qua Docker proxy,
-    // kết nối không tự giải phóng kịp -> sau ~6 lần chuyển tab chạm giới hạn 6 kết nối/host
-    // của HTTP/1.1 -> trang sau bị treo. pagehide chạy cả khi điều hướng lẫn đóng tab.
     window.addEventListener("pagehide", function () { try { es.close(); } catch (_) {} });
     return {
       uid: uid,
@@ -28,7 +22,6 @@
   })();
   var PAGE = (document.body.className.match(/page-([a-z]+)/) || [])[1] || "";
 
-  // Huy hiệu số thông báo trên navbar (Tin nhắn / Bạn bè).
   function bumpNav(name) {
     var b = document.querySelector('.nav-links a[data-nav="' + name + '"] .nav-badge');
     if (!b) return;
@@ -37,7 +30,6 @@
     b.hidden = false;
   }
 
-  // Pill "bài viết mới" ở trang Cộng đồng (bấm để tải lại feed).
   var _newPosts = 0, _pill = null;
   function showNewPostsPill() {
     _newPosts++;
@@ -50,9 +42,7 @@
     _pill.textContent = "↑ " + _newPosts + " bài viết mới — bấm để xem";
   }
 
-  /* ── Handler realtime toàn cục (toast · badge · cộng đồng) ── */
   RT.on("dm", function (d) {
-    // Đang mở đúng đoạn chat -> module tin nhắn tự cập nhật; ở đây chỉ báo khi KHÁC.
     var log = document.getElementById("dm-log");
     var open = log ? log.getAttribute("data-user") : null;
     if (open && String(d.from) === String(open)) return;
@@ -87,7 +77,6 @@
   });
   RT.on("post_new", function () { if (PAGE === "blog") showNewPostsPill(); });
 
-  /* ── Presence: chấm online (sidebar/header) + trạng thái "hoạt động X trước" ── */
   (function () {
     function setDot(uid, online) {
       document.querySelectorAll('.pdot[data-uid="' + uid + '"]').forEach(function (el) {
@@ -120,7 +109,6 @@
     });
   })();
 
-  /* ── Scroll-reveal: hiện dần các khối khi cuộn tới ── */
   (function () {
     if (REDUCE || CALM || !("IntersectionObserver" in window)) return;
     var SEL = ".card, .cat-card, .cta, .post, .stat, .cw-feat, .section-title";
@@ -135,7 +123,6 @@
           el.style.transitionDelay = Math.min((idx % 8) * 45, 320) + "ms";
           el.classList.add("in");
           io.unobserve(el);
-          // Gỡ .reveal sau khi hiện xong để hover dùng transition gốc (nhanh hơn).
           setTimeout(function () { el.classList.remove("reveal"); el.style.transitionDelay = ""; }, 1100);
         }
       });
@@ -143,7 +130,6 @@
     els.forEach(function (el) { io.observe(el); });
   })();
 
-  /* ── Nav nổi khối khi cuộn ── */
   (function () {
     var nav = document.querySelector(".nav");
     if (!nav) return;
@@ -152,7 +138,6 @@
     window.addEventListener("scroll", on, { passive: true });
   })();
 
-  /* ── Toast ── */
   function toast(msg, kind) {
     var wrap = document.getElementById("toast-wrap");
     if (!wrap) { wrap = document.createElement("div"); wrap.id = "toast-wrap"; document.body.appendChild(wrap); }
@@ -163,19 +148,16 @@
     setTimeout(function () { t.style.opacity = "0"; t.style.transform = "translateY(8px)"; setTimeout(function () { t.remove(); }, 250); }, 2600);
   }
 
-  // ── CSRF: đọc token từ cookie 'csrf' và gắn vào mọi request ghi dữ liệu ──
   function csrfToken() {
     var m = document.cookie.match(/(?:^|;\s*)csrf=([a-f0-9]+)/);
     return m ? m[1] : "";
   }
-  // fetch có sẵn header CSRF (giữ nguyên các option khác do người gọi truyền vào).
   function cfetch(url, opts) {
     opts = opts || {};
     opts.headers = Object.assign({}, opts.headers, { "X-CSRF-Token": csrfToken() });
     return fetch(url, opts);
   }
 
-  // ── Modal nhập lời giới thiệu khi gửi lời mời kết bạn ──
   function askIntro(onSend) {
     var ov = document.createElement("div");
     ov.className = "modal-ov";
@@ -212,14 +194,13 @@
     });
   }
 
-  // Gõ dần chữ (typewriter) vào phần tử, xong thì thay bằng HTML đã định dạng.
   function typeInto(el, plain, html, onDone) {
     if (REDUCE || !plain) {
       el.classList.remove("typing"); el.innerHTML = html;
       window.scrollTo(0, document.body.scrollHeight); if (onDone) onDone(); return;
     }
     el.classList.add("typing");
-    var i = 0, n = plain.length, step = Math.max(1, Math.round(n / 180)); // gói gọn ~180 nhịp
+    var i = 0, n = plain.length, step = Math.max(1, Math.round(n / 180));
     (function tick() {
       i += step;
       el.textContent = plain.slice(0, i);
@@ -229,7 +210,6 @@
     })();
   }
 
-  /* ── Nút Xóa khỏi danh sách (Dashboard) ── */
   document.addEventListener("click", function (e) {
     var btn = e.target.closest && e.target.closest(".card-del");
     if (!btn) return;
@@ -245,7 +225,6 @@
     }).catch(function () { toast("Lỗi mạng", "err"); });
   });
 
-  /* ── Nút Lưu/Bỏ lưu trên CARD (Tìm kiếm · Dành cho bạn · liên quan) ── */
   document.addEventListener("click", function (e) {
     var btn = e.target.closest && e.target.closest(".card-save");
     if (!btn) return;
@@ -268,13 +247,11 @@
     }).catch(function () { delete btn.dataset.busy; toast("Lỗi mạng", "err"); });
   });
 
-  /* ── Theo dõi học tập: lưu · hoàn thành · thanh % · bỏ lưu ── */
   var box = document.querySelector(".enroll-box");
   if (box) {
     var courseId = parseInt(box.getAttribute("data-course"), 10);
     var progVal = document.getElementById("enroll-prog-val");
     var statusSel = document.getElementById("enroll-status");
-    // % do bài học quyết định (không còn thanh kéo) — đọc giá trị hiện tại đang hiển thị.
     function curProgress() { return parseInt(progVal && progVal.textContent, 10) || 0; }
 
     function saveEnroll(status, progress, okMsg) {
@@ -289,7 +266,6 @@
       saveEnroll(statusSel.value, curProgress(), "✓ Đã lưu khóa học");
     });
 
-    // Đánh dấu hoàn thành thủ công (hữu ích cho khóa chưa có bài học video).
     var completeBtn = document.getElementById("enroll-complete");
     if (completeBtn) completeBtn.addEventListener("click", function () {
       updateProgressBar(100, "completed");
@@ -304,7 +280,6 @@
     });
   }
 
-  /* ── Tải file đính kèm (trang khóa học) ── */
   var attForm = document.getElementById("attach-form");
   if (attForm) {
     var cId = attForm.getAttribute("data-course");
@@ -320,7 +295,6 @@
         .then(function (res) {
           attMsg.textContent = "";
           if (!res.ok) { toast(res.j.error || "Tải lên thất bại", "err"); return; }
-          // Đóng góp của user thường -> chờ admin duyệt, không thêm vào danh sách công khai.
           if (res.j.pending) { attForm.reset(); toast("🙌 Đã gửi đóng góp — chờ quản trị viên duyệt", "ok"); return; }
           var a = res.j.attachment, ul = document.getElementById("attach-list");
           var empty = document.getElementById("attach-empty"); if (empty) empty.style.display = "none";
@@ -343,7 +317,6 @@
     }).catch(function () { toast("Lỗi mạng", "err"); });
   });
 
-  // Xem nội dung file đính kèm ngay trong trang (PDF/ảnh nhúng; DOCX/Excel hiện text).
   document.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest(".att-view");
     if (!b) return;
@@ -368,14 +341,12 @@
     v.scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
 
-  /* ── Chat: hội thoại + lịch sử + typewriter + link tham khảo ── */
   var form = document.getElementById("chatform");
   if (form) {
     var input = document.getElementById("chatinput");
     var log = document.getElementById("chatlog");
     var conversationId = log.dataset.conv ? parseInt(log.dataset.conv, 10) : null;
     var history = [];
-    // Nạp lại ngữ cảnh từ tin nhắn đã render khi mở một cuộc trò chuyện cũ.
     log.querySelectorAll(".msg").forEach(function (m) {
       var role = m.classList.contains("user") ? "user" : "assistant";
       var b = m.querySelector(".bubble");
@@ -441,27 +412,70 @@
       var thinking = bubble("assistant", "");
       var tbub = thinking.querySelector(".bubble");
       tbub.classList.add("typing");
+      var payload = { message: text, history: history.slice(0, -1), conversation_id: conversationId || undefined };
 
-      postJSON("/api/chat", { message: text, history: history.slice(0, -1), conversation_id: conversationId || undefined }).then(function (res) {
-        if (!res.ok) { tbub.classList.remove("typing"); tbub.textContent = res.j.error || "Có lỗi xảy ra."; return; }
-        var html = res.j.response_html || esc(res.j.response || "");
-        var tmp = document.createElement("div"); tmp.innerHTML = html;
-        var plain = (tmp.textContent || "").trim();
-        typeInto(tbub, plain, html, function () { recsBlock(res.j.recommendations); refsBlock(res.j.references); });
-        history.push({ role: "assistant", content: res.j.response || "" });
-        if (res.j.conversation_id && !conversationId) {
-          conversationId = res.j.conversation_id;
+      function finish(j) {
+        tbub.classList.remove("typing");
+        tbub.innerHTML = j.response_html || esc(j.response || "");
+        window.scrollTo(0, document.body.scrollHeight);
+        recsBlock(j.recommendations); refsBlock(j.references);
+        history.push({ role: "assistant", content: j.response || "" });
+        if (j.conversation_id && !conversationId) {
+          conversationId = j.conversation_id;
           log.dataset.conv = conversationId;
           addConvToSidebar(conversationId, text.slice(0, 60));
           if (window.history && window.history.replaceState) window.history.replaceState(null, "", "/chat?c=" + conversationId);
         }
-      }).catch(function () { tbub.classList.remove("typing"); tbub.textContent = "Lỗi mạng khi gọi trợ lý."; });
+      }
+      function fallback() {
+        postJSON("/api/chat", payload).then(function (res) {
+          if (!res.ok) { tbub.classList.remove("typing"); tbub.textContent = res.j.error || "Có lỗi xảy ra."; return; }
+          var html = res.j.response_html || esc(res.j.response || "");
+          var tmp = document.createElement("div"); tmp.innerHTML = html;
+          typeInto(tbub, (tmp.textContent || "").trim(), html, function () { recsBlock(res.j.recommendations); refsBlock(res.j.references); });
+          history.push({ role: "assistant", content: res.j.response || "" });
+          if (res.j.conversation_id && !conversationId) {
+            conversationId = res.j.conversation_id;
+            log.dataset.conv = conversationId;
+            addConvToSidebar(conversationId, text.slice(0, 60));
+            if (window.history && window.history.replaceState) window.history.replaceState(null, "", "/chat?c=" + conversationId);
+          }
+        }).catch(function () { tbub.classList.remove("typing"); tbub.textContent = "Lỗi mạng khi gọi trợ lý."; });
+      }
+
+      if (!window.ReadableStream || !window.TextDecoder) return fallback();
+      cfetch("/api/chat/stream", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        .then(function (r) {
+          if (!r.ok || !r.body) throw new Error("stream unavailable");
+          var reader = r.body.getReader(), dec = new TextDecoder(), buf = "", acc = "", started = false;
+          function pump() {
+            return reader.read().then(function (s) {
+              if (s.done) { tbub.classList.remove("typing"); return; }
+              buf += dec.decode(s.value, { stream: true });
+              var idx;
+              while ((idx = buf.indexOf("\n\n")) >= 0) {
+                var line = buf.slice(0, idx).trim(); buf = buf.slice(idx + 2);
+                if (line.indexOf("data: ") !== 0) continue;
+                var d; try { d = JSON.parse(line.slice(6)); } catch (_) { continue; }
+                if (d.type === "text") {
+                  acc += d.text || "";
+                  tbub.classList.remove("typing");
+                  tbub.textContent = acc;
+                  if (!started || acc.length % 200 < 30) window.scrollTo(0, document.body.scrollHeight);
+                  started = true;
+                } else if (d.type === "final") { finish(d); }
+              }
+              return pump();
+            });
+          }
+          return pump();
+        })
+        .catch(function () { if (tbub.classList.contains("typing")) fallback(); else tbub.classList.remove("typing"); });
     }
 
     form.addEventListener("submit", function (e) { e.preventDefault(); send(); });
   }
 
-  /* ── Xóa cuộc trò chuyện (sidebar) ── */
   document.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest(".conv-del");
     if (!b) return;
@@ -478,7 +492,6 @@
     }).catch(function () { toast("Lỗi mạng", "err"); });
   });
 
-  /* ── Tạo mật khẩu mạnh + hiện/ẩn (register & account) ── */
   function genPwd() {
     var L = "abcdefghijkmnpqrstuvwxyz", U = "ABCDEFGHJKLMNPQRSTUVWXYZ", D = "23456789", S = "!@#$%^&*-_=+?";
     var all = L + U + D + S, pick = function (s) { return s[Math.floor(Math.random() * s.length)]; };
@@ -498,7 +511,6 @@
     pwField.type = pwField.type === "password" ? "text" : "password";
   });
 
-  /* ── Blog cộng đồng: đăng · like · comment · xóa ── */
   var postForm = document.getElementById("post-form");
   if (postForm) {
     var imgInput = document.getElementById("post-image");
@@ -535,7 +547,6 @@
     });
   }
 
-  // Nút "Đánh dấu hoàn thành" tự đổi thành "Đã hoàn thành khóa học" khi xem hết bài (100%).
   function reflectComplete(pct, status) {
     var b = document.getElementById("enroll-complete"); if (!b) return;
     var done = pct >= 100 || status === "completed";
@@ -543,15 +554,13 @@
     b.classList.toggle("is-done", done);
     b.disabled = done;
   }
-  // Cập nhật toàn bộ UI tiến độ từ % (và trạng thái) do server tính lại theo số bài học.
   function updateProgressBar(pct, status) {
     var bar = document.getElementById("enroll-bar"); if (bar) bar.style.width = pct + "%";
     var val = document.getElementById("enroll-prog-val"); if (val) val.textContent = pct;
-    if (status) { var sel = document.getElementById("enroll-status"); if (sel) sel.value = status; } // đồng bộ trạng thái
+    if (status) { var sel = document.getElementById("enroll-status"); if (sel) sel.value = status; }
     reflectComplete(pct, status);
   }
 
-  /* ── Like · chia sẻ · xóa bài · kết bạn · bài học (click delegation) ── */
   document.addEventListener("click", function (e) {
     var t = e.target;
     var like = t.closest && t.closest(".like-btn");
@@ -592,7 +601,6 @@
         });
       }
       if (act === "request") {
-        // Kết bạn đi kèm lời giới thiệu để người nhận biết lý do mà chấp nhận.
         askIntro(function (intro) { sendFriend({ to: uid, intro: intro }); });
       } else {
         sendFriend(act === "accept" ? { from: uid } : { user: uid });
@@ -626,7 +634,6 @@
     }
   });
 
-  /* ── Bình luận + thêm bài học (submit delegation) ── */
   document.addEventListener("submit", function (e) {
     var cf = e.target.closest && e.target.closest(".cmt-form");
     if (cf) {
@@ -651,7 +658,6 @@
       if (!lurl) return;
       postJSON("/api/courses/" + lf.getAttribute("data-course") + "/lessons", { url: lurl, title: ltitle }).then(function (res) {
         if (!res.ok) { toast(res.j.error || "Link YouTube không hợp lệ", "err"); return; }
-        // Đóng góp của user thường -> chờ admin duyệt, không reload (chưa hiển thị công khai).
         if (res.j.pending) {
           document.getElementById("lesson-url").value = ""; document.getElementById("lesson-title").value = "";
           toast("🙌 Đã gửi đóng góp — chờ quản trị viên duyệt", "ok"); return;
@@ -662,7 +668,6 @@
     }
   });
 
-  /* ── Menu 3 chấm trên đầu đoạn chat (tải lịch sử) ── */
   (function () {
     var btn = document.getElementById("msg-menu-btn");
     var pop = document.getElementById("msg-menu-pop");
@@ -672,7 +677,6 @@
     document.addEventListener("click", function (e) { if (!pop.contains(e.target) && e.target !== btn) setOpen(false); });
   })();
 
-  /* ── Nhắn tin (1-1) realtime: render tức thì qua SSE · đang soạn · đã xem ── */
   (function () {
     var form = document.getElementById("dm-form");
     var log = document.getElementById("dm-log");
@@ -686,7 +690,6 @@
     });
     log.scrollTop = log.scrollHeight;
 
-    // Giờ mỗi tin — format theo múi giờ trình duyệt (server chạy UTC nên không render ở server).
     function fmtMsgTime(iso) {
       var d = new Date(iso); if (isNaN(d.getTime())) return "";
       var now = new Date();
@@ -697,7 +700,6 @@
         : { day: "2-digit", month: "2-digit", year: "numeric" };
       return d.toLocaleDateString("vi-VN", opts) + " " + hm;
     }
-    // Điền giờ cho các tin đã render sẵn từ server.
     log.querySelectorAll(".dm-time[datetime]").forEach(function (el) {
       el.textContent = fmtMsgTime(el.getAttribute("datetime"));
     });
@@ -705,12 +707,10 @@
     function clearSeen() { if (seenEl) seenEl.textContent = ""; }
     function showSeen() { if (seenEl) seenEl.textContent = "✓ Đã xem"; }
 
-    // Đánh dấu đã đọc các tin nhận được -> server báo người gửi "đã xem".
     function markRead() { cfetch("/api/messages/" + other + "/read", { method: "POST" }).catch(function () {}); }
 
-    // Dựng bong bóng tin nhắn (mirror với messages.ejs) — ảnh/video/file + thẻ chia sẻ.
     function buildDm(m, mine) {
-      if (log.querySelector('.dm[data-id="' + m.id + '"]')) return; // chống nhân đôi (SSE + POST + poll)
+      if (log.querySelector('.dm[data-id="' + m.id + '"]')) return;
       var d = document.createElement("div");
       d.className = "dm " + (mine ? "me" : "them"); d.setAttribute("data-id", m.id);
       var html = "";
@@ -731,9 +731,8 @@
       d.innerHTML = '<div class="dm-bubble">' + html + "</div>" +
         '<time class="dm-time" datetime="' + esc(m.created_at) + '">' + esc(fmtMsgTime(m.created_at)) + "</time>";
       log.appendChild(d); log.scrollTop = log.scrollHeight;
-      if (mine) clearSeen(); // có tin mới mình gửi -> "đã xem" cũ không còn ứng với tin mới nhất
+      if (mine) clearSeen();
     }
-    // Dự phòng (khi SSE rớt): kéo tin còn thiếu. Thưa thôi vì đường chính là SSE.
     function poll() {
       fetch("/api/messages/" + other + "?after=" + lastId).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
         if (!j || !j.messages) return;
@@ -742,7 +741,6 @@
       }).catch(function () {});
     }
 
-    // Đính kèm: chọn ảnh/video/tài liệu + xem trước tên + cho bỏ chọn.
     var imgI = document.getElementById("dm-image"), vidI = document.getElementById("dm-video"), docI = document.getElementById("dm-doc");
     var filesBox = document.getElementById("dm-files");
     function refreshFiles() {
@@ -760,7 +758,7 @@
     }
     [imgI, vidI, docI].forEach(function (i) { if (i) i.addEventListener("change", refreshFiles); });
 
-    var input = document.getElementById("dm-input"); // dùng chung cho submit + tín hiệu "đang soạn"
+    var input = document.getElementById("dm-input");
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var text = input.value.trim();
@@ -779,24 +777,20 @@
           if (btn) btn.disabled = false;
           if (!res.ok) { toast(res.j.error || "Không gửi được", "err"); return; }
           input.value = ""; imgI.value = ""; vidI.value = ""; docI.value = ""; refreshFiles();
-          // Render NGAY từ phản hồi (không chờ poll); SSE chỉ đẩy tới người nhận.
           if (res.j.message) { lastId = Math.max(lastId, res.j.message.id); buildDm(res.j.message, true); }
         }).catch(function () { if (btn) btn.disabled = false; toast("Lỗi mạng", "err"); });
     });
 
-    // ── Realtime nhận tin: vẽ ngay từ payload SSE, không fetch lại ──
     RT.on("dm", function (d) {
       if (String(d.from) !== String(other) || !d.message) return;
       lastId = Math.max(lastId, d.message.id);
       buildDm(d.message, false);
       hideTyping();
-      markRead(); // đang mở đoạn chat -> đánh dấu đã đọc ngay
+      markRead();
     });
 
-    // ── "Đã xem": người kia đã đọc tin của mình ──
     RT.on("dm_read", function (d) { if (String(d.by) === String(other)) showSeen(); });
 
-    // ── "Đang soạn tin": hiện rồi tự ẩn sau 4s nếu không có tín hiệu mới ──
     var typingTimer = null;
     function hideTyping() { if (typingEl) { typingEl.hidden = true; } clearTimeout(typingTimer); }
     RT.on("typing", function (d) {
@@ -805,7 +799,6 @@
       clearTimeout(typingTimer);
       typingTimer = setTimeout(function () { typingEl.hidden = true; }, 4000);
     });
-    // Gửi tín hiệu "đang soạn" khi gõ — tiết lưu tối đa mỗi 2.5s.
     var lastTyping = 0;
     if (input) input.addEventListener("input", function () {
       var now = Date.now();
@@ -815,11 +808,10 @@
       }
     });
 
-    markRead();               // mở đoạn chat = đã đọc tin chưa đọc
-    setInterval(poll, 25000); // dự phòng thưa khi SSE rớt kết nối
+    markRead();              
+    setInterval(poll, 25000);
   })();
 
-  /* ── Chia sẻ vào tin nhắn: chọn bạn bè rồi gửi (post / khóa học) ── */
   function shareToFriend(payload, label) {
     fetch("/api/friends/list").then(function (r) { return r.ok ? r.json() : { friends: [] }; }).then(function (j) {
       var friends = (j && j.friends) || [];

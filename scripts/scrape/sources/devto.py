@@ -9,7 +9,6 @@ from __future__ import annotations
 from scripts.scrape.base import BaseScraper
 
 API = "https://dev.to/api/articles"
-# Tag thiên về nội dung học IT (mặc định). Có thể mở rộng tùy nhu cầu.
 DEFAULT_TAGS = ["tutorial", "beginners", "python", "javascript", "webdev", "programming",
                 "machinelearning", "datascience", "devops", "security"]
 
@@ -29,7 +28,7 @@ class DevtoScraper(BaseScraper):
             page = 1
             while len(rows) < self.max_items:
                 data = self.get_json(API, params={"tag": tag, "per_page": per_page, "page": page})
-                if not data:  # hết bài hoặc lỗi
+                if not data:
                     break
                 for art in data:
                     url = art.get("url") or ""
@@ -47,7 +46,7 @@ class DevtoScraper(BaseScraper):
                         "instructor": (art.get("user") or {}).get("name", ""),
                         "platform": "dev.to",
                         "link": url,
-                        "level": "",  # adapt_real_data -> mặc định "Trung cấp"
+                        "level": "",
                     })
                     if len(rows) >= self.max_items:
                         break

@@ -1,4 +1,4 @@
-"""Đánh giá Collaborative Filtering đúng chuẩn (Trụ cột B6).
+"""Đánh giá Collaborative Filtering đúng chuẩn.
 
 Chạy hai giao thức trên cf_model + interactions:
   - Leave-one-out (che 1 tương tác/user) — so CF với baseline popularity.
@@ -35,8 +35,6 @@ def build_histories(item_list, max_users=None):
     hist = defaultdict(list)
     for r in inter.itertuples():
         hist[int(r.user_id)].append(id_to_pos[int(r.item_id)])
-    # KHÔNG cắt theo max_users ở đây: train item_sim cần TOÀN bộ user cho đủ mật độ;
-    # việc giới hạn số user ĐÁNH GIÁ do từng hàm eval tự xử lý qua tham số max_users.
     return {u: v for u, v in hist.items() if len(v) >= 4}
 
 

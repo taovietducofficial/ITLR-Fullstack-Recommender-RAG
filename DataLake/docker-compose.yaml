@@ -52,7 +52,7 @@ services:
       - data_network
 
   spark-worker-1:
-    image: docker.io/bitnami/spark:3.3.2
+    image: docker.io/bitnamilegacy/spark:3.3.2
     container_name: "spark-worker-1"
     env_file:
       - .env

@@ -14,8 +14,6 @@ import re
 
 from itlr.core.recommender import normalize_text, strip_accents
 
-# Viết tắt / biệt danh phổ biến -> cụm từ chuẩn (key đã bỏ dấu, viết thường).
-# Mở rộng được nối vào cuối truy vấn để tăng tín hiệu cho cả detection lẫn retrieval.
 ABBREVIATIONS = {
     "ml": "machine learning",
     "ai": "tri tue nhan tao artificial intelligence",
@@ -49,12 +47,8 @@ ABBREVIATIONS = {
     " os": "he dieu hanh operating system",
 }
 
-# Viết tắt NHẬP NHẰNG (đồng thời là từ tiếng Việt thông dụng) -> chỉ mở rộng khi
-# truy vấn chỉ có ĐÚNG một từ, tránh "ai là ca sĩ" bị bơm thành "trí tuệ nhân tạo...".
 _AMBIGUOUS_ABBR = {"ai", "be", "ui"}
 
-# Từ điển sửa lỗi chính tả thủ công cho lỗi hay gặp mà fuzzy có thể bỏ sót
-# (key đã bỏ dấu, viết thường). Ưu tiên cao hơn fuzzy matching.
 COMMON_TYPOS = {
     "phyton": "python", "pythn": "python", "phython": "python", "pyton": "python",
     "javascrip": "javascript", "javscript": "javascript", "javascipt": "javascript",
@@ -76,8 +70,6 @@ COMMON_TYPOS = {
     "lotrinh": "lo trinh", "baomat": "bao mat", "mangmaytinh": "mang may tinh",
 }
 
-# Vốn từ CNTT chuẩn dùng làm đích cho fuzzy correction (đã bỏ dấu, viết thường).
-# Được bổ sung động từ category + topic của catalog trong build_query_vocab().
 _SEED_VOCAB = {
     "python", "java", "javascript", "typescript", "kotlin", "swift", "golang", "rust",
     "react", "angular", "vue", "svelte", "nextjs", "node", "express", "django", "flask",
@@ -93,16 +85,12 @@ _SEED_VOCAB = {
     "frontend", "backend", "fullstack", "developer", "programming", "framework",
     "android", "mobile", "blockchain", "ethereum", "cloud", "serverless", "lambda",
     "analytics", "visualization", "statistics", "regression",
-    # từ nghề nghiệp / vai trò — KHÔNG để fuzzy sửa nhầm (vd "engineer"->"engine")
     "engineer", "engineering", "developer", "scientist", "analyst", "fullstack",
     "roadmap", "career", "intern", "fresher", "junior", "senior",
-    # tiếng Việt (đã bỏ dấu) — các cụm hay gõ sai/thiếu dấu
     "lap", "trinh", "khoa", "hoc", "tai", "lieu", "lo", "trinh", "co", "ban", "nang",
     "cao", "nhap", "mon", "du", "lieu", "tri", "tue", "nhan", "tao", "bao", "mat",
     "mang", "may", "tinh", "dien", "toan", "dam", "may", "giai", "thuat", "cau", "truc",
     "phat", "trien", "web", "game", "kiem", "thu", "huong", "dan", "thuc", "hanh",
-    # từ chức năng / so sánh / nghi vấn tiếng Việt (bỏ dấu) — BẢO VỆ khỏi fuzzy sửa nhầm
-    # (vd "so sanh"->"sanh" từng bị sửa bậy thành "san"). Chỉ đánh dấu là "từ đúng".
     "sanh", "khac", "nhau", "nao", "voi", "cho", "cua", "mot", "cac", "nhung", "hay",
     "hoac", "the", "khi", "khong", "duoc", "lam", "biet", "hieu",
 }
@@ -130,8 +118,6 @@ def build_query_vocab(retrieval_model=None, item_list=None):
         for cat in item_list["category"].unique():
             _add_phrase(cat)
 
-    # BẢO VỆ mọi thuật ngữ/viết tắt trong từ điển glossary khỏi bị fuzzy sửa nhầm
-    # (vd "olap"->"lap", "rlhf"->...). Thêm token alias vào vốn từ đích -> coi là từ đúng.
     try:
         from itlr.chatbot.knowledge_base import CONCEPTS
         for entry in CONCEPTS.values():
@@ -147,16 +133,12 @@ def _correct_token(tok, vocab):
     """Trả về (token_đã_sửa, bool_có_sửa). Bảo toàn từ tiếng Việt có dấu."""
     bare = strip_accents(tok)
 
-    # 1) Lỗi chính tả thường gặp (ưu tiên cao nhất)
     if bare in COMMON_TYPOS:
         return COMMON_TYPOS[bare], True
 
-    # 2) Từ đã đúng (có trong vốn từ) -> giữ nguyên
     if bare in vocab:
         return tok, False
 
-    # 3) Chỉ fuzzy với token kiểu "tiếng Anh/không dấu", đủ dài, để tránh
-    #    làm hỏng từ tiếng Việt có dấu (vd "lập", "trình").
     if len(bare) >= 4 and bare.isalpha() and tok == bare:
         match = difflib.get_close_matches(bare, vocab, n=1, cutoff=0.84)
         if match and match[0] != bare:
@@ -175,24 +157,17 @@ def understand_query(query, vocab):
       - corrections: list (từ_sai, từ_đúng) đã sửa
       - expansions:  list cụm mở rộng từ viết tắt
     """
-    # Canonicalize ký hiệu TRƯỚC normalize_text (vốn bỏ '+'/'#'): "c++"->cpp, "c#"->csharp
-    # -> phân biệt C / C++ / C# trong cả định tuyến lẫn hiển thị.
     query = re.sub(r"(?i)c\+\+", "cpp", str(query))
     query = re.sub(r"(?i)c#", "csharp", query)
     tokens = normalize_text(query).split()
     corrected_tokens = []
     corrections = []
     expansions = []
-    expansion_pairs = []   # [(viết_tắt, cụm_chuẩn_đọc_được)] -> để minh bạch hóa cho người dùng
+    expansion_pairs = []
 
     single_token = len(tokens) == 1
     for tok in tokens:
         bare = strip_accents(tok)
-        # CHỈ mở rộng viết tắt khi token là ASCII không dấu (tok == bare). Nếu không,
-        # từ tiếng Việt CÓ DẤU bị bỏ dấu sẽ khớp nhầm viết tắt: "bé"->"be"->backend,
-        # "cứ"->"cu", "ổ"->"o"... -> truy vấn ngoài lĩnh vực bị mở rộng thành IT.
-        # Với viết tắt NHẬP NHẰNG (cũng là từ tiếng Việt thông dụng: ai/be/ui), chỉ mở
-        # rộng khi đứng MỘT MÌNH -> "ai" (1 từ) = AI, nhưng "ai là ca sĩ" coi như từ thường.
         if tok == bare and bare in ABBREVIATIONS:
             if bare in _AMBIGUOUS_ABBR and not single_token:
                 corrected_tokens.append(tok)
@@ -223,8 +198,6 @@ def understand_query(query, vocab):
     }
 
 
-# Cụm mở rộng viết tắt trong ABBREVIATIONS gộp cả tiếng Việt lẫn tiếng Anh để tăng tín hiệu
-# truy hồi; khi HIỂN THỊ cho người dùng chỉ cần cụm đầu, gọn & dễ đọc.
 _ABBR_READABLE = {
     "ml": "Machine Learning", "ai": "Trí tuệ nhân tạo (AI)", "dl": "Deep Learning",
     "nlp": "Xử lý ngôn ngữ tự nhiên (NLP)", "cv": "Computer Vision", "llm": "Large Language Model",

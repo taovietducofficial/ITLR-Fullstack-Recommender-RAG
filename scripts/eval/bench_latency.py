@@ -1,4 +1,4 @@
-"""Benchmark độ trễ & khả năng mở rộng phục vụ (Trụ cột E).
+"""Benchmark độ trễ & khả năng mở rộng phục vụ.
 
 Đo p50/p95/p99 + QPS cho TỪNG tầng của phễu (Candidate Gen / L1 / L2 rerank / MMR / Full),
 so FAISS ANN vs brute-force (recall–latency tradeoff), và in dấu chân bộ nhớ các artifact.
@@ -56,7 +56,6 @@ def stage_latencies(ctx, queries, repeats, warmup):
     emb_cfg = P.StageConfig(candidate_source="embedding", candidate_k=600)
     l1_signals = frozenset({"category", "topic", "title"})
 
-    # tiền tính ứng viên cho các tầng sau (để đo riêng từng tầng)
     cand_cache = {q: P.candidate_generation(ctx, q, emb_cfg) for q in queries}
     base_cache = {q: P._base_scores(ctx, q, "embedding") for q in queries}
 
@@ -77,8 +76,6 @@ def stage_latencies(ctx, queries, repeats, warmup):
             lambda q: P.l2_rerank(ctx, q, ranked_cache[q], l2cfg),
             queries, max(2, repeats // 3), 1)
 
-    # Stage-2 thay thế bằng Learning-to-Rank (GBDT) — nếu đã build artifacts/ltr.pkl.
-    # So sánh trực tiếp chi phí cross-encoder (nặng) vs LTR (nhẹ) trên cùng pool.
     from itlr.eval.loader import attach_ltr_scorer
     if attach_ltr_scorer(ctx):
         ltrcfg = P.StageConfig(use_ltr=True, rerank_pool=48)
@@ -163,7 +160,7 @@ def main():
     fvb = faiss_vs_brute(ctx, QUERIES, args.repeats, args.warmup)
     mem = memory_footprint(ctx)
 
-    lines = ["# Benchmark độ trễ & mở rộng (Trụ cột E)\n",
+    lines = ["# Benchmark độ trễ & mở rộng\n",
              f"*{len(QUERIES)} truy vấn × {args.repeats} lần lặp, 1 luồng, CPU. "
              f"Đo bằng time.perf_counter().*\n"]
     lines += fmt_table("Độ trễ từng tầng của phễu", stages)
@@ -184,7 +181,7 @@ def main():
         lt = np.median(stages[_LTR_KEY])
         lines.append(f"\n> **Cross-encoder là nút thắt cổ chai đuôi (p99 rất cao trên CPU)**; thay "
                      f"Stage-2 bằng **LightGBM LTR** rẻ hơn ~**{ce/max(lt,1e-9):.0f}×** ở trung vị — "
-                     f"đúng lý do production dùng GBDT ranker thay cross-encoder nặng (nối Trụ cột C↔E).")
+                     f"đúng lý do production dùng GBDT ranker thay cross-encoder nặng.")
     lines.append("\n## Dấu chân bộ nhớ\n")
     lines.append("| Thành phần | MB | Kích thước |")
     lines.append("|---|---|---|")
@@ -204,7 +201,7 @@ def main():
     print("== FAISS vs brute (mean ms) ==")
     for k, lat in fvb.items():
         print(f"  {k}: {np.mean(lat):.2f}")
-    print(f"\n-> reports/latency.md")
+    print("\n-> reports/latency.md")
 
 
 if __name__ == "__main__":

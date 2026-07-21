@@ -12,23 +12,21 @@ import { acceptedFriendIds } from "../services/social";
 
 export const apiRouter = Router();
 
-// ── Realtime (SSE): mỗi tab đã đăng nhập giữ 1 kết nối để NHẬN cập nhật tức thì ──
 apiRouter.get("/realtime", requireAuth, async (req, res) => {
   res.status(200).set({
     "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-Control": "no-cache, no-transform",
     Connection: "keep-alive",
-    "X-Accel-Buffering": "no", // tắt buffering ở reverse proxy (nginx) để đẩy ngay
+    "X-Accel-Buffering": "no",
   });
   (res as any).flushHeaders?.();
   res.write("retry: 5000\n\n");
   res.write('event: ready\ndata: {"ok":true}\n\n');
 
   const uid = req.user!.id;
-  const wasOnline = isOnline(uid); // kiểm tra TRƯỚC khi thêm để biết đây có phải kết nối đầu tiên.
+  const wasOnline = isOnline(uid);
   const remove = addClient(uid, res);
 
-  // Presence: kết nối đầu tiên -> báo bạn bè "online"; luôn gửi ảnh chụp bạn bè đang online cho tab mới.
   try {
     const friends = await acceptedFriendIds(uid);
     if (!wasOnline) {
@@ -37,25 +35,23 @@ apiRouter.get("/realtime", requireAuth, async (req, res) => {
     }
     const online = friends.filter((fid) => isOnline(fid));
     res.write(`event: presence_snapshot\ndata: ${JSON.stringify({ online })}\n\n`);
-  } catch { /* presence là phụ — lỗi ở đây không được làm hỏng kết nối SSE */ }
+  } catch {  }
 
-  const ping = setInterval(() => { try { res.write(": ping\n\n"); } catch { /* đóng */ } }, 25000);
+  const ping = setInterval(() => { try { res.write(": ping\n\n"); } catch {  } }, 25000);
   req.on("close", async () => {
     clearInterval(ping);
     remove();
-    // Kết nối CUỐI CÙNG đóng -> chuyển offline: lưu last_seen + báo bạn bè.
     if (!isOnline(uid)) {
       try {
         await query("UPDATE users SET last_seen = now() WHERE id = $1", [uid]);
         const friends = await acceptedFriendIds(uid);
         const at = new Date().toISOString();
         friends.forEach((fid) => sendToUser(fid, "presence", { user: uid, online: false, last_seen: at }));
-      } catch { /* bỏ qua */ }
+      } catch {  }
     }
   });
 });
 
-// ── Chatbot proxy + lưu lịch sử + link tham khảo Google ─────────────────────────
 const chatSchema = z.object({
   message: z.string().trim().min(1),
   history: z.array(z.object({ role: z.string(), content: z.string() })).max(20).optional(),
@@ -74,9 +70,6 @@ apiRouter.post("/chat", requireAuth, async (req, res) => {
     return res.status(502).json({ error: "Không kết nối được trợ lý (recommender :8000)." });
   }
 
-  // Lưu hội thoại cho user đã đăng nhập. Bọc try/catch: nếu lưu lỗi (vd cookie cũ mang
-  // user_id không còn tồn tại sau khi restore DB -> FK violation), vẫn trả lời bình thường,
-  // chỉ bỏ qua việc lưu lịch sử — không để sập cả khung chat ("Lỗi mạng").
   let convId = conversation_id;
   if (req.user) {
     try {
@@ -111,7 +104,6 @@ apiRouter.post("/chat", requireAuth, async (req, res) => {
   });
 });
 
-// ── Hội thoại: liệt kê / xóa ─────────────────────────────────────────────────
 apiRouter.get("/conversations", requireAuth, async (req, res) => {
   const rows = await query(
     "SELECT id, title, updated_at FROM conversations WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 50",
@@ -127,7 +119,6 @@ apiRouter.delete("/conversations/:id", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// ── Lưu / cập nhật / bỏ lưu khóa học ───────────────────────────────────────────
 const saveSchema = z.object({
   course_id: z.coerce.number().int(),
   status: z.enum(["saved", "in_progress", "completed"]).optional(),
@@ -160,11 +151,9 @@ apiRouter.post("/unsave", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// ── File đính kèm khóa học (docx/pdf/excel) — LƯU TRONG PostgreSQL (bytea) ──────
 const ALLOWED = new Set([".pdf", ".doc", ".docx", ".xls", ".xlsx"]);
 const IMG_EXT = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp"]);
 const extOf = (name: string) => path.extname(name || "").toLowerCase();
-// multer 1.x giải mã originalname theo latin1 -> sửa lại UTF-8 cho tên tiếng Việt.
 const utf8name = (name: string) => Buffer.from(name, "latin1").toString("utf8");
 
 const upload = multer({
@@ -183,8 +172,6 @@ apiRouter.post("/courses/:id/attachments", requireAuth, upload.single("file"), a
 
   const original = utf8name(req.file.originalname);
   const text = await extractText(req.file.buffer, extOf(original));
-  // Tài khoản admin (role) đăng ngay; mọi tài khoản khác = đóng góp chờ duyệt (pending).
-  // Auto-duyệt gắn theo TÀI KHOẢN, KHÔNG theo cookie admin-passcode (chế độ duyệt toàn trình duyệt).
   const approved = req.user!.role === "admin";
   const rows = await query(
     `INSERT INTO attachments (course_id, user_id, filename, mime, size, data, extracted_text, approved)
@@ -192,7 +179,6 @@ apiRouter.post("/courses/:id/attachments", requireAuth, upload.single("file"), a
     [courseId, req.user!.id, original, req.file.mimetype, req.file.size, req.file.buffer, text || null, approved]
   );
   if (!approved) return res.json({ ok: true, pending: true });
-  // Nạp CỘNG DỒN vào dataset CSV (chỉ khi đã duyệt) — độc lập DB.
   appendCatalogRow({
     title: original, description: text || original, type: "Tài liệu",
     category: "Tài liệu cộng đồng", instructor: req.user!.name, platform: `Khóa học #${courseId}`,
@@ -212,7 +198,6 @@ apiRouter.delete("/attachments/:id", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// Tải xuống file đính kèm (đọc bytea từ PostgreSQL, giữ tên gốc). Cổng auth bảo vệ sẵn.
 apiRouter.get("/download/:id", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(404).send("Not found");
@@ -226,7 +211,6 @@ apiRouter.get("/download/:id", requireAuth, async (req, res) => {
   res.send(a.data);
 });
 
-// Xem INLINE (PDF render trong iframe). Loại khác dùng /text bên dưới.
 apiRouter.get("/attachment/:id/inline", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(404).send("Not found");
@@ -240,7 +224,6 @@ apiRouter.get("/attachment/:id/inline", requireAuth, async (req, res) => {
   res.send(a.data);
 });
 
-// Nội dung văn bản trích xuất (DOCX/Excel/PDF) để hiển thị trực tiếp trong trang khóa học.
 apiRouter.get("/attachment/:id/text", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(404).json({ error: "Not found" });
@@ -252,10 +235,9 @@ apiRouter.get("/attachment/:id/text", requireAuth, async (req, res) => {
   res.json({ filename: a.filename, text: a.extracted_text || "(Không trích xuất được nội dung văn bản từ file này.)" });
 });
 
-// ── Blog cộng đồng: đăng bài (status / ảnh / tài liệu) · like · comment ─────────
 const postUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 60 * 1024 * 1024 }, // cho phép video tới 60MB
+  limits: { fileSize: 60 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const e = extOf(file.originalname);
     if (file.fieldname === "image") cb(null, IMG_EXT.has(e));
@@ -284,7 +266,6 @@ apiRouter.post(
       [req.user!.id, content, image?.buffer || null, image?.mimetype || null,
        video?.buffer || null, video?.mimetype || null, doc?.buffer || null, doc?.mimetype || null, docOriginal]
     );
-    // Tài liệu blog cũng nạp CỘNG DỒN vào dataset CSV.
     if (doc) {
       const text = await extractText(doc.buffer, extOf(doc.originalname));
       appendCatalogRow({
@@ -300,12 +281,10 @@ apiRouter.post(
         likes: 0, liked: false, comments: [], created_at: rows[0].created_at, user_id: req.user!.id,
       },
     });
-    // Realtime: báo cho mọi người đang xem Cộng đồng có bài mới (trừ chính tác giả).
     broadcast("post_new", { id: rows[0].id, author: req.user!.name }, req.user!.id);
   }
 );
 
-// Phục vụ ảnh / tài liệu bài viết đọc bytea từ PostgreSQL.
 apiRouter.get("/media/post/:id/image", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(404).send("Not found");
@@ -332,7 +311,6 @@ apiRouter.get("/media/post/:id/doc", requireAuth, async (req, res) => {
   res.send(p.doc_data);
 });
 
-// Video bài viết — hỗ trợ HTTP Range để tua/seek mượt.
 apiRouter.get("/media/post/:id/video", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(404).send("Not found");
@@ -377,7 +355,7 @@ apiRouter.post("/posts/:id/like", requireAuth, async (req, res) => {
   }
   const [{ n }] = await query<{ n: number }>("SELECT count(*)::int AS n FROM post_likes WHERE post_id = $1", [id]);
   res.json({ ok: true, liked, count: n });
-  broadcast("post_like", { postId: id, count: n }); // realtime: cập nhật số tim
+  broadcast("post_like", { postId: id, count: n });
 });
 
 apiRouter.post("/posts/:id/comments", requireAuth, async (req, res) => {
@@ -389,7 +367,6 @@ apiRouter.post("/posts/:id/comments", requireAuth, async (req, res) => {
     [id, req.user!.id, content]
   );
   res.json({ ok: true, comment: { id: rows[0].id, author: req.user!.name, content, created_at: rows[0].created_at } });
-  // Realtime: đẩy bình luận mới tới mọi người đang xem (trừ người vừa bình luận).
   broadcast("post_comment", { postId: id, author: req.user!.name, content }, req.user!.id);
 });
 
@@ -405,8 +382,6 @@ apiRouter.delete("/posts/:id", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// ── Bài học video (YouTube) trong khóa học + tiến độ theo bài ──────────────────
-// Tính lại % tiến độ của user cho 1 khóa = số bài đã xem / tổng số bài.
 async function recomputeProgress(userId: number, courseId: number): Promise<{ progress: number; status: string }> {
   const [{ total }] = await query<{ total: number }>("SELECT count(*)::int AS total FROM lessons WHERE course_id = $1 AND approved", [courseId]);
   const [{ done }] = await query<{ done: number }>(
@@ -432,8 +407,6 @@ apiRouter.post("/courses/:id/lessons", requireAuth, async (req, res) => {
   if (Number.isNaN(courseId) || !ytId) return res.status(400).json({ error: "Link YouTube không hợp lệ." });
   const exists = await query("SELECT 1 FROM courses WHERE item_id = $1", [courseId]);
   if (!exists.length) return res.status(404).json({ error: "Khóa học không tồn tại." });
-  // Tài khoản admin (role) đăng ngay; mọi tài khoản khác = đóng góp chờ duyệt (pending).
-  // Auto-duyệt gắn theo TÀI KHOẢN, KHÔNG theo cookie admin-passcode (chế độ duyệt toàn trình duyệt).
   const approved = req.user!.role === "admin";
   const rows = await query<{ id: number }>(
     "INSERT INTO lessons (course_id, title, youtube_id, added_by, approved) VALUES ($1,$2,$3,$4,$5) RETURNING id",
@@ -470,7 +443,6 @@ apiRouter.delete("/lessons/:id", requireAuth, async (req, res) => {
   res.json({ ok: true, ...p });
 });
 
-// Lỗi từ multer (file quá lớn...) -> trả JSON rõ ràng thay vì trang HTML 500.
 apiRouter.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
   if (err instanceof multer.MulterError) {
     const msg = err.code === "LIMIT_FILE_SIZE"

@@ -17,17 +17,12 @@ Phơi bày 3 năng lực như tab Streamlit cũ (mọi logic lõi giữ nguyên)
 import os
 import sys
 
-# Console Windows mặc định mã hóa cp1252 -> emoji/tiếng Việt trong log startup gây
-# UnicodeEncodeError, làm CHẾT app startup khi chạy bằng uvicorn thật. Ép stdout/stderr
-# sang UTF-8 (no-op nếu đã UTF-8). Phải làm TRƯỚC mọi lệnh print/log có ký tự ngoài ASCII.
 for _stream in (sys.stdout, sys.stderr):
     try:
         _stream.reconfigure(encoding="utf-8")
     except Exception:
         pass
 
-# Dùng model đã cache, không ping HuggingFace -> tránh treo khi mạng chậm/bị chặn.
-# Phải đặt TRƯỚC khi nạp transformers.
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
@@ -66,10 +61,10 @@ def _prewarm_ollama():
     """Nạp sẵn model Ollama vào RAM (chạy NỀN) -> câu hỏi chatbot ĐẦU TIÊN không bị
     cold-start ~90s (nguyên nhân hay gây timeout/'báo lỗi' ở câu đầu).
 
-    Warm khi Ollama LÀ backend đang dùng: bỏ qua nếu đã có API key (Claude/OpenAI) hoặc
+    Warm khi Ollama LÀ backend đang dùng: bỏ qua nếu đã có API key (OpenAI) hoặc
     USE_OLLAMA bị tắt tường minh. Không cần BẮT BUỘC đặt USE_OLLAMA nữa (khớp _llm_available
     vốn tự phát hiện Ollama)."""
-    if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY"):
+    if os.environ.get("OPENAI_API_KEY"):
         return
     if str(os.environ.get("USE_OLLAMA", "")).lower() in ("0", "false", "no"):
         return
@@ -112,7 +107,6 @@ async def lifespan(_app):
 app = FastAPI(title="IT Learning Recommender API", version="1.0.0", lifespan=lifespan)
 
 
-# ── Observability (Trụ cột G): đếm request + độ trễ theo route, phơi /metrics ─────
 _METRICS = {"requests_total": 0, "errors_total": 0, "by_route": {}}
 
 
@@ -162,10 +156,9 @@ def metrics():
     return "\n".join(lines) + "\n"
 
 
-# ── Schema request ────────────────────────────────────────────────────────────
 class SearchReq(BaseModel):
     query: str
-    type: Optional[str] = None          # "Khóa học" | "Tài liệu" | None (Tất cả)
+    type: Optional[str] = None
     min_pct: int = 90
 
 
@@ -181,10 +174,9 @@ class ChatReq(BaseModel):
 
 class ForYouReq(BaseModel):
     persona: Union[int, str]
-    interested: List[int] = []          # item_id user vừa bấm "Quan tâm" trong phiên
+    interested: List[int] = []
 
 
-# ── Endpoints ────────────────────────────────────────────────────────────────
 @app.post("/api/search")
 def api_search(req: SearchReq):
     eng = load_engine()
@@ -201,13 +193,11 @@ _CHAT_ERROR_MSG = (
 def api_chat(req: ChatReq):
     eng = load_engine()
     history = [{"role": m.role, "content": m.content} for m in req.history]
-    # Bọc pipeline: lỗi bất ngờ -> câu xin lỗi gọn (200) thay vì 500 -> frontend không hiện "báo lỗi".
     try:
         result = eng.chat(req.message, history=history)
     except Exception as e:  # noqa: BLE001
         _log(f"[!] /api/chat lỗi: {e}")
         return {"response": _CHAT_ERROR_MSG, "recommendations": [], "intent": "error"}
-    # Chỉ trả các trường cần cho UI (response + recommendations + intent).
     return {
         "response": result["response"],
         "recommendations": result.get("recommendations", []),
@@ -244,7 +234,6 @@ def api_chat_stream(req: ChatReq):
     return StreamingResponse(
         gen(),
         media_type="text/event-stream",
-        # Tắt buffering ở proxy (nginx) để chữ tới client tức thì.
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
@@ -258,7 +247,7 @@ def admin_reload():
     Dùng bởi `scripts/update_data.py --restart`.
     """
     load_engine.cache_clear()
-    eng = load_engine()                       # nạp lại ngay -> request kế tiếp không phải chờ
+    eng = load_engine()
     n = len(eng.items) if hasattr(eng, "items") else None
     return {"ok": True, "reloaded": True, "items": n}
 
@@ -283,7 +272,6 @@ def api_suggested():
     return {"prompts": SUGGESTED_PROMPTS, "welcome": EducationalChatbot.WELCOME_MESSAGE}
 
 
-# ── Frontend tĩnh ──────────────────────────────────────────────────────────────
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 

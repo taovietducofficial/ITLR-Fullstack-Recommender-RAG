@@ -1,4 +1,4 @@
-"""Kiểm định thống kê cho hiệu số metric giữa hai cấu hình (Trụ cột B5).
+"""Kiểm định thống kê cho hiệu số metric giữa hai cấu hình.
 
 Mọi tuyên bố "A tốt hơn B" cần kèm bằng chứng thống kê, không phải may rủi. Module cài:
   - paired_bootstrap : khoảng tin cậy bootstrap cho hiệu số trung bình (per-query).
@@ -45,7 +45,6 @@ def paired_bootstrap(
     hi = float(np.quantile(boot_means, 1 - alpha / 2))
 
     mean_diff = float(diff.mean())
-    # p-value bootstrap hai phía: tỉ lệ mẫu vượt qua 0 theo hướng ngược lại
     if mean_diff >= 0:
         p = 2.0 * float(np.mean(boot_means <= 0))
     else:
@@ -61,7 +60,6 @@ def _t_sf(t: float, df: int) -> float:
 
         return float(2 * stats.t.sf(abs(t), df))
     except Exception:
-        # fallback: xấp xỉ chuẩn (đủ tốt khi df lớn)
         return float(2 * (1 - 0.5 * (1 + math.erf(abs(t) / math.sqrt(2)))))
 
 
@@ -76,7 +74,6 @@ def paired_t_test(scores_a: Sequence[float], scores_b: Sequence[float]) -> Dict[
     mean = diff.mean()
     sd = diff.std(ddof=1)
     if sd == 0:
-        # mọi hiệu số bằng nhau: khác biệt xác định (p≈0 nếu mean≠0)
         return {"t_stat": float("inf") if mean != 0 else 0.0,
                 "p_value": 0.0 if mean != 0 else 1.0, "mean_diff": float(mean)}
     t = mean / (sd / math.sqrt(n))

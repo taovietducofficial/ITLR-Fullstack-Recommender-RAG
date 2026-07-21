@@ -118,7 +118,6 @@ class EducationalRAG:
                  for r in results]
             )
 
-        # Topic index direct hits
         topic_hits = self._topic_index_lookup(enriched)
         if topic_hits:
             topic_ranking = []
@@ -216,8 +215,6 @@ class EducationalRAG:
 
         return documents
 
-    # Số ứng viên cosine cao nhất được chấm điểm hybrid (đủ rộng để không bỏ sót,
-    # đủ hẹp để KHÔNG lặp Python trên toàn bộ catalog -> nhanh ở quy mô 50k+).
     REC_CANDIDATE_POOL = 300
 
     def get_recommendations(self, seed_item_id, top_n=5, exclude_ids=None, query=None):
@@ -236,12 +233,9 @@ class EducationalRAG:
         seed_topics = parse_topics(seed["topics"])
         seed_category = seed["category"]
         q_topics = set(extract_query_tokens(query or ""))
-        # Tính cosine seed-vs-all on-the-fly từ TF-IDF (đã bỏ ma trận N×N khỏi retrieval_model)
         tfidf = self.model["matrices"]["full"]
         seed_sim = cosine_similarity(tfidf[seed_index], tfidf).ravel()
 
-        # Chỉ chấm hybrid trên top ứng viên theo cosine (vectorized argpartition) thay vì
-        # lặp toàn bộ catalog -> giảm vòng lặp Python từ N (50k) xuống ~300.
         k = min(self.REC_CANDIDATE_POOL + len(exclude_ids) + 1, len(seed_sim))
         top_idx = np.argpartition(seed_sim, -k)[-k:]
 

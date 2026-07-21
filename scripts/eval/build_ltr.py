@@ -1,4 +1,4 @@
-"""Huấn luyện Learning-to-Rank (LambdaMART qua LightGBM) — Trụ cột C (đóng góp chính).
+"""Huấn luyện Learning-to-Rank (LambdaMART qua LightGBM).
 
 Thay các trọng số kết hợp tín hiệu CHỈNH TAY (SCORE_WEIGHTS/HYBRID_ITEM_WEIGHTS) bằng một
 HÀM XẾP HẠNG HỌC TỪ DỮ LIỆU. Quy trình:
@@ -77,11 +77,10 @@ def build_training_data(ctx, qrels, pos_for_id, neg_per_query, pos_cap, with_cro
         pos_set = {p for p, _ in pos}
         query = perturb(q["query"]) if noisy else q["query"]
 
-        # hard negatives: top ứng viên embedding KHÔNG nằm trong tập liên quan
         cand = P.candidate_generation(ctx, query, hard_cfg)
         hard = [p for p in cand if p not in pos_set][: int(neg_per_query * 0.7)]
         negs = list(hard)
-        while len(negs) < neg_per_query:                 # bù random negative
+        while len(negs) < neg_per_query:
             c = int(rng.integers(0, n_items))
             if c not in pos_set and c not in set(negs):
                 negs.append(c)
@@ -142,7 +141,6 @@ def main():
         ctx, train_qrels, pos_for_id, args.neg_per_query, args.pos_cap, with_cross, rng)
     print(f"  X={X.shape} | {len(groups)} nhóm | {time.time()-t:.1f}s")
 
-    # tách 1 phần train làm valid (early stopping) — theo nhóm
     n_val = max(2, len(groups) // 6)
     val_rows = sum(groups[:n_val])
     dtrain = lgb.Dataset(X[val_rows:], label=y[val_rows:], group=groups[n_val:])
@@ -165,14 +163,12 @@ def main():
     bundle = {"booster": booster, "feature_names": LF.FEATURE_NAMES,
               "params": params, "with_cross": with_cross}
     pickle.dump(bundle, open(config.artifact("ltr.pkl"), "wb"))
-    print(f"-> artifacts/ltr.pkl")
+    print("-> artifacts/ltr.pkl")
 
-    # ── đồ thị: feature importance (gain) + SHAP + calibration ────────────────
     figs = config.ROOT / "reports" / "figures"
     os.makedirs(figs, exist_ok=True)
     make_plots(booster, X, y, figs)
 
-    # ── so sánh LTR vs heuristic chỉnh tay trên test (sạch + nhiễu) ───────────
     ctx.ltr_scorer = _make_scorer(ctx, booster, with_cross)
     heur_cfg = P.StageConfig(name="heuristic", candidate_source="embedding",
                              l1_signals=frozenset({"category", "topic", "title"}))
@@ -180,7 +176,7 @@ def main():
                             l1_signals=frozenset({"category", "topic", "title"}),
                             use_ltr=True, rerank_pool=100)
 
-    report_lines = ["# Learning-to-Rank (Trụ cột C)\n",
+    report_lines = ["# Learning-to-Rank\n",
                     f"- LightGBM lambdarank | {len(LF.FEATURE_NAMES)} đặc trưng | "
                     f"best_iter={booster.best_iteration} | valid NDCG@10={best_ndcg:.4f}",
                     f"- Train {len(train_qids)} truy vấn / Test {len(test_qids)} truy vấn (held-out)\n",
@@ -193,7 +189,7 @@ def main():
         heur = ndcg_per_query_pipeline(ctx, heur_cfg, qrels, id_for_pos, test_qids, noisy=noisy)
         ltr = ndcg_per_query_pipeline(ctx, ltr_cfg, qrels, id_for_pos, test_qids, noisy=noisy)
         cmp = significance.compare(ltr, heur)
-        sig = "✅ p<0.05" if cmp["significant"] else "—"
+        sig = "p<0.05" if cmp["significant"] else "—"
         report_lines.append(f"| {label} | {cmp['mean_b']:.4f} | {cmp['mean_a']:.4f} | "
                             f"{cmp['mean_diff']:+.4f} | {cmp['p_ttest']:.4g} | {sig} |")
         print(f"  Heur={cmp['mean_b']:.4f} LTR={cmp['mean_a']:.4f} Δ={cmp['mean_diff']:+.4f} "
@@ -215,7 +211,7 @@ def main():
         "THUẦN TỪ DỮ LIỆU, không cần chỉnh tay**.\n"
         "- **Đóng góp của LTR** vì vậy là **phương pháp luận**: (1) thay heuristic cảm tính bằng hàm "
         "xếp hạng học được + hard-negative mining; (2) **giải thích được** (SHAP — tín hiệu nào quan "
-        "trọng); (3) **điểm được hiệu chỉnh** (reliability diagram). Trên **dữ liệu thật** (Trụ cột I) "
+        "trọng); (3) **điểm được hiệu chỉnh** (reliability diagram). Trên **dữ liệu thật** "
         "nơi liên quan KHÔNG phải một luật đơn giản, cách tiếp cận học-từ-dữ-liệu được kỳ vọng vượt "
         "heuristic — đây là hướng kiểm chứng tiếp theo.\n"
         "- Đặc trưng cross-encoder (mặc định BẬT; chạy không `--no-cross`) bổ sung tín hiệu ngữ nghĩa "
@@ -224,7 +220,7 @@ def main():
     out = config.ROOT / "reports" / "ltr.md"
     with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(report_lines))
-    print(f"-> reports/ltr.md")
+    print("-> reports/ltr.md")
 
 
 def _make_scorer(ctx, booster, with_cross=True):
@@ -244,7 +240,6 @@ def make_plots(booster, X, y, figs):
         print(f"  [đồ thị bỏ qua — thiếu matplotlib] {e}")
         return
 
-    # SHAP summary (beeswarm) — giải thích tín hiệu nào quan trọng
     try:
         import shap
         sample = X[np.random.default_rng(0).choice(len(X), size=min(800, len(X)), replace=False)]
@@ -257,7 +252,6 @@ def make_plots(booster, X, y, figs):
     except Exception as e:
         print(f"  [SHAP bỏ qua] {e}")
 
-    # Reliability diagram — điểm dự đoán (chuẩn hóa) có khớp xác suất liên quan không
     try:
         raw = booster.predict(X)
         p = (raw - raw.min()) / (raw.max() - raw.min() + 1e-9)

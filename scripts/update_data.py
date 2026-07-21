@@ -73,28 +73,28 @@ def reload_recommender():
     import json
     import urllib.request
     url = os.environ.get("RECOMMENDER_URL", "http://localhost:8000").rstrip("/") + "/admin/reload"
-    print(f"\n▶ 5/5 Nạp lại recommender: POST {url}", flush=True)
+    print(f"\n5/5 Nạp lại recommender: POST {url}", flush=True)
     try:
         req = urllib.request.Request(url, data=b"", method="POST")
         with urllib.request.urlopen(req, timeout=180) as r:
             d = json.loads(r.read())
-        print(f"✅ Recommender đã nạp lại artifacts: {d.get('items')} khóa.", flush=True)
+        print(f"Recommender đã nạp lại artifacts: {d.get('items')} khóa.", flush=True)
     except Exception as e:
-        print(f"ℹ️  Chưa gọi được /admin/reload ({e}).\n"
+        print(f"Chưa gọi được /admin/reload ({e}).\n"
               f"   Recommender có thể CHƯA chạy — hãy khởi động/khởi động lại 'npm run dev' "
               f"để chatbot nạp dữ liệu mới.", flush=True)
 
 
 def run(step: str, cmd, *, cwd=None, env=None, shell=False):
     """Chạy 1 bước, in tiêu đề + thời gian; raise nếu thất bại (fail-fast)."""
-    print(f"\n{'='*70}\n▶ {step}\n  $ {cmd if shell else ' '.join(cmd)}\n{'='*70}", flush=True)
+    print(f"\n{'='*70}\n{step}\n  $ {cmd if shell else ' '.join(cmd)}\n{'='*70}", flush=True)
     t0 = time.time()
     res = subprocess.run(cmd, cwd=cwd or ROOT, env=env or _child_env(), shell=shell)
     dt = time.time() - t0
     if res.returncode != 0:
-        print(f"✗ '{step}' THẤT BẠI (exit {res.returncode}, {dt:.0f}s) — dừng pipeline.", flush=True)
+        print(f"'{step}' THẤT BẠI (exit {res.returncode}, {dt:.0f}s) — dừng pipeline.", flush=True)
         sys.exit(res.returncode)
-    print(f"✅ '{step}' xong ({dt:.0f}s).", flush=True)
+    print(f"'{step}' xong ({dt:.0f}s).", flush=True)
 
 
 def main():
@@ -122,7 +122,6 @@ def main():
     t0 = time.time()
     print(f"PIPELINE CẬP NHẬT DỮ LIỆU -> {args.csv}", flush=True)
 
-    # 1) CÀO
     if not args.skip_scrape:
         run("1/4 Cào dữ liệu web",
             [py, "scripts/scrape/run_scrape.py", "--source", args.source,
@@ -130,7 +129,6 @@ def main():
     else:
         print("\n(bỏ qua bước cào)", flush=True)
 
-    # 2) GỘP (nạp vào CSV đích, giữ item_id cũ ổn định, khử trùng toàn cục, dịch EN->VI)
     if not args.skip_merge:
         merge_cmd = [py, "scripts/scrape/build_scraped_catalog.py", "--merge-into", args.csv]
         if args.no_translate:
@@ -139,7 +137,6 @@ def main():
     else:
         print("\n(bỏ qua bước gộp)", flush=True)
 
-    # 3) DB: UPSERT vào Postgres (giữ enrollments). Chạy trong web/ để dùng web/.env (DATABASE_URL).
     if not args.skip_db:
         run("3/4 UPSERT Postgres (npm run sync)",
             "npm run sync", cwd=os.path.join(ROOT, "web"), shell=True,
@@ -147,9 +144,6 @@ def main():
     else:
         print("\n(bỏ qua bước DB)", flush=True)
 
-    # 4) MODEL: rebuild artifacts cho recommender — AN TOÀN với embeddings.
-    #    item_list.pkl (build_model) và embeddings.pkl PHẢI cùng số khóa, nếu lệch -> tìm kiếm
-    #    ngữ nghĩa HỎNG. Nên: số khóa ĐỔI -> rebuild CẢ embeddings; KHÔNG đổi -> chỉ build_model.
     built = False
     if not args.skip_build:
         new_n = _csv_count(csv_abs)
@@ -158,15 +152,14 @@ def main():
         need_emb = args.embeddings == "always" or (args.embeddings == "auto" and count_changed)
 
         if count_changed and args.embeddings == "never":
-            # Số khóa đổi nhưng người dùng cấm rebuild embeddings -> KHÔNG build_model (tránh lệch).
-            print(f"\n⚠️  Số khóa đổi ({emb_n} -> {new_n}) nhưng --embeddings never.\n"
+            print(f"\nSố khóa đổi ({emb_n} -> {new_n}) nhưng --embeddings never.\n"
                   f"   BỎ QUA build_model để KHÔNG làm lệch item_list/embeddings (recommender giữ "
                   f"nguyên {emb_n} khóa — cũ nhưng nhất quán).\n"
                   f"   Muốn cập nhật đầy đủ: chạy lại với --embeddings auto (sẽ rebuild cả embeddings).",
                   flush=True)
         else:
             if count_changed:
-                print(f"\nℹ️  Số khóa đổi ({emb_n} -> {new_n}) -> sẽ rebuild CẢ embeddings để giữ khớp "
+                print(f"\nSố khóa đổi ({emb_n} -> {new_n}) -> sẽ rebuild CẢ embeddings để giữ khớp "
                       f"(mất ~vài chục phút trên CPU).", flush=True)
             run("4/4 Rebuild artifacts (build_model)",
                 [py, "-m", "itlr.pipelines.build_model"],
@@ -179,15 +172,13 @@ def main():
     else:
         print("\n(bỏ qua bước build_model)", flush=True)
 
-    # 5) (tùy chọn) Bảo recommender nạp lại artifacts NGAY -> chatbot thấy dữ liệu mới, không cần
-    #    tắt/mở lại npm run dev. Chỉ gọi khi THỰC SỰ có build (artifacts đổi).
     if args.restart:
         if built:
             reload_recommender()
         else:
             print("\n(--restart: không có build mới nên không cần nạp lại recommender)", flush=True)
 
-    print(f"\n🎉 PIPELINE XONG sau {time.time()-t0:.0f}s. Catalog: {args.csv}", flush=True)
+    print(f"\nPIPELINE XONG sau {time.time()-t0:.0f}s. Catalog: {args.csv}", flush=True)
     if not args.restart:
         print("   Nhắc: chatbot (:8000) chỉ thấy dữ liệu mới sau khi nạp lại artifacts — chạy lại "
               "pipeline kèm --restart, hoặc khởi động lại 'npm run dev'.", flush=True)

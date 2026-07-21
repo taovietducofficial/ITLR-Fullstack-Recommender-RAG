@@ -322,8 +322,6 @@ CATEGORIES = {
     },
 }
 
-# Ba cấp độ — quyết định tiền tố tiêu đề, đối tượng, sắc thái mô tả. Trọng số phân bố
-# kim tự tháp (nhiều cơ bản, ít nâng cao) như catalog học tập thật.
 LEVELS = [
     ("Cơ bản", 0.42),
     ("Trung cấp", 0.36),
@@ -375,7 +373,6 @@ LEVEL_CONFIG = {
     },
 }
 
-# Góc tiếp cận thêm vào tiêu đề (đôi khi) để tăng đa dạng, không gắn cứng cấp độ.
 ANGLES = [
     "qua dự án thực tế", "theo lộ trình bài bản", "chuẩn phỏng vấn",
     "từ A đến Z", "kèm bài tập", "thực chiến", "tinh gọn",
@@ -383,7 +380,6 @@ ANGLES = [
     "có chứng chỉ", "ôn thi", "cho đồ án",
 ]
 
-# Khung mô tả dùng chung — điền {topic}/{t2}/{t3}/{category}/{adj}/{audience}/{outcome}.
 DESC_TEMPLATES = [
     "{prefix_phrase} {topic} {adj}, đi qua {t2} và {t3}. Sau khi hoàn thành, bạn sẽ {outcome}.",
     "Học {topic} {audience}: tập trung vào {t2}, {t3} và thực hành qua các bài lab. Mục tiêu giúp bạn {outcome}.",
@@ -457,11 +453,11 @@ def make_title(item_type, level, main_topic, category):
     prefix_pool = cfg["course_prefixes"] if item_type == "Khóa học" else cfg["doc_prefixes"]
     title = f"{random.choice(prefix_pool)} {main_topic}"
     r = random.random()
-    if r < 0.22:                                   # gắn chuyên mục
+    if r < 0.22:
         title += f" cho {category}"
-    elif r < 0.46:                                 # gắn góc tiếp cận
+    elif r < 0.46:
         title += f" {random.choice(ANGLES)}"
-    elif r < 0.60:                                 # gắn đối tượng học (mở rộng không gian tiêu đề)
+    elif r < 0.60:
         title += f" {random.choice(cfg['audiences'])}"
     return title
 

@@ -1,29 +1,18 @@
-/* ════════════════════════════════════════════════════════════════════════════
-   Kiểu dữ liệu cho các hàng (row) trả về từ PostgreSQL.
-   Mục tiêu: thay `query<any>` bằng `query<KiểuCụThể>` để có gợi ý + bắt lỗi
-   sai tên cột lúc biên dịch — KHÔNG đổi SQL, chỉ thêm an toàn kiểu.
-   Mỗi interface mô tả ĐÚNG các cột mà câu SELECT tương ứng trả về.
-   ════════════════════════════════════════════════════════════════════════════ */
-
 export type Role = "user" | "admin";
 
-// Hàng đếm: SELECT count(*)::int AS n
 export interface CountRow {
   n: number;
 }
 
-// Thẻ người dùng rút gọn (avatar partial · danh sách bạn bè · lời mời).
-// `intro` chỉ có mặt ở truy vấn lời mời kết bạn.
 export interface UserCard {
   id: number;
   name: string;
   has_avatar: boolean;
   intro?: string | null;
-  online?: boolean;             // presence: gắn ở runtime (isOnline)
+  online?: boolean;
   last_seen?: Date | string | null;
 }
 
-// Hồ sơ công khai: SELECT id,name,email,role,created_at,(avatar IS NOT NULL) AS has_avatar
 export interface ProfileRow {
   id: number;
   name: string;
@@ -33,7 +22,6 @@ export interface ProfileRow {
   has_avatar: boolean;
 }
 
-// Đọc blob để tải/stream (attachment · ảnh/tài liệu bài viết · media tin nhắn).
 export interface BlobRow {
   filename?: string | null;
   mime: string | null;
@@ -41,7 +29,6 @@ export interface BlobRow {
   doc_original?: string | null;
 }
 
-// ── Tin nhắn trực tiếp (theo DM_COLS) + bản xem trước sau enrichMessages ───────
 export interface DmSharedPost {
   id: number;
   content: string;
@@ -61,17 +48,16 @@ export interface DmRow {
   sender_id: number;
   content: string;
   created_at: Date;
-  read_at: Date | null;         // realtime: thời điểm người nhận đã đọc ("đã xem")
+  read_at: Date | null;
   has_image: boolean;
   has_video: boolean;
   has_doc: boolean;
   doc_original: string | null;
   shared_post_id: number | null;
   shared_course_id: number | null;
-  post?: DmSharedPost | null;     // gắn thêm bởi enrichMessages
-  course?: DmSharedCourse | null; // gắn thêm bởi enrichMessages
+  post?: DmSharedPost | null;
+  course?: DmSharedCourse | null;
 }
-// Đọc media của 1 tin nhắn (kèm 2 đầu để kiểm tra quyền).
 export interface DmMediaRow {
   sender_id: number;
   recipient_id: number;
@@ -80,7 +66,6 @@ export interface DmMediaRow {
   doc_original: string | null;
 }
 
-// ── Bài viết cộng đồng (fetchPosts) ───────────────────────────────────────────
 export interface CommentRow {
   id: number;
   post_id: number;
@@ -111,11 +96,10 @@ export interface PostRow {
   doc_original: string | null;
   likes: number;
   liked: boolean;
-  comments: CommentRow[];     // gắn thêm sau truy vấn
-  origin: PostOrigin | null;  // gắn thêm sau truy vấn (nếu là bài share)
+  comments: CommentRow[];
+  origin: PostOrigin | null;
 }
 
-// ── Bài học video trong khóa học ──────────────────────────────────────────────
 export interface LessonRow {
   id: number;
   title: string;
@@ -124,7 +108,6 @@ export interface LessonRow {
   done: boolean;
 }
 
-// ── Bảng quản trị ─────────────────────────────────────────────────────────────
 export interface AdminStats {
   users: number;
   courses: number;

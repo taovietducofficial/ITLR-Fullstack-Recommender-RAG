@@ -1470,7 +1470,7 @@
       ],
       "category": "Trí tuệ nhân tạo",
       "level": "Nâng cao",
-      "definition": "LLM là mô hình Transformer khổng lồ huấn luyện trên lượng văn bản lớn, có thể hiểu và sinh ngôn ngữ tự nhiên (vd GPT, Claude). Nền tảng của chatbot và trợ lý AI hiện đại.",
+      "definition": "LLM là mô hình Transformer khổng lồ huấn luyện trên lượng văn bản lớn, có thể hiểu và sinh ngôn ngữ tự nhiên (vd GPT). Nền tảng của chatbot và trợ lý AI hiện đại.",
       "topics": [
         "NLP",
         "Transformer",
@@ -5568,7 +5568,7 @@
       ],
       "category": "Trí tuệ nhân tạo",
       "level": "Nâng cao",
-      "definition": "RLHF tinh chỉnh mô hình ngôn ngữ bằng phản hồi của con người (xếp hạng câu trả lời) để mô hình hữu ích và an toàn hơn — kỹ thuật cốt lõi đứng sau ChatGPT/Claude.",
+      "definition": "RLHF tinh chỉnh mô hình ngôn ngữ bằng phản hồi của con người (xếp hạng câu trả lời) để mô hình hữu ích và an toàn hơn — kỹ thuật cốt lõi đứng sau ChatGPT.",
       "topics": [
         "Machine Learning",
         "NLP",

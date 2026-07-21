@@ -1,4 +1,4 @@
-"""Chuẩn bị PHIẾU GÁN NHÃN dễ đọc cho con người + trộn nhãn đã gán trở lại (Trụ cột B3).
+"""Chuẩn bị PHIẾU GÁN NHÃN dễ đọc cho con người + trộn nhãn đã gán trở lại.
 
 Vấn đề: `human_judgments.csv` chỉ có `item_id` -> người gán không phán xét được. Script này:
 
@@ -37,14 +37,13 @@ def prepare():
     items = pd.read_csv(config.ITEMS_CSV)
     cols = [c for c in ["item_id", "title", "category", "level", "topics", "description"] if c in items.columns]
     info = items[cols].copy()
-    info["description"] = info["description"].astype(str).str.slice(0, 240)  # rút gọn cho dễ đọc
+    info["description"] = info["description"].astype(str).str.slice(0, 240)
 
     sheet = human[["query_id", "query", "item_id"]].merge(info, on="item_id", how="left")
-    sheet["human_label"] = ""           # cột người điền (1 = liên quan, 0 = không)
-    # sắp theo query để người gán đọc theo cụm
+    sheet["human_label"] = ""
     sheet = sheet.sort_values(["query_id", "item_id"]).reset_index(drop=True)
     out = config.data_file(SHEET)
-    sheet.to_csv(out, index=False, encoding="utf-8-sig")  # utf-8-sig -> Excel mở đúng tiếng Việt
+    sheet.to_csv(out, index=False, encoding="utf-8-sig")
     print(f"-> {out}")
     print(f"   {len(sheet)} cặp (truy vấn, mục) cần gán. Mở bằng Excel/Sheets, điền cột "
           f"'human_label' = 1 (liên quan) / 0 (không), LƯU dạng CSV, rồi chạy --merge.")

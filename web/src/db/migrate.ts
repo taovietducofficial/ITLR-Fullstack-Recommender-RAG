@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { pool } from "./pool";
 
-// Tạo bảng từ schema.sql (idempotent). Chạy: npm run migrate
 async function migrate() {
   const sql = readFileSync(join(__dirname, "schema.sql"), "utf-8");
   await pool.query(sql);

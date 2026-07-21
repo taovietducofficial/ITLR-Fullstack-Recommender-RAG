@@ -18,8 +18,8 @@ from scipy.sparse import csr_matrix
 
 from itlr import config
 
-TOP_K = 50          # số láng giềng giữ lại mỗi item
-N_DEMO_USERS = 40   # số persona đưa ra cho dropdown demo
+TOP_K = 50
+N_DEMO_USERS = 40
 
 
 def top_k_per_row(sim, k):
@@ -51,16 +51,14 @@ def main():
     item_pos = inter["item_id"].map(id_to_pos).to_numpy()
     n_users = user_codes.max() + 1
 
-    # Ma trận user-item nhị phân
     R = csr_matrix(
         (np.ones(len(inter)), (user_codes, item_pos)),
         shape=(n_users, n_items),
     )
-    R.data[:] = 1.0  # đảm bảo nhị phân
+    R.data[:] = 1.0
 
-    # Co-occurrence items x items + chuẩn hóa cosine
     cooc = (R.T @ R).tocoo()
-    pop = np.asarray(R.sum(axis=0)).ravel()          # số user đã tương tác mỗi item
+    pop = np.asarray(R.sum(axis=0)).ravel()
     mask = (cooc.row != cooc.col) & (cooc.data > 0)
     r, c, v = cooc.row[mask], cooc.col[mask], cooc.data[mask]
     denom = np.sqrt(pop[r] * pop[c])
@@ -68,7 +66,6 @@ def main():
     sim = csr_matrix((v / denom, (r, c)), shape=(n_items, n_items))
     sim = top_k_per_row(sim, TOP_K)
 
-    # Lịch sử + nhãn persona cho demo (chọn user có lịch sử đa dạng)
     histories, labels = {}, {}
     cats = item_list["category"].to_numpy()
     grouped = inter.groupby("user_id")["item_id"].apply(list)

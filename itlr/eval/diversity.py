@@ -1,4 +1,4 @@
-"""Metric "beyond-accuracy" — vượt khỏi độ chính xác thuần (Trụ cột B4).
+"""Metric "beyond-accuracy" — vượt khỏi độ chính xác thuần.
 
 Đo các phẩm chất mà accuracy không nắm bắt: hệ có phơi bày được nhiều catalog không
 (Coverage), kết quả có đa dạng không (Intra-list Diversity), có mới mẻ không (Novelty),
@@ -34,7 +34,6 @@ def intra_list_diversity(item_indices: Sequence[int], embeddings: np.ndarray) ->
     vecs = embeddings[idx]
     sims = vecs @ vecs.T
     n = len(idx)
-    # trung bình các cặp khác nhau (bỏ đường chéo)
     off_diag_sum = sims.sum() - np.trace(sims)
     avg_sim = off_diag_sum / (n * (n - 1))
     return float(1.0 - avg_sim)
@@ -55,7 +54,7 @@ def novelty(recommended_lists: Sequence[Sequence[int]], popularity: np.ndarray) 
     total = pop.sum()
     if total <= 0:
         return 0.0
-    probs = (pop + 1.0) / (total + len(pop))  # làm mượt Laplace để tránh log(0)
+    probs = (pop + 1.0) / (total + len(pop))
     vals = []
     for lst in recommended_lists:
         for i in lst:

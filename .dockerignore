@@ -9,6 +9,5 @@ data                 # nạp qua volume
 notebooks
 web                  # web có image riêng
 *.md
-.claude
 __thesis*
 .env

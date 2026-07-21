@@ -32,10 +32,10 @@ SEED = 7
 N_USERS = int(sys.argv[1]) if len(sys.argv) > 1 else 1800
 MIN_INTERACTIONS, MAX_INTERACTIONS = 8, 40
 
-LATENT_DIM = 24          # số nhân tử ẩn
-N_ARCHETYPES = 40        # số "cộng đồng" gu (nhiều hơn số chuyên mục -> tạo nhóm con)
-USER_NOISE = 0.35        # độ lệch p_u quanh archetype (nhỏ -> cộng đồng chặt)
-SHARPNESS = 6.0          # độ "nhọn" của lựa chọn (cao -> chọn tập item nhất quán hơn)
+LATENT_DIM = 24
+N_ARCHETYPES = 40
+USER_NOISE = 0.35
+SHARPNESS = 6.0
 
 
 def build_item_factors(items: pd.DataFrame, rng: np.random.Generator) -> np.ndarray:
@@ -67,17 +67,15 @@ def main():
     n_items = len(items)
     item_ids = items["item_id"].astype(int).to_numpy()
 
-    q = build_item_factors(items, rng)                       # (n_items, d)
-    archetypes = rng.normal(size=(N_ARCHETYPES, LATENT_DIM))  # tâm các cộng đồng gu
-    # skew độ phổ biến nội tại (Pareto) -> một số item hot hơn dù cùng độ khớp
+    q = build_item_factors(items, rng)
+    archetypes = rng.normal(size=(N_ARCHETYPES, LATENT_DIM))
     pop_bias = np.log(rng.pareto(2.0, size=n_items) + 1.0)
 
     rows = []
     for uid in range(1, N_USERS + 1):
         arch = archetypes[rng.integers(0, N_ARCHETYPES)]
         p_u = arch + rng.normal(size=LATENT_DIM) * USER_NOISE
-        scores = q @ p_u + 0.3 * pop_bias                    # độ hấp dẫn item với user
-        # xác suất chọn ∝ exp(sharpness * z(scores)); softmax ổn định số học
+        scores = q @ p_u + 0.3 * pop_bias
         z = (scores - scores.mean()) / (scores.std() + 1e-9)
         logits = SHARPNESS * z
         logits -= logits.max()

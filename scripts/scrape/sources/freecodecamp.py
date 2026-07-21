@@ -15,7 +15,6 @@ from bs4 import BeautifulSoup
 from scripts.scrape.base import BaseScraper
 
 RSS = "https://www.freecodecamp.org/news/rss/"
-# Namespace trong RSS của Ghost: content:encoded, dc:creator.
 NS = {"content": "http://purl.org/rss/1.0/modules/content/",
       "dc": "http://purl.org/dc/elements/1.1/"}
 

@@ -1,4 +1,4 @@
-"""Trích đặc trưng cho Learning-to-Rank (Trụ cột C).
+"""Trích đặc trưng cho Learning-to-Rank.
 
 Mỗi cặp (query, item) -> vector ~15 đặc trưng kết hợp tín hiệu từ vựng, ngữ nghĩa, cấu
 trúc metadata và độ phổ biến. Toàn bộ đặc trưng đều BIẾN THIÊN theo item trong cùng một

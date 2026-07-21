@@ -21,8 +21,7 @@ sentence-transformers
 requests
 beautifulsoup4
 
-# LLM cho Chatbot (đều tùy chọn — chỉ cần khi cấu hình API key tương ứng)
-anthropic
+# LLM cho Chatbot (tùy chọn — chỉ cần khi cấu hình API key tương ứng)
 openai
 
 # Chỉ mục vector ANN (tùy chọn). Nếu môi trường chưa có wheel phù hợp,
@@ -39,3 +38,4 @@ shap
 mlflow
 pytest
 psutil
+ruff

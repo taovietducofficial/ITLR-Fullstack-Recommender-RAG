@@ -1,7 +1,5 @@
 import { env } from "../config/env";
 
-// Client gọi recommender Python (FastAPI). Server-to-server (không cần CORS).
-// Mọi hàm chịu lỗi: nếu recommender chết -> ném Error để route bắt và hiện thông báo gọn.
 
 export interface RecItem {
   item_id: number;
@@ -26,7 +24,7 @@ export interface SearchResult {
 }
 
 export interface ChatResult {
-  response: string; // markdown
+  response: string;
   recommendations: RecItem[];
   intent: string;
 }
@@ -36,8 +34,6 @@ export interface Persona {
   label: string;
 }
 
-// Timeout (ms) cho gọi recommender. Chat dùng LLM cục bộ (Ollama) RẤT chậm trên CPU (có thể vài
-// phút) -> CHAT_TIMEOUT dài hơn nhiều. Các gọi khác (search/suggested) chỉ cần đủ chịu cold-start.
 const DEFAULT_TIMEOUT = Number(process.env.RECOMMENDER_TIMEOUT_MS || 60000);
 const CHAT_TIMEOUT = Number(process.env.RECOMMENDER_CHAT_TIMEOUT_MS || 240000);
 
@@ -68,7 +64,7 @@ export const recommender = {
     return post<SearchResult>("/api/search", { query, type: type || null, min_pct: minPct });
   },
   chat(message: string, history: { role: string; content: string }[] = []): Promise<ChatResult> {
-    return post<ChatResult>("/api/chat", { message, history }, CHAT_TIMEOUT);  // chờ lâu cho LLM
+    return post<ChatResult>("/api/chat", { message, history }, CHAT_TIMEOUT);
   },
   personas(): Promise<Persona[]> {
     return call<Persona[]>("/api/personas");

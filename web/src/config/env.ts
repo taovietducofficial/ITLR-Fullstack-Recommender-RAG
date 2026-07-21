@@ -12,7 +12,6 @@ function required(name: string, fallback?: string): string {
 
 const isProd = process.env.NODE_ENV === "production";
 
-// Bảo mật: ở production KHÔNG cho dùng secret/passcode mặc định (dễ đoán).
 const jwtSecret = required("JWT_SECRET", "dev-secret-change-me");
 if (isProd && (jwtSecret === "dev-secret-change-me" || jwtSecret.length < 32)) {
   throw new Error("JWT_SECRET phải đặt mạnh (≥ 32 ký tự) khi chạy production.");
@@ -24,7 +23,10 @@ if (isProd && adminPasscode === "1") {
 
 export const env = {
   port: parseInt(process.env.PORT || "3000", 10),
-  databaseUrl: required("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/it_learning"),
+  databaseUrl: required(
+    "DATABASE_URL",
+    "postgresql://postgres:postgres@localhost:5432/it_learning",
+  ),
   jwtSecret,
   recommenderUrl: (process.env.RECOMMENDER_URL || "http://localhost:8000").replace(/\/$/, ""),
   adminPasscode,

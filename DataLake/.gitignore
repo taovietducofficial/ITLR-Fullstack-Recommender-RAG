@@ -25,6 +25,8 @@ dbt/logs/
 
 # Local data
 minio/
+# Olist raw CSVs (~120MB) — tải từ Kaggle, không commit (xem README mục Dataset)
+dataset/
 
 # dbt anonymous user id
 dbt/.user.yml

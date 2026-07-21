@@ -49,7 +49,6 @@ def get_sql_chain(db):
     )
 
 
-# add new function
 def get_non_db_response(question: str, chat_history: list):
     template = """
     You are an intelligent assistant. A user is asking you a question that might not be related to the database. Provide a helpful response to the user's query.

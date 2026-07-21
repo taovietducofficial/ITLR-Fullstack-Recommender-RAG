@@ -1,4 +1,4 @@
-"""Đánh giá định lượng CỔNG OFF-TOPIC của chatbot (Trụ cột H).
+"""Đánh giá định lượng CỔNG OFF-TOPIC của chatbot.
 
 Hệ dùng `query_relevance_max` (điểm tương đồng cao nhất với catalog) làm cổng: < ngưỡng ->
 coi là NGOÀI lĩnh vực CNTT. Script này biến cách chọn ngưỡng "0.55 cảm tính" thành quyết
@@ -74,10 +74,9 @@ def main():
     labels = df["label"].to_numpy()
 
     auc = roc_auc(labels, scores)
-    # quét ngưỡng tìm F1 tối ưu
     grid = np.linspace(0.30, 0.80, 51)
     best = max(((t, *prf_at(labels, scores, t)) for t in grid), key=lambda x: x[3])
-    cur = prf_at(labels, scores, 0.55)  # ngưỡng hiện tại (gần ABS_RELEVANCE_GATE 0.48–0.55)
+    cur = prf_at(labels, scores, 0.55)
 
     print(f"\nAUC (ROC) = {auc:.4f}")
     print(f"Ngưỡng hiện tại 0.55: P={cur[0]:.3f} R={cur[1]:.3f} F1={cur[2]:.3f}")
@@ -85,7 +84,7 @@ def main():
     print("IT score TB:", round(float(df[df.label==1].score.mean()), 3),
           "| ngoài lĩnh vực TB:", round(float(df[df.label==0].score.mean()), 3))
 
-    lines = ["# Đánh giá cổng off-topic của chatbot (Trụ cột H)\n",
+    lines = ["# Đánh giá cổng off-topic của chatbot\n",
              f"*Bộ test: {len(df)} câu ({int(df.label.sum())} IT / {int((df.label==0).sum())} ngoài lĩnh vực). "
              f"Tín hiệu cổng = `query_relevance_max`.*\n",
              f"- **AUC (ROC) = {auc:.4f}**",
@@ -104,7 +103,7 @@ def main():
     os.makedirs(out.parent, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
-    print(f"\n-> reports/offtopic_eval.md")
+    print("\n-> reports/offtopic_eval.md")
 
 
 if __name__ == "__main__":

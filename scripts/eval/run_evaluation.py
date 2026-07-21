@@ -1,11 +1,11 @@
-"""Chạy thực nghiệm đánh giá ĐẦU-CUỐI (Trụ cột B — chương Thực nghiệm).
+"""Chạy thực nghiệm đánh giá ĐẦU-CUỐI.
 
 Sinh:
   - reports/results.csv      : metric mọi cấu hình (bảng ablation dạng máy đọc)
   - reports/tables.md        : bảng ablation + kiểm định thống kê (đưa thẳng vào báo cáo)
   - reports/per_query.csv     : NDCG@10 per-query mỗi cấu hình (phục vụ vẽ/kiểm định lại)
 
-Mỗi cấu hình tương ứng một mức của phễu multi-stage (Trụ cột A): TF-IDF only -> BM25 ->
+Mỗi cấu hình tương ứng một mức của phễu multi-stage: TF-IDF only -> BM25 ->
 Hybrid lexical -> Embeddings -> +L1 -> +Cross-Encoder -> +RAG-Fusion+MMR (Full).
 
 Cách chạy:
@@ -22,13 +22,11 @@ import os
 import pickle
 import sys
 import time
-from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import random  # noqa: E402
 
-import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from itlr import config  # noqa: E402
@@ -46,13 +44,13 @@ def perturb_query(query: str, rng: random.Random) -> str:
     Dùng cho chế độ --noisy: nhãn liên quan GIỮ NGUYÊN, chỉ truy vấn bị nhiễu -> đo độ
     BỀN của hệ (kênh ngữ nghĩa + char n-gram bỏ dấu) so với khớp từ vựng chính xác.
     """
-    q = strip_accents(query)            # bỏ dấu (cực phổ biến khi gõ tiếng Việt)
+    q = strip_accents(query)
     chars = list(q)
     for i in range(len(chars) - 1):
         r = rng.random()
-        if r < 0.04:                    # hoán đổi 2 ký tự liền kề
+        if r < 0.04:
             chars[i], chars[i + 1] = chars[i + 1], chars[i]
-        elif r < 0.06 and chars[i] != " ":  # xóa ký tự
+        elif r < 0.06 and chars[i] != " ":
             chars[i] = ""
     return "".join(chars)
 
@@ -167,7 +165,6 @@ def main():
         print(f"  [{name}] NDCG@10={agg['NDCG@10']:.4f} P@5={agg['P@5']:.4f} "
               f"MAP={agg['MAP']:.4f} ({time.time()-t:.1f}s)")
 
-    # ── results.csv ──────────────────────────────────────────────────────────
     os.makedirs(config.ROOT / "reports", exist_ok=True)
     metric_keys = list(next(iter(results.values())).keys())
     with open(config.ROOT / "reports" / f"results{suffix}.csv", "w", newline="", encoding="utf-8") as f:
@@ -177,7 +174,6 @@ def main():
             w.writerow([name] + [fmt(agg[k]) for k in metric_keys])
     print(f"-> reports/results{suffix}.csv")
 
-    # ── per_query.csv (NDCG@10) ──────────────────────────────────────────────
     with open(config.ROOT / "reports" / f"per_query{suffix}.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         names = list(configs.keys())
@@ -185,10 +181,6 @@ def main():
         for qid in qrels:
             w.writerow([qid] + [fmt(ndcg_by_cfg[n][qid]) for n in names])
 
-    # ── kiểm định thống kê: cấu hình TỐT NHẤT (NDCG@10) vs từng baseline ──────
-    # Dùng cấu hình NDCG@10 cao nhất làm mốc (không cố định "Full" — vì MMR đánh đổi độ
-    # chính xác lấy đa dạng nên Full không phải lúc nào cũng cao nhất; chọn tự động cho
-    # bảng kiểm định luôn phản ánh "tốt nhất vs baseline").
     full_name = max(results, key=lambda n: results[n]["NDCG@10"])
     sig_rows = []
     full_scores = [ndcg_by_cfg[full_name][q] for q in qrels]
@@ -199,7 +191,6 @@ def main():
         cmp = significance.compare(full_scores, base_scores)
         sig_rows.append((name, cmp))
 
-    # ── beyond-accuracy cho cấu hình Full (đa dạng hóa MMR) ──────────────────
     diverse_name = "+ RAG-Fusion + MMR (Full)"
     ba = diversity.beyond_accuracy_report(
         rec_lists_by_cfg.get(diverse_name, rec_lists_by_cfg[full_name]), n_items,
@@ -207,7 +198,6 @@ def main():
         popularity=None,
     )
 
-    # ── tables.md ────────────────────────────────────────────────────────────
     write_tables(results, sig_rows, ba, full_name, len(qrels), suffix, args.noisy)
     print(f"-> reports/tables{suffix}.md")
     print(f"\nHoàn tất. Xem reports/tables{suffix}.md để có bảng ablation + kiểm định.")
@@ -232,7 +222,6 @@ def write_tables(results, sig_rows, ba, full_name, n_queries, suffix="", noisy=F
                      "Cấu hình **Full** thêm MMR -> đánh đổi một phần độ chính xác lấy **đa dạng** "
                      "(xem mục beyond-accuracy); **+ Cross-Encoder** là mốc độ-chính-xác cao nhất.\n")
 
-    # bảng headline
     lines.append("## Bảng ablation (headline metrics)\n")
     header = "| Cấu hình | " + " | ".join(HEADLINE) + " |"
     sep = "|---|" + "|".join(["---"] * len(HEADLINE)) + "|"
@@ -244,7 +233,6 @@ def write_tables(results, sig_rows, ba, full_name, n_queries, suffix="", noisy=F
         lines.append(f"| {bold}{name}{bold} | " + " | ".join(cells) + " |")
     lines.append("")
 
-    # kiểm định thống kê (mốc = cấu hình tốt nhất, in đậm ở bảng trên)
     lines.append(f"## Kiểm định thống kê — **{full_name}** (tốt nhất) vs baseline (NDCG@10)\n")
     lines.append(f"| Baseline | NDCG@10 (base) | {full_name} − base | CI 95% | p (t-test) | p (bootstrap) | Có ý nghĩa? |")
     lines.append("|---|---|---|---|---|---|---|")
@@ -255,7 +243,6 @@ def write_tables(results, sig_rows, ba, full_name, n_queries, suffix="", noisy=F
                      f"| {c['p_ttest']:.4g} | {c['p_bootstrap']:.4g} | {sig} |")
     lines.append("")
 
-    # beyond-accuracy
     lines.append("## Beyond-accuracy (cấu hình Full, top-10)\n")
     lines.append("| Metric | Giá trị |")
     lines.append("|---|---|")

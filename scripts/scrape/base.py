@@ -21,7 +21,6 @@ from urllib.parse import urlparse
 import pandas as pd
 import requests
 
-# Cột chuẩn cho CSV thô — KHỚP alias trong adapt_real_data.COLUMN_ALIASES.
 RAW_COLUMNS = ["title", "description", "category", "topics", "instructor", "platform", "link", "level"]
 
 USER_AGENT = (
@@ -46,22 +45,18 @@ class BaseScraper:
         self._last_request = 0.0
         self._robots: dict[str, urllib.robotparser.RobotFileParser] = {}
 
-    # ── robots.txt ────────────────────────────────────────────────────────────
     def _robots_for(self, url: str) -> urllib.robotparser.RobotFileParser:
         parts = urlparse(url)
         origin = f"{parts.scheme}://{parts.netloc}"
         rp = self._robots.get(origin)
         if rp is None:
             rp = urllib.robotparser.RobotFileParser()
-            # Tải robots.txt bằng SESSION của ta (đúng User-Agent). KHÔNG dùng rp.read():
-            # nó fetch bằng UA "Python-urllib" mặc định -> site sau Cloudflare trả 403 ->
-            # robotparser tưởng "disallow_all" và chặn nhầm MỌI URL.
             try:
                 resp = self.session.get(origin + "/robots.txt", timeout=self.timeout)
                 if resp.status_code == 200:
                     rp.parse(resp.text.splitlines())
                 else:
-                    rp.parse([])  # không có/đọc được robots -> mặc định cho phép (vẫn rate-limit)
+                    rp.parse([])
             except requests.RequestException:
                 rp.parse([])
             self._robots[origin] = rp
@@ -73,7 +68,6 @@ class BaseScraper:
         except Exception:
             return True
 
-    # ── HTTP có rate-limit + retry ──────────────────────────────────────────────
     def _throttle(self):
         wait = self.delay - (time.time() - self._last_request)
         if wait > 0:
@@ -112,17 +106,14 @@ class BaseScraper:
         except ValueError:
             return None
 
-    # ── Giao diện cào ────────────────────────────────────────────────────────────
     def scrape(self) -> list[dict]:
         """Lớp con override: trả list bản ghi (dict với key trong RAW_COLUMNS)."""
         raise NotImplementedError
 
-    # ── Ghi CSV thô ────────────────────────────────────────────────────────────
     @staticmethod
     def to_csv(rows: list[dict], path: str):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         df = pd.DataFrame(rows)
-        # Bảo đảm có đủ cột chuẩn (thiếu -> rỗng) và đúng thứ tự.
         for c in RAW_COLUMNS:
             if c not in df.columns:
                 df[c] = ""

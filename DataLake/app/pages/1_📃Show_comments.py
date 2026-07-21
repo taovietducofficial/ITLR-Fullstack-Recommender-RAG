@@ -35,7 +35,6 @@ def main():
 
     if st.button("Show comment"):
         if product_id_input:
-            # show category
             check_query = (
                 f"SELECT COUNT(*) FROM products WHERE product_id = '{product_id_input}'"
             )
@@ -50,7 +49,6 @@ def main():
                 if category_result:
                     category = category_result[0]
                     st.write(f"Category: {category}")
-                # show comments
                 query = f"SELECT order_reviews.review_comment_message, order_reviews.review_score, order_reviews.review_creation_date FROM order_reviews JOIN order_items ON order_reviews.order_id = order_items.order_id WHERE order_items.product_id = '{product_id_input}' ORDER BY order_reviews.review_creation_date DESC"
                 result = execute_query(query)
                 data = []
@@ -61,7 +59,6 @@ def main():
                         else:
                             data.append([row[0], row[2], "negative"])
                 df = pd.DataFrame(data, columns=["Comment", "Date Create", "Sentiment"])
-                # filter with date and sentiment
                 filtered_data = df
 
                 if start_date and end_date:

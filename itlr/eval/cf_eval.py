@@ -1,4 +1,4 @@
-"""Đánh giá Collaborative Filtering đúng chuẩn (Trụ cột B6).
+"""Đánh giá Collaborative Filtering đúng chuẩn.
 
 Hai giao thức:
   - leave_one_out : che 1 tương tác của mỗi user, đo khả năng model gợi ý lại đúng item.
@@ -21,9 +21,6 @@ from itlr.core.recommender import recommend_for_user
 from itlr.eval import metrics as M
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Tái dựng độ tương đồng item-based KHÔNG RÒ RỈ (chỉ từ tương tác TRAIN)
-# ─────────────────────────────────────────────────────────────────────────────
 def build_item_sim(train_pairs: Sequence[tuple], n_items: int, top_k: int = 50):
     """Dựng item_sim cosine co-occurrence + popularity CHỈ từ các cặp (user_pos, item_pos) train.
 
@@ -33,7 +30,6 @@ def build_item_sim(train_pairs: Sequence[tuple], n_items: int, top_k: int = 50):
         return csr_matrix((n_items, n_items)), np.zeros(n_items)
     users = np.array([u for u, _ in train_pairs])
     items = np.array([i for _, i in train_pairs])
-    # nén user id về 0..n_users-1
     uniq = {u: k for k, u in enumerate(sorted(set(users.tolist())))}
     rows = np.array([uniq[u] for u in users])
     n_users = len(uniq)
@@ -46,7 +42,6 @@ def build_item_sim(train_pairs: Sequence[tuple], n_items: int, top_k: int = 50):
     denom = np.sqrt(pop[r] * pop[c])
     denom[denom == 0] = 1.0
     sim = csr_matrix((v / denom, (r, c)), shape=(n_items, n_items))
-    # giữ top-k mỗi hàng
     sim = sim.tocsr()
     data, indices, indptr = [], [], [0]
     for rr in range(sim.shape[0]):
@@ -70,7 +65,6 @@ def temporal_split_clean(
 ) -> Dict[str, float]:
     """Temporal split KHÔNG RÒ RỈ: gom phần TRAIN của MỌI user -> train lại item_sim, rồi đo
     trên phần test (tương lai) của từng user. Đây là con số CF đáng tin nhất để báo cáo."""
-    # Train item_sim từ phần quá khứ của MỌI user (mật độ đủ lớn); chỉ ĐÁNH GIÁ trên subset.
     uids = list(histories.keys())
     n_items = len(item_list)
 
@@ -83,9 +77,9 @@ def temporal_split_clean(
         cut = max(1, int(len(hist) * (1 - test_ratio)))
         train, test = hist[:cut], set(hist[cut:])
         for p in train:
-            train_pairs.append((ucode, p))         # quá khứ -> luôn vào tập train sim
+            train_pairs.append((ucode, p))
         if test and (max_users is None or len(test_map) < max_users):
-            test_map[ucode] = (train, test)        # chỉ một subset dùng để đo
+            test_map[ucode] = (train, test)
 
     sim, pop = build_item_sim(train_pairs, n_items, top_k=top_k_neighbors)
     cf_model = {"item_sim": sim, "popularity": pop,

@@ -12,9 +12,9 @@ from scripts.scrape.sources.freecodecamp import FreeCodeCampScraper
 from scripts.scrape.sources.viblo import VibloScraper
 
 SCRAPERS: dict[str, type[BaseScraper]] = {
-    "viblo": VibloScraper,                 # VI — API JSON công khai
-    "devto": DevtoScraper,                 # EN — API JSON công khai (Forem)
-    "freecodecamp": FreeCodeCampScraper,   # EN — RSS (nội dung CC)
+    "viblo": VibloScraper,
+    "devto": DevtoScraper,
+    "freecodecamp": FreeCodeCampScraper,
 }
 
 

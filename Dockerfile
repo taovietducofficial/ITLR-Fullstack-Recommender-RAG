@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt ./
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Mã nguồn (artifacts/data nạp qua volume lúc chạy, không copy vào image).
+# Mã nguồn (var/artifacts, var/data nạp qua volume lúc chạy, không copy vào image).
 COPY itlr ./itlr
 COPY scripts ./scripts
 COPY pyproject.toml ./

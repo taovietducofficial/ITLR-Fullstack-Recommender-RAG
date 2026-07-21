@@ -1,0 +1,41 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  quality-node:
+    name: Quality gate (web)
+    uses: ./.github/workflows/reusable-node-ci.yml
+
+  quality-python:
+    name: Quality gate (itlr)
+    uses: ./.github/workflows/reusable-python-ci.yml
+
+  deploy:
+    name: Deploy (VPS)
+    needs: [quality-node, quality-python]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - name: SSH deploy
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            cd "${{ vars.DEPLOY_PATH }}"
+            git pull origin main
+            docker compose up -d --build

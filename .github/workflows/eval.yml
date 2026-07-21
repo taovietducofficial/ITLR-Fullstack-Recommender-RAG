@@ -1,8 +1,5 @@
 name: eval
 
-# CI cho khung đánh giá (Trụ cột G): mỗi push/PR chạy kiểm thử đơn vị các module metric/
-# significance/off-policy (numpy thuần, KHÔNG cần nạp model nặng) + smoke import pipeline.
-# Bộ eval đầy đủ (cần artifacts ~500MB) chạy thủ công bằng scripts/eval/run_all.py.
 
 on:
   push:

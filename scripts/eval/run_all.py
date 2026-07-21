@@ -1,4 +1,4 @@
-"""Tái lập TOÀN BỘ thực nghiệm bằng MỘT lệnh (Trụ cột G — reproducibility).
+"""Tái lập TOÀN BỘ thực nghiệm bằng MỘT lệnh (reproducibility).
 
 Chạy lần lượt: sinh nhãn -> ablation sạch -> ablation nhiễu -> CF eval -> off-policy ->
 (tùy chọn) LTR -> latency -> Cohen's Kappa. Mọi con số trong reports/ tái lập được từ đây.
@@ -37,12 +37,9 @@ def main():
     env["PYTHONIOENCODING"] = "utf-8"
 
     steps = [
-        # Hai benchmark: semantic (natural, mặc định) + keyword (cho test nhiễu/robustness)
         (["scripts/eval/make_judgments.py", "--natural", "--queries-per-cat", "4", "--simulate-human"], True),
         (["scripts/eval/make_judgments.py", "--out", "eval/relevance_keyword.csv", "--no-human"], True),
-        # 2A: semantic benchmark (sạch) -> độ hiểu ngữ nghĩa
         (["scripts/eval/run_evaluation.py", "--no-rerank"] + (["--quick"] if args.quick else []), True),
-        # 2B: keyword benchmark (nhiễu) -> độ bền
         (["scripts/eval/run_evaluation.py", "--judgments", "eval/relevance_keyword.csv", "--tag", "_kw",
           "--noisy", "--no-rerank"] + (["--max-queries", "20"] if args.quick else []), True),
         (["scripts/eval/eval_cf.py", "--max-users", "300" if args.quick else "800"], True),

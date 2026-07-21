@@ -24,7 +24,6 @@ class RecommenderEngine:
         self.cf_model = cf_model
         self.chatbot = chatbot
 
-    # ── Tab Tìm kiếm ──────────────────────────────────────────────────────────
     def search(self, query, item_type=None, min_pct=90):
         """Tìm kiếm ngữ nghĩa — logic hiểu truy vấn của tab Tìm kiếm.
 
@@ -41,8 +40,6 @@ class RecommenderEngine:
         understanding = understand_query(query, self.search_index.get("vocab") or frozenset())
         search_query = understanding["corrected"] or query
 
-        # Nếu truy vấn là một KHÁI NIỆM (vd "DBA", "RLHF", "SE") -> bổ sung tên đầy đủ +
-        # chủ đề để truy hồi đúng. safe_concept_match: không nhận nhầm "em bé"/"ai là ca sĩ".
         matched = None
         mkey = safe_concept_match(query)
         if mkey:
@@ -71,7 +68,6 @@ class RecommenderEngine:
             "corrected": bool(understanding["corrections"] or notes),
         }
 
-    # ── Tab Chatbot ───────────────────────────────────────────────────────────
     def chat(self, message, history=None):
         """Trả lời chatbot (off-topic gate + khái niệm-trước đã nằm trong EducationalChatbot)."""
         return self.chatbot.chat(message, history=history or [])
@@ -80,7 +76,6 @@ class RecommenderEngine:
         """Bản STREAMING: generator yield (event, data) — xem EducationalChatbot.chat_stream."""
         yield from self.chatbot.chat_stream(message, history=history or [])
 
-    # ── Tab Dành cho bạn (Collaborative Filtering) ─────────────────────────────
     def personas(self):
         """Danh sách hồ sơ người dùng mô phỏng: [{uid, label}]."""
         labels = self.cf_model["labels"]
@@ -122,8 +117,8 @@ def load_engine():
     from itlr.core.rerank import get_reranker
 
     model = SentenceTransformer(meta["model_name"])
-    ann = load_ann()           # FAISS nếu đã build + cài; None -> brute-force
-    reranker = get_reranker()  # cross-encoder nếu khả dụng; None -> bỏ tầng rerank
+    ann = load_ann()
+    reranker = get_reranker()
     search_index["ann"] = ann
     search_index["reranker"] = reranker
 
@@ -131,6 +126,5 @@ def load_engine():
         items, retrieval_model, search_index=search_index, embed_model=model,
         query_prefix=search_index["query_prefix"], ann=ann, reranker=reranker,
     )
-    # Vốn từ để mở rộng viết tắt / sửa lỗi chính tả cho ô Tìm kiếm (giống chatbot).
     search_index["vocab"] = chatbot.vocab
     return RecommenderEngine(items, model, search_index, cf_model, chatbot)

@@ -33,7 +33,7 @@ from itlr import config  # noqa: E402
 MODEL = "facebook/nllb-200-distilled-600M"
 CACHE_PATH = config.data_file("translation_cache.json")
 SKIP_VALUES = {"Đang cập nhật", "Tổng quát", "CNTT", ""}
-SAVE_EVERY = 200  # lưu cache ra đĩa sau mỗi N chuỗi dịch được
+SAVE_EVERY = 200
 
 
 def load_model():
@@ -56,7 +56,7 @@ def save_cache(cache: dict[str, str]):
     tmp = CACHE_PATH + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(cache, f, ensure_ascii=False)
-    os.replace(tmp, CACHE_PATH)  # ghi nguyên tử -> không hỏng cache nếu tắt giữa chừng
+    os.replace(tmp, CACHE_PATH)
 
 
 def translate_missing(texts: list[str], tok, mdl, batch_size: int, cache: dict[str, str]):
@@ -64,7 +64,7 @@ def translate_missing(texts: list[str], tok, mdl, batch_size: int, cache: dict[s
 
     vie = tok.convert_tokens_to_ids("vie_Latn")
     uniq = {t for t in texts if t and t.strip() and t not in SKIP_VALUES}
-    todo = sorted((t for t in uniq if t not in cache), key=len)  # sắp theo độ dài -> batch hiệu quả
+    todo = sorted((t for t in uniq if t not in cache), key=len)
     total = len(todo)
     print(f"  Tổng chuỗi duy nhất: {len(uniq)} | đã có trong cache: {len(uniq)-total} | "
           f"cần dịch: {total}", flush=True)
@@ -94,8 +94,8 @@ def translate_missing(texts: list[str], tok, mdl, batch_size: int, cache: dict[s
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--in", dest="inp", default="data/it_learning_items_real.csv")
-    ap.add_argument("--out", dest="out", default="data/it_learning_items_real_vi.csv")
+    ap.add_argument("--in", dest="inp", default="var/data/it_learning_items_real.csv")
+    ap.add_argument("--out", dest="out", default="var/data/it_learning_items_real_vi.csv")
     ap.add_argument("--batch", type=int, default=32)
     ap.add_argument("--fields", default="title,description")
     args = ap.parse_args()
@@ -115,7 +115,6 @@ def main():
         all_texts += df[f].astype(str).tolist()
     translate_missing(all_texts, tok, mdl, args.batch, cache)
 
-    # Áp cache vào dataframe (chuỗi không có trong cache -> giữ nguyên, vd placeholder VI).
     for f in fields:
         df[f] = df[f].astype(str).map(lambda s: cache.get(s, s))
     df.to_csv(args.out, index=False, encoding="utf-8")

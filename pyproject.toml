@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Hệ thống gợi ý tài liệu & khóa học CNTT + chatbot định hướng học tập (RAG đa intent)"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "Proprietary" }
 authors = [{ name = "TÀO VIỆT ĐỨC", email = "taovietduc.work@gmail.com" }]
 keywords = ["recommender-system", "rag", "chatbot", "fastapi", "vietnamese-nlp"]
 dynamic = ["dependencies"]
@@ -29,3 +29,14 @@ include = ["itlr*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = [
+    "E501",  # nhiều docstring/comment tiếng Việt dài hơn line-length — không đáng để bẻ dòng
+    "E702",  # `a; b` xuất hiện có chủ đích trong vài script eval ngắn — không đáng viết lại tay
+]

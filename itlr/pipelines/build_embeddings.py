@@ -13,7 +13,6 @@ Lưu ý: chạy bằng CÙNG Python dùng để chạy app (python hệ thống)
 import os
 import pickle
 
-# Dùng model đã cache, không ping HuggingFace -> tránh treo khi mạng chậm/bị chặn
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
@@ -56,14 +55,12 @@ def main():
     n = len(items)
     print(f"Items: {n}")
 
-    preset = resolve_preset()  # chọn qua EMBEDDING_MODEL (mặc định e5-base)
+    preset = resolve_preset()
     print(f"Embedding model: {preset['model_name']}")
     model = load_model(preset["model_name"])
     texts = [build_text(row) for _, row in items.iterrows()]
     embeddings = encode_passages(model, texts, preset, batch_size=64, show_progress_bar=True)
 
-    # Lưu embeddings + meta (tên model + tiền tố query/passage). Calibration điểm
-    # tính THEO TỪNG TRUY VẤN trong search_by_embedding() nên không lưu lo/hi ở đây.
     pickle.dump(embeddings, open(os.path.join(ARTIFACTS, "embeddings.pkl"), "wb"))
     pickle.dump(
         meta_from_preset(preset),
@@ -71,7 +68,6 @@ def main():
     )
     print(f"Đã lưu embeddings.pkl {embeddings.shape} + search_meta.pkl")
 
-    # Chỉ mục vector ANN (FAISS) cho truy hồi nhanh, mở rộng được.
     try:
         from itlr.core.ann import build_ann
 
@@ -80,7 +76,7 @@ def main():
             print(f"Đã build chỉ mục ANN ({backend}) -> ann_index.*")
         else:
             print("Bỏ qua ANN (chưa cài faiss/hnswlib) — app sẽ brute-force như cũ.")
-    except Exception as exc:  # không chặn build nếu ANN lỗi
+    except Exception as exc:
         print(f"Bỏ qua ANN do lỗi: {exc}")
 
     build_char_index(items)

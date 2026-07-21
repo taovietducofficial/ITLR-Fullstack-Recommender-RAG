@@ -7,7 +7,7 @@
 #   docker compose down -v              # dừng + XÓA dữ liệu (pg + cache model)
 #
 # Biến môi trường lấy từ file .env cùng thư mục (xem .env.docker.example).
-# YÊU CẦU: thư mục ./artifacts phải có model artifacts (chạy `python scripts/build_all.py`
+# YÊU CẦU: thư mục ./var/artifacts phải có model artifacts (chạy `python scripts/build_all.py`
 # trước, hoặc copy artifacts vào) — recommender mount read-only từ đó.
 # ─────────────────────────────────────────────────────────────────────────────
 services:
@@ -48,7 +48,6 @@ services:
       EMBEDDING_MODEL: minilm           # artifacts build bằng minilm (đa ngữ); khớp search_meta.pkl
       DISABLE_RERANKER: "1"             # bỏ cross-encoder (~1.1GB) -> khởi động nhanh/nhẹ; search 2 tầng vẫn tốt
       # LLM cho chatbot (tùy chọn) — bỏ trống thì chạy tổng hợp cục bộ offline:
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       # Ollama (LLM local MIỄN PHÍ) -> chatbot trò chuyện tự nhiên trong IT. Recommender trong
       # Docker gọi Ollama chạy trên máy HOST qua host.docker.internal.
@@ -56,8 +55,8 @@ services:
       OLLAMA_BASE_URL: http://host.docker.internal:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
     volumes:
-      - ./artifacts:/app/artifacts:ro      # model artifacts (~550MB) — không bake vào image
-      - ./data:/app/data:ro                # catalog/CSV (recommender chỉ đọc khi cần)
+      - ./var/artifacts:/app/artifacts:ro  # model artifacts (~550MB) — không bake vào image
+      - ./var/data:/app/data:ro            # catalog/CSV (recommender chỉ đọc khi cần)
       - hf-cache:/root/.cache/huggingface  # cache model -> không tải lại sau restart
     expose:
       - "8000"
@@ -88,7 +87,7 @@ services:
       # Bật khi chạy sau HTTPS/reverse-proxy (cookie secure). Để trống nếu chạy HTTP thuần:
       # NODE_ENV: production
     volumes:
-      - ./data:/data                       # CSV: seed 4.088 khóa THẬT + GHI cộng dồn file upload (cần quyền ghi)
+      - ./var/data:/data                   # CSV: seed 4.088 khóa THẬT + GHI cộng dồn file upload (cần quyền ghi)
     ports:
       - "${WEB_PORT:-3000}:3000"
 

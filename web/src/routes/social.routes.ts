@@ -16,16 +16,14 @@ const avatarUpload = multer({
   fileFilter: (_req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
-// ── Đính kèm trong tin nhắn: ảnh / video / tài liệu (PDF·DOCX·XLS) ─────────────
 const DM_DOC_EXT = new Set([".pdf", ".doc", ".docx", ".xls", ".xlsx"]);
 const DM_IMG_EXT = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp"]);
 const extOf = (name: string) => path.extname(name || "").toLowerCase();
-// multer 1.x giải mã originalname theo latin1 -> sửa lại UTF-8 cho tên tiếng Việt.
 const utf8name = (name: string) => Buffer.from(name, "latin1").toString("utf8");
 
 const dmUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 60 * 1024 * 1024 }, // video tới 60MB
+  limits: { fileSize: 60 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const e = extOf(file.originalname);
     if (file.fieldname === "image") cb(null, DM_IMG_EXT.has(e));
@@ -35,14 +33,12 @@ const dmUpload = multer({
   },
 });
 
-// Cột chọn cho 1 tin nhắn (kèm cờ media + id chia sẻ) — KHÔNG kéo bytea nặng về.
 const DM_COLS = `id, sender_id, content, created_at, read_at,
   (image_data IS NOT NULL) AS has_image,
   (video_data IS NOT NULL) AS has_video,
   (doc_data   IS NOT NULL) AS has_doc, doc_original,
   shared_post_id, shared_course_id`;
 
-// Gắn thêm bản xem trước cho bài viết / khóa học được chia sẻ trong tin nhắn.
 async function enrichMessages(rows: DmRow[]): Promise<DmRow[]> {
   if (!rows.length) return rows;
   const postIds = [...new Set(rows.map((r) => r.shared_post_id).filter(Boolean))];
@@ -74,7 +70,6 @@ async function enrichMessages(rows: DmRow[]): Promise<DmRow[]> {
   return rows;
 }
 
-// ── Avatar: phục vụ ảnh từ DB ──────────────────────────────────────────────────
 socialRouter.get("/api/avatar/:id", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(404).end();
@@ -95,7 +90,6 @@ socialRouter.post("/api/account/avatar", requireAuth, avatarUpload.single("avata
   res.redirect("/account");
 });
 
-// Đổi tên hiển thị (cập nhật lại JWT để navbar đổi theo).
 socialRouter.post("/account/profile", requireAuth, async (req, res) => {
   const name = String(req.body?.name || "").trim().slice(0, 80);
   if (name) {
@@ -105,7 +99,6 @@ socialRouter.post("/account/profile", requireAuth, async (req, res) => {
   res.redirect("/account");
 });
 
-// ── Trang hồ sơ user: bài viết + nút kết bạn / nhắn tin ────────────────────────
 socialRouter.get("/u/:id", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(404).render("error", { title: "404", message: "Không tìm thấy người dùng." });
@@ -125,7 +118,6 @@ socialRouter.get("/u/:id", requireAuth, async (req, res) => {
   res.render("profile", { title: profile.name, profile, posts, status, friendCount: fc.n });
 });
 
-// ── Kết bạn ────────────────────────────────────────────────────────────────────
 socialRouter.post("/api/friends/request", requireAuth, async (req, res) => {
   const to = parseInt(req.body?.to, 10);
   const me = req.user!.id;
@@ -140,7 +132,6 @@ socialRouter.post("/api/friends/request", requireAuth, async (req, res) => {
     [me, to, intro || null]
   );
   res.json({ ok: true, status: "pending_out" });
-  // Realtime: báo lời mời kết bạn tới người nhận.
   sendToUser(to, "friend_request", { from: me, name: req.user!.name, intro: intro || "" });
 });
 
@@ -152,7 +143,6 @@ socialRouter.post("/api/friends/accept", requireAuth, async (req, res) => {
     [from, req.user!.id]
   );
   res.json({ ok: true });
-  // Realtime: báo cho người đã gửi lời mời biết được chấp nhận.
   sendToUser(from, "friend_accept", { by: req.user!.id, name: req.user!.name });
 });
 
@@ -167,7 +157,6 @@ socialRouter.post("/api/friends/remove", requireAuth, async (req, res) => {
   res.json({ ok: true, status: "none" });
 });
 
-// ── Trang bạn bè: lời mời đến + danh sách bạn ─────────────────────────────────
 socialRouter.get("/friends", requireAuth, async (req, res) => {
   const me = req.user!.id;
   const [incoming, friends] = await Promise.all([
@@ -186,7 +175,6 @@ socialRouter.get("/friends", requireAuth, async (req, res) => {
   res.render("friends", { title: "Bạn bè", incoming, friends });
 });
 
-// ── Nhắn tin (chỉ giữa bạn bè) ────────────────────────────────────────────────
 socialRouter.get("/messages", requireAuth, async (req, res) => {
   const me = req.user!.id;
   const friends = await query<UserCard>(
@@ -195,7 +183,7 @@ socialRouter.get("/messages", requireAuth, async (req, res) => {
        JOIN users u ON u.id = CASE WHEN f.requester_id = $1 THEN f.addressee_id ELSE f.requester_id END
       WHERE f.status = 'accepted' AND (f.requester_id = $1 OR f.addressee_id = $1) ORDER BY u.name`, [me]
   );
-  friends.forEach((u) => (u.online = isOnline(u.id))); // presence ban đầu (SSE giữ cho cập nhật)
+  friends.forEach((u) => (u.online = isOnline(u.id)));
 
   let active: UserCard | null = null;
   let messages: DmRow[] = [];
@@ -214,7 +202,6 @@ socialRouter.get("/messages", requireAuth, async (req, res) => {
             ORDER BY id`, [me, other]
         )
       );
-      // Mở đoạn chat = đã đọc các tin nhận từ người này -> báo người gửi "đã xem".
       const read = await query<{ id: number }>(
         `UPDATE direct_messages SET read_at = now()
           WHERE recipient_id = $1 AND sender_id = $2 AND read_at IS NULL RETURNING id`, [me, other]
@@ -225,7 +212,6 @@ socialRouter.get("/messages", requireAuth, async (req, res) => {
   res.render("messages", { title: "Tin nhắn", friends, active, messages, me });
 });
 
-// Gửi tin nhắn: hỗ trợ multipart (ảnh/video/tài liệu) HOẶC JSON (text / chia sẻ post-khóa học).
 socialRouter.post(
   "/api/messages",
   requireAuth,
@@ -242,7 +228,6 @@ socialRouter.post(
     const video = files?.video?.[0];
     const doc = files?.doc?.[0];
 
-    // Chia sẻ bài viết / khóa học vào đoạn chat (kiểm tra tồn tại để FK không lỗi).
     let sharedPostId: number | null = parseInt(req.body?.shared_post_id, 10);
     if (Number.isNaN(sharedPostId)) sharedPostId = null;
     else if (!(await query("SELECT 1 FROM posts WHERE id=$1", [sharedPostId])).length) sharedPostId = null;
@@ -269,12 +254,10 @@ socialRouter.post(
     );
     const [message] = await enrichMessages(rows);
     res.json({ ok: true, message });
-    // Realtime: đẩy tin nhắn tới người nhận ngay lập tức.
     sendToUser(to, "dm", { from: me, fromName: req.user!.name, message });
   }
 );
 
-// ── Realtime: "đang soạn tin" — chỉ đẩy SSE tạm thời, không lưu DB ────────────
 socialRouter.post("/api/messages/:userId/typing", requireAuth, async (req, res) => {
   const me = req.user!.id;
   const other = parseInt(req.params.userId, 10);
@@ -284,7 +267,6 @@ socialRouter.post("/api/messages/:userId/typing", requireAuth, async (req, res) 
   sendToUser(other, "typing", { from: me, name: req.user!.name });
 });
 
-// ── Realtime: đánh dấu ĐÃ ĐỌC các tin nhận từ người này -> báo người gửi "đã xem" ──
 socialRouter.post("/api/messages/:userId/read", requireAuth, async (req, res) => {
   const me = req.user!.id;
   const other = parseInt(req.params.userId, 10);
@@ -298,7 +280,6 @@ socialRouter.post("/api/messages/:userId/read", requireAuth, async (req, res) =>
   if (rows.length) sendToUser(other, "dm_read", { by: me, at: new Date().toISOString() });
 });
 
-// ── Backup lịch sử trò chuyện: tải về file HTML tự chứa (chỉ chủ cuộc trò chuyện) ──
 function htmlEscape(s: string): string {
   return String(s ?? "").replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string)
@@ -391,10 +372,9 @@ socialRouter.get("/api/messages/:userId", requireAuth, async (req, res) => {
   res.json({ messages: rows, me: req.user!.id });
 });
 
-// ── Phục vụ media của tin nhắn (chỉ người gửi/người nhận xem được) ─────────────
 socialRouter.get("/api/messages/media/:id/:kind", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const kind = req.params.kind; // image | video | doc
+  const kind = req.params.kind;
   if (Number.isNaN(id) || !["image", "video", "doc"].includes(kind)) return res.status(404).send("Not found");
   const rows = await query<DmMediaRow>(
     `SELECT sender_id, recipient_id, ${kind}_data AS data, ${kind}_mime AS mime, doc_original
@@ -433,7 +413,6 @@ socialRouter.get("/api/messages/media/:id/:kind", requireAuth, async (req, res) 
   res.send(m.data);
 });
 
-// Danh sách bạn bè (cho hộp thoại "Chia sẻ vào tin nhắn").
 socialRouter.get("/api/friends/list", requireAuth, async (req, res) => {
   const me = req.user!.id;
   const friends = await query<UserCard>(
@@ -445,11 +424,9 @@ socialRouter.get("/api/friends/list", requireAuth, async (req, res) => {
   res.json({ friends });
 });
 
-// ── Chia sẻ bài viết về trang cá nhân ─────────────────────────────────────────
 socialRouter.post("/api/posts/:id/share", requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (Number.isNaN(id)) return res.status(400).json({ error: "Không hợp lệ." });
-  // Lấy gốc thật: nếu bài này cũng là share thì trỏ về bài gốc đầu tiên.
   const src = await query<{ shared_from: number | null }>("SELECT shared_from FROM posts WHERE id = $1", [id]);
   if (!src.length) return res.status(404).json({ error: "Bài viết không tồn tại." });
   const origin = src[0].shared_from || id;
@@ -458,7 +435,6 @@ socialRouter.post("/api/posts/:id/share", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// Lỗi từ multer (file quá lớn...) -> trả JSON rõ ràng thay vì trang HTML 500.
 socialRouter.use((err: any, _req: any, res: any, next: any) => {
   if (err instanceof multer.MulterError) {
     const msg = err.code === "LIMIT_FILE_SIZE"

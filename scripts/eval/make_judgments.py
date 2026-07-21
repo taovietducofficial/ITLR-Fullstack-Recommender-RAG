@@ -1,7 +1,7 @@
-"""Sinh nhãn liên quan (relevance judgments) cho khung đánh giá — Trụ cột B2 + B3.
+"""Sinh nhãn liên quan (relevance judgments) cho khung đánh giá.
 
 Đầu ra:
-  1) data/eval/relevance_judgments.csv  (B2 — nhãn bán-tự-động, dùng TRAIN/dev)
+  1) data/eval/relevance_judgments.csv  (nhãn bán-tự-động, dùng TRAIN/dev)
        Cột: query_id, query, category, topic, item_id, grade
        Quy tắc (rule-based trên TOÀN catalog, KHÔNG dùng retrieval -> không thiên lệch
        về hệ thống đang đánh giá):
@@ -13,12 +13,12 @@
        Cách này giữ tập liên quan TẬP TRUNG (vài chục–vài trăm item) -> Recall/MAP có ý nghĩa,
        đồng thời tránh "vòng tròn" vì nhãn sinh từ metadata, không từ điểm của hệ thống.
 
-  2) data/eval/human_judgments.csv  (B3 — KHUNG nhãn vàng người gán, dùng TEST sạch)
+  2) data/eval/human_judgments.csv  (KHUNG nhãn vàng người gán, dùng TEST sạch)
        Lấy mẫu phân tầng ~N cặp (query, item) trải đều các mức grade tự động -> cột
        `human_label` để NGƯỜI gán tay (1 = liên quan, 0 = không). Cột `auto_grade` giữ để
        tính Cohen's Kappa (đồng thuận auto vs người) sau khi gán xong.
        Cờ --simulate-human: điền `human_label` bằng MÔ PHỎNG có nhiễu (CHỈ để chạy thử
-       pipeline đầu-cuối) — phải thay bằng nhãn người THẬT trước khi đưa vào khóa luận.
+       pipeline đầu-cuối) — phải thay bằng nhãn người THẬT trước khi dùng làm số liệu chính thức.
 
 Cách chạy:
     python scripts/eval/make_judgments.py
@@ -34,20 +34,15 @@ import random
 import sys
 from collections import Counter
 
-# cho phép `python scripts/eval/make_judgments.py` từ thư mục gốc
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import pandas as pd  # noqa: E402
 
 from itlr import config  # noqa: E402
-from itlr.core.recommender import normalize_text, parse_topics  # noqa: E402
+from itlr.core.recommender import parse_topics  # noqa: E402
 
-# Một số chuyên mục "rác"/quá nhỏ -> bỏ khỏi benchmark
 SKIP_CATEGORIES = {"Tài liệu cộng đồng"}
 
-# Chọn topic làm truy vấn sao cho TẬP LIÊN QUAN tập trung (Recall/MAP có ý nghĩa):
-#   - tần suất TRONG chuyên mục ∈ [MIN_CAT_FREQ, MAX_CAT_FREQ]  (đủ lớn, không quá lớn)
-#   - tần suất TOÀN catalog ≤ MAX_TOTAL_FREQ  (tránh topic dùng tràn lan -> set khổng lồ)
 MIN_CAT_FREQ = 20
 MAX_CAT_FREQ = 320
 MAX_TOTAL_FREQ = 750
@@ -59,7 +54,6 @@ def top_topics_per_category(items: pd.DataFrame, per_cat: int) -> dict:
     Tần suất vừa phải -> tập liên quan tập trung (vài chục–vài trăm item) thay vì hàng
     nghìn, để Recall@K / MAP / NDCG@K đều mang ý nghĩa (catalog synthetic dùng lại topic
     rất dày nên topic phổ biến nhất sẽ phủ cả nghìn item)."""
-    # tần suất topic toàn catalog (để loại topic dùng tràn lan)
     total_freq: Counter = Counter()
     item_topics_all = [parse_topics(t) for t in items["topics"]]
     for ts in item_topics_all:
@@ -74,14 +68,13 @@ def top_topics_per_category(items: pd.DataFrame, per_cat: int) -> dict:
             for t in parse_topics(topics_str):
                 if len(t) > 2:
                     counter[t] += 1
-        # ưu tiên topic tần suất trung bình (gần MAX_CAT_FREQ) cho tập liên quan đẹp
         eligible = [
             t for t, c in counter.items()
             if MIN_CAT_FREQ <= c <= MAX_CAT_FREQ and total_freq[t] <= MAX_TOTAL_FREQ
         ]
         eligible.sort(key=lambda t: counter[t], reverse=True)
         topics = eligible[:per_cat]
-        if len(topics) < per_cat:  # nới điều kiện nếu chuyên mục thiếu topic vừa phải
+        if len(topics) < per_cat:
             extra = [t for t, c in counter.most_common() if t not in topics and c >= 5]
             topics += extra[: per_cat - len(topics)]
         if topics:
@@ -96,7 +89,6 @@ def build_queries(topic_map: dict) -> list:
     for cat, topics in topic_map.items():
         for topic in topics:
             qid += 1
-            # truy vấn tự nhiên: tên topic + gợi ý chuyên mục (mô phỏng người dùng gõ)
             query_text = f"{topic} {cat}".strip()
             queries.append({
                 "query_id": f"Q{qid:03d}",
@@ -107,19 +99,12 @@ def build_queries(topic_map: dict) -> list:
     return queries
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Chế độ NATURAL (Bước nâng cấp): truy vấn = câu hỏi tiếng Việt tự nhiên từ glossary,
-# KHÔNG chứa token topic tiếng Anh -> khớp từ vựng không còn tầm thường, buộc phải HIỂU
-# NGỮ NGHĨA mới xếp đúng. Phá "trần lexical" của benchmark synthetic.
-# ─────────────────────────────────────────────────────────────────────────────
 import json  # noqa: E402
 
-from itlr.core.recommender import strip_accents  # noqa: E402
 
 GLOSSARY_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     "itlr", "chatbot", "data", "it_glossary.json")
-# giữ tập liên quan tập trung: tổng tần suất các topic mục tiêu nằm trong khoảng này
 NAT_MIN_TOTAL, NAT_MAX_TOTAL = 30, 900
 
 
@@ -133,21 +118,21 @@ def _mask_terms(concept: dict, target_topics: set) -> set:
     for s in list(concept.get("aliases", [])) + list(target_topics):
         for tok in str(s).lower().split():
             tok = tok.strip(".,:;()\"'")
-            if len(tok) > 1 and tok.isascii():       # chỉ giữ token tiếng Anh
+            if len(tok) > 1 and tok.isascii():
                 terms.add(tok)
     return terms
 
 
 def _natural_query_text(concept: dict, target_topics: set, max_tokens: int = 28) -> str:
     """Dựng câu truy vấn từ định nghĩa, chỉ MASK token topic tiếng Anh; giữ nguyên tiếng Việt."""
-    definition = str(concept.get("definition", "")).split(". ")[0]  # câu đầu
+    definition = str(concept.get("definition", "")).split(". ")[0]
     mask = _mask_terms(concept, target_topics)
     kept = []
     for raw in definition.split():
         word = raw.strip(".,:;()\"'")
         if not word:
             continue
-        if word.isascii() and word.lower() in mask:   # chỉ bỏ token tiếng Anh lộ topic
+        if word.isascii() and word.lower() in mask:
             continue
         kept.append(word)
         if len(kept) >= max_tokens:
@@ -160,7 +145,6 @@ def load_glossary_natural_queries(items: pd.DataFrame, max_per_cat: int) -> list
     with open(GLOSSARY_PATH, encoding="utf-8") as f:
         concepts = json.load(f)["concepts"]
 
-    # tần suất + chuyên mục thống lĩnh của từng topic catalog
     total_freq: Counter = Counter()
     topic_cat: dict = {}
     for topics_str, cat in zip(items["topics"], items["category"]):
@@ -177,27 +161,25 @@ def load_glossary_natural_queries(items: pd.DataFrame, max_per_cat: int) -> list
         tot = sum(total_freq[t] for t in ttopics)
         if not (NAT_MIN_TOTAL <= tot <= NAT_MAX_TOTAL):
             continue
-        # chuyên mục mục tiêu = chuyên mục thống lĩnh gộp trên các topic
         cat_votes: Counter = Counter()
         for t in ttopics:
             cat_votes.update(topic_cat[t])
         target_cat = cat_votes.most_common(1)[0][0]
         qtext = _natural_query_text(c, ttopics)
-        if len(qtext.split()) < 5:        # quá ngắn -> bỏ (không đủ ngữ cảnh)
+        if len(qtext.split()) < 5:
             continue
         by_cat.setdefault(target_cat, []).append({
             "topics": ttopics, "category": target_cat, "query": qtext,
             "concept": c.get("name", ""), "ntot": tot,
         })
 
-    # cân bằng: tối đa max_per_cat truy vấn/chuyên mục, ưu tiên tập liên quan vừa phải
     queries, qid = [], 0
     for cat, lst in by_cat.items():
-        lst.sort(key=lambda q: abs(q["ntot"] - 250))   # gần 250 item liên quan là đẹp
+        lst.sort(key=lambda q: abs(q["ntot"] - 250))
         for q in lst[:max_per_cat]:
             qid += 1
             q["query_id"] = f"Q{qid:03d}"
-            q["topic"] = sorted(q["topics"])[0]        # giữ trường 'topic' cho tương thích CSV
+            q["topic"] = sorted(q["topics"])[0]
             queries.append(q)
     return queries
 
@@ -217,7 +199,6 @@ def grade_item(query: dict, row_category: str, row_topics: set) -> int:
 
 def generate_relevance(items: pd.DataFrame, queries: list) -> list:
     """Quét catalog, sinh các dòng qrels (chỉ lưu grade >= 1)."""
-    # tiền xử lý topic của từng item một lần
     item_topics = [parse_topics(t) for t in items["topics"]]
     item_cats = items["category"].tolist()
     item_ids = items["item_id"].astype(int).tolist()
@@ -274,7 +255,6 @@ def sample_human_pool(qrels_rows: list, all_item_ids: list, pool_size: int, seed
         rng.shuffle(g2); rng.shuffle(g1)
         chosen += g2[: max(1, per_q // 3)]
         chosen += g1[: max(1, per_q // 3)]
-        # negatives: item ngẫu nhiên không thuộc tập liên quan của query
         n_neg = max(1, per_q - len(chosen))
         negs = []
         tries = 0
@@ -297,7 +277,7 @@ def simulate_human(pool: list, seed: int) -> None:
     """[CHỈ ĐỂ THỬ PIPELINE] Điền human_label mô phỏng: ~88% đồng thuận với auto.
 
     auto_grade>=1 -> human 1, auto_grade 0 -> human 0, lật nhãn ~12% để tạo bất đồng
-    thực tế (đo Cohen's Kappa < 1). KHÔNG dùng cho số liệu khóa luận chính thức.
+    thực tế (đo Cohen's Kappa < 1). KHÔNG dùng cho số liệu báo cáo chính thức.
     """
     rng = random.Random(seed + 99)
     for r in pool:

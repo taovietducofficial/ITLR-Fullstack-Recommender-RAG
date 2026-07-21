@@ -1,14 +1,14 @@
-"""Đánh giá trên NHÃN VÀNG NGƯỜI GÁN + đo đồng thuận auto vs người (Trụ cột B3).
+"""Đánh giá trên NHÃN VÀNG NGƯỜI GÁN + đo đồng thuận auto vs người.
 
 Hai đầu ra chính:
   1) Cohen's Kappa giữa nhãn tự động (auto_grade) và nhãn người (human_label) -> chứng minh
-     quy trình sinh nhãn tự động (B2) đáng tin tới mức nào (tức số liệu TRAIN không rác).
+     quy trình sinh nhãn tự động đáng tin tới mức nào (tức số liệu TRAIN không rác).
   2) (tùy chọn --with-ranking) Metric xếp hạng của các cấu hình trên TEST set người gán
      theo lối pooled evaluation — đây là con số SẠCH (không vòng tròn).
 
 `data/eval/human_judgments.csv` cần cột: query_id, query, item_id, auto_grade, human_label.
 human_label trống -> bỏ qua (chưa gán). Nếu file đang là mô phỏng (--simulate-human ở
-make_judgments) thì Kappa phản ánh mức nhiễu mô phỏng, KHÔNG dùng cho khóa luận chính thức.
+make_judgments) thì Kappa phản ánh mức nhiễu mô phỏng, KHÔNG dùng cho số liệu báo cáo chính thức.
 
 Cách chạy:
     python scripts/eval/evaluate_human.py                 # chỉ Cohen's Kappa (nhanh, không cần model)
@@ -24,7 +24,6 @@ from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from itlr import config  # noqa: E402
@@ -42,7 +41,6 @@ def load_human(path: str) -> pd.DataFrame:
 def kappa_report(df: pd.DataFrame) -> dict:
     kappa = significance.cohen_kappa(df["auto_bin"].tolist(), df["human_label"].tolist())
     agree = float((df["auto_bin"] == df["human_label"]).mean())
-    # confusion
     tp = int(((df["auto_bin"] == 1) & (df["human_label"] == 1)).sum())
     tn = int(((df["auto_bin"] == 0) & (df["human_label"] == 0)).sum())
     fp = int(((df["auto_bin"] == 1) & (df["human_label"] == 0)).sum())
@@ -67,7 +65,6 @@ def ranking_on_human(df: pd.DataFrame):
         char_vectorizer=si["char_vectorizer"], char_matrix=si["char_matrix"],
         query_prefix=si.get("query_prefix", ""), ann=si.get("ann"), reranker=si.get("reranker"),
     )
-    pos_for_id = {int(i): p for p, i in enumerate(engine.items["item_id"].astype(int).to_numpy())}
     id_for_pos = engine.items["item_id"].astype(int).to_numpy()
 
     configs = P.ablation_configs()
@@ -83,9 +80,7 @@ def ranking_on_human(df: pd.DataFrame):
             query = group["query"].iloc[0]
             labeled = {int(r.item_id): int(r.human_label) for r in group.itertuples()}
             ranking = P.rank(ctx, query, cfg, top_n=2000)
-            # giữ thứ tự hệ thống, chỉ trên item đã gán
             ranked_ids = [int(id_for_pos[p]) for p in ranking if int(id_for_pos[p]) in labeled]
-            # item đã gán nhưng hệ không xếp -> nối đuôi (rel theo nhãn)
             tail = [i for i in labeled if i not in set(ranked_ids)]
             rels = [labeled[i] for i in ranked_ids] + [labeled[i] for i in tail]
             n_rel = sum(labeled.values())
@@ -136,7 +131,6 @@ def main():
         for name, a in agg.items():
             print(f"  [{name}] NDCG@5={a.get('NDCG@5',0):.4f} P@3={a.get('P@3',0):.4f}")
             lines.append(f"| {name} | " + " | ".join(f"{a.get(k,0):.4f}" for k in keys) + " |")
-        # kiểm định Full(+CE) vs BM25
         if "+ Cross-Encoder" in per_cfg and "BM25 only" in per_cfg:
             cmp = significance.compare(per_cfg["+ Cross-Encoder"], per_cfg["BM25 only"])
             lines.append(f"\n**+ Cross-Encoder vs BM25 (NDCG@5):** Δ={cmp['mean_diff']:+.4f}, "
@@ -147,7 +141,7 @@ def main():
     os.makedirs(out.parent, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
-    print(f"\n-> reports/human_eval.md")
+    print("\n-> reports/human_eval.md")
 
 
 if __name__ == "__main__":

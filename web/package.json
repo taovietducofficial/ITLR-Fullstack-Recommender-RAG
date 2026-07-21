@@ -9,6 +9,10 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts",
+    "test": "vitest run --coverage",
     "migrate": "tsx src/db/migrate.ts",
     "seed": "tsx src/db/seed-courses.ts",
     "sync": "tsx src/db/sync-courses.ts",
@@ -47,6 +51,12 @@
     "@types/pg": "^8.11.6",
     "@types/pg-copy-streams": "^1.2.5",
     "tsx": "^4.19.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "@eslint/js": "^9.17.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript-eslint": "^8.18.0",
+    "vitest": "^4.1.10"
   }
 }

@@ -21,11 +21,6 @@ def _key(text):
     return strip_accents(normalize_text(text))
 
 
-# ───────────────────────── KHÁI NIỆM (nạp từ file dữ liệu) ─────────────────────────
-# Giải thích khái niệm CNTT tách ra file dữ liệu riêng, dễ mở rộng/biên tập:
-#   itlr/chatbot/data/it_glossary.json  (mỗi mục: name, aliases, category, level,
-#   definition, topics, related, example). Loader giữ các khóa code cũ đang dùng
-#   (name/aliases/def/topics) và bổ sung category/related/example cho câu trả lời giàu hơn.
 _GLOSSARY_PATH = Path(__file__).resolve().parent / "data" / "it_glossary.json"
 
 
@@ -50,10 +45,6 @@ def _load_concepts(path=_GLOSSARY_PATH):
 CONCEPTS = _load_concepts()
 
 
-# ───────────────────────── KHO VAI TRÒ (nạp từ file dữ liệu) ─────────────────────────
-# Toàn bộ vai trò IT (lộ trình + phỏng vấn + lương + tư vấn chọn nghề) tách ra file dữ liệu:
-#   itlr/chatbot/data/it_roles.json  — thêm vai trò = thêm mục JSON, KHÔNG sửa code.
-# CAREERS được DỰNG từ ROLES để giữ tương thích code cũ (name, aliases, milestones=[(stage, skills)]).
 _ROLES_PATH = Path(__file__).resolve().parent / "data" / "it_roles.json"
 
 
@@ -63,8 +54,8 @@ def _load_roles(path=_ROLES_PATH):
 
 
 _ROLES_DATA = _load_roles()
-ROLES = _ROLES_DATA["roles"]                       # nguồn đầy đủ: description/roadmap/interview/salary
-CAREER_GUIDANCE = _ROLES_DATA.get("career_guidance", [])  # [(sở thích, gợi ý vai trò)]
+ROLES = _ROLES_DATA["roles"]
+CAREER_GUIDANCE = _ROLES_DATA.get("career_guidance", [])
 
 CAREERS = {
     key: {
@@ -77,8 +68,6 @@ CAREERS = {
 
 
 
-# ───────────────────────── ĐỒ THỊ "HỌC TIẾP" ─────────────────────────
-# đã thạo kỹ năng (key) -> gợi ý học tiếp theo (theo thứ tự ưu tiên).
 NEXT_SKILL = {
     "python": ["OOP", "SQL", "Git", "Data Structures"],
     "oop": ["Data Structures", "Design Pattern", "SQL"],
@@ -101,7 +90,6 @@ NEXT_SKILL = {
 }
 
 
-# Phán xét ngắn cho các cặp so sánh kinh điển (key = frozenset token chuẩn hóa).
 COMPARISONS = {
     frozenset({"java", "python"}): "**Python** dễ học, cú pháp ngắn, mạnh ở AI/Data & dựng nhanh; **Java** tĩnh kiểu, hiệu năng ổn định, mạnh ở hệ thống lớn/Android doanh nghiệp. → Mới bắt đầu hoặc làm AI/Data chọn Python; backend doanh nghiệp/Android chọn Java.",
     frozenset({"react", "angular"}): "**React** là thư viện UI linh hoạt, hệ sinh thái lớn, dễ bắt đầu; **Angular** là framework đầy đủ (TypeScript, DI, router) hợp dự án lớn cần khuôn khổ chặt. → Linh hoạt & cộng đồng chọn React; đội lớn cần chuẩn hóa chọn Angular.",
@@ -111,7 +99,6 @@ COMPARISONS = {
     frozenset({"sql", "nosql"}): "**SQL** (quan hệ) schema chặt, ACID, truy vấn mạnh; **NoSQL** schema linh hoạt, mở rộng ngang, hợp dữ liệu phi cấu trúc/quy mô lớn. → Dữ liệu có cấu trúc/giao dịch chọn SQL; linh hoạt/quy mô lớn chọn NoSQL.",
 }
 
-# Bí danh -> token chuẩn để tra COMPARISONS.
 _COMPARE_CANON = {
     "java": "java", "python": "python", "react": "react", "reactjs": "react",
     "angular": "angular", "angularjs": "angular", "vue": "vue",
@@ -145,8 +132,6 @@ def find_concepts(query):
     Xếp hạng theo độ dài alias KHỚP DÀI NHẤT (đặc trưng hơn) -> 'sql injection' thắng
     'sql', để handler 'X là gì?' chọn đúng khái niệm cụ thể nhất.
     """
-    # Chuẩn hóa ký hiệu trước khi bỏ dấu/dấu câu: "c++"->cpp, "c#"->csharp, để C/C++/C#
-    # phân biệt được (normalize_text vốn bỏ '+'/'#' -> cả ba sẽ thành 'c').
     pre = str(query).lower().replace("c++", "cpp").replace("c#", "csharp")
     q = _key(pre)
     q_tokens = q.split()
@@ -155,7 +140,6 @@ def find_concepts(query):
         best = 0
         for a in info["aliases"]:
             ka = _key(a)
-            # cụm nhiều từ: khớp chuỗi con; từ đơn: khớp đúng token (tránh 'ai' dính 'training')
             hit = (ka in q) if " " in ka else (ka in q_tokens)
             if hit:
                 best = max(best, len(ka))
@@ -210,9 +194,6 @@ def find_career(query):
     return (best[0], best[1]) if best else (None, None)
 
 
-# LĨNH VỰC/viết tắt -> career_key, dùng cho câu LỘ TRÌNH khi find_career (khớp tên nghề) trượt
-# ("lộ trình AI", "học web từ đầu", "lộ trình BA/QA"). Dựng từ field_aliases trong it_roles.json;
-# find_roadmap_field khớp theo TỪ cho alias ngắn (an toàn hơn substring) -> 'ai' không dính 'email'.
 FIELD_TO_CAREER = {key: r.get("field_aliases", []) for key, r in ROLES.items()}
 
 
@@ -225,9 +206,8 @@ def find_roadmap_field(query):
     q = strip_accents(normalize_text(query))
     tok_list = q.split()
     toks = set(tok_list)
-    # 'ba' nhập nhằng (Business Analyst vs số 3): bỏ nếu là 'ba <đơn vị>' ("ba tháng", "ba khóa").
     _ambig_unit = {"thang", "tuan", "nam", "ngay", "buoi", "gio", "khoa", "muc", "phan", "loai"}
-    best = None  # (career_key, len)
+    best = None
     for career, terms in FIELD_TO_CAREER.items():
         for t in terms:
             tk = strip_accents(t)
@@ -268,7 +248,6 @@ def role_roadmap(key):
     return (ROLES.get(key) or {}).get("roadmap", [])
 
 
-# Vốn kỹ năng nhận diện được = mọi kỹ năng trong CAREERS + tên khái niệm + NEXT_SKILL.
 def _build_skill_vocab():
     vocab = {}
     def add(name):
@@ -336,8 +315,6 @@ def next_skills(known, limit=6):
     return out[:limit]
 
 
-# ───────────────────────── ƯỚC LƯỢNG THỜI GIAN ─────────────────────────
-# giờ học điển hình theo cấp độ (tự học ~10h/tuần).
 _HOURS_BY_LEVEL = {"co ban": 50, "trung cap": 100, "nang cao": 160}
 
 
@@ -351,7 +328,7 @@ def estimate_skill_time(level_text="co ban"):
 def estimate_career_time(career_key):
     """Tổng ước lượng cho cả lộ trình nghề: (giờ, tháng) — dạng khoảng."""
     n_skills = sum(len(s) for _, s in CAREERS[career_key]["milestones"])
-    hours = n_skills * 35  # ~35h/kỹ năng trung bình
-    months_low = round(hours / 12 / 4.3)   # ~12h/tuần
-    months_high = round(hours / 8 / 4.3)   # ~8h/tuần
+    hours = n_skills * 35
+    months_low = round(hours / 12 / 4.3)
+    months_high = round(hours / 8 / 4.3)
     return hours, months_low, months_high

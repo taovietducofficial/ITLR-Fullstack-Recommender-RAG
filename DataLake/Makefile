@@ -1,14 +1,14 @@
 to_mysql:
-	docker exec -it de_mysql mysql -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" ${MYSQL_DATABASE}
+	docker exec -it mysql mysql -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" ${MYSQL_DATABASE}
 
 to_mysql_root:
-	docker exec -it de_mysql mysql -u"root" -p"${MYSQL_ROOT_PASSWORD}" ${MYSQL_DATABASE}
+	docker exec -it mysql mysql -u"root" -p"${MYSQL_ROOT_PASSWORD}" ${MYSQL_DATABASE}
 
 mysql_create:
-	docker exec -it de_mysql mysql --local_infile -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" ${MYSQL_DATABASE} -e"source /tmp/load_dataset/mysql_datasource.sql"
+	docker exec -it mysql mysql --local_infile -u"root" -p"${MYSQL_ROOT_PASSWORD}" -e"source /tmp/load_dataset/olist.sql"
 
 mysql_load:
-	docker exec -it de_mysql mysql --local_infile -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" ${MYSQL_DATABASE} -e"source /tmp/load_dataset/mysql_load.sql"
+	docker exec -it mysql mysql --local_infile -u"root" -p"${MYSQL_ROOT_PASSWORD}" olist -e"source /tmp/load_dataset/load_data.sql"
 
 to_psql:
 	docker exec -it de_psql psql postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}

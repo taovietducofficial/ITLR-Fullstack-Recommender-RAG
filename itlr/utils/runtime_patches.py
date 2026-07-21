@@ -15,7 +15,6 @@ import logging
 import sys
 import warnings
 
-# 1) Ẩn cảnh báo lệch phiên bản sklearn khi unpickle.
 try:
     from sklearn.exceptions import InconsistentVersionWarning
 
@@ -23,7 +22,6 @@ try:
 except Exception:
     pass
 
-# 2) Hạ mức log + tắt thanh tiến trình của transformers / sentence-transformers.
 for _name in ("transformers", "sentence_transformers"):
     logging.getLogger(_name).setLevel(logging.ERROR)
 try:
@@ -34,7 +32,6 @@ try:
 except Exception:
     pass
 
-# 3) Windows: nuốt ConnectionResetError từ ProactorBasePipeTransport khi đóng pipe.
 if sys.platform.startswith("win"):
     import functools
 
@@ -47,7 +44,6 @@ if sys.platform.startswith("win"):
                 try:
                     return func(self, *args, **kwargs)
                 except ConnectionResetError:
-                    # Client đóng kết nối đột ngột -> bỏ qua, không phải lỗi app.
                     pass
 
             return wrapper

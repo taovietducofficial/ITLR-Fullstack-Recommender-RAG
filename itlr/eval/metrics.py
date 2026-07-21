@@ -25,9 +25,6 @@ def _as_array(ranked_rels: Sequence[float]) -> np.ndarray:
     return np.asarray(list(ranked_rels), dtype="float64")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Metric đơn truy vấn (per-query)
-# ─────────────────────────────────────────────────────────────────────────────
 def precision_at_k(ranked_rels: Sequence[float], k: int) -> float:
     """Tỉ lệ item liên quan (rel > 0) trong K kết quả đầu."""
     if k <= 0:
@@ -103,9 +100,6 @@ def reciprocal_rank(ranked_rels: Sequence[float]) -> float:
     return 1.0 / (hit_positions[0] + 1)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Gộp nhiều truy vấn (run-level)
-# ─────────────────────────────────────────────────────────────────────────────
 def per_query_metrics(
     ranked_rels: Sequence[float],
     n_relevant: int,

@@ -1,7 +1,5 @@
 import nodemailer from "nodemailer";
 
-// Cấu hình SMTP từ env. Với Gmail: SMTP_USER = email, SMTP_PASS = App Password (16 ký tự).
-// Tạo App Password: Google Account -> Bảo mật -> Xác minh 2 bước -> App passwords.
 const user = process.env.SMTP_USER;
 const pass = process.env.SMTP_PASS;
 const host = process.env.SMTP_HOST;
@@ -13,7 +11,7 @@ const transporter = mailConfigured
   ? nodemailer.createTransport(
       host
         ? { host, port, secure: port === 465, auth: { user, pass } }
-        : { service: "gmail", auth: { user: user as string, pass: pass as string } }
+        : { service: "gmail", auth: { user: user as string, pass: pass as string } },
     )
   : null;
 

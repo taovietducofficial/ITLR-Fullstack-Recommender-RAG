@@ -9,7 +9,6 @@ from dagster import Output, asset
 COMPUTE_KIND = "SQL"
 LAYER = "bronze"
 
-# asset name -> (asset group, MySQL table)
 BRONZE_TABLES = {
     "bronze_customer": ("customer", "customers"),
     "bronze_seller": ("seller", "sellers"),

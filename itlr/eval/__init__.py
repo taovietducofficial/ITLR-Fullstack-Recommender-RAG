@@ -1,4 +1,4 @@
-"""Khung đánh giá khoa học cho hệ gợi ý (Trụ cột B của kế hoạch nâng cấp).
+"""Khung đánh giá khoa học cho hệ gợi ý.
 
 Các module:
   - metrics.py       : metric xếp hạng chuẩn ngành (Precision/Recall/NDCG/MAP/MRR/HitRate).

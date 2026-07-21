@@ -24,7 +24,6 @@ from itlr.core.recommender import (
     search_by_query,
 )
 
-# Labeled evaluation queries: (query, expected_category, expected_topic_keyword)
 EVAL_QUERIES = [
     ("Machine Learning khóa học", "Trí tuệ nhân tạo", "machine learning"),
     ("tài liệu Docker Kubernetes DevOps", "DevOps", "docker"),
@@ -86,7 +85,7 @@ def main():
         "item_id", "title", "type", "description", "category",
         "topics", "instructor", "platform", "link",
     ]
-    if "level" in items.columns:          # trường cấp độ (mới) — giữ nếu có
+    if "level" in items.columns:
         keep_cols.insert(3, "level")
     item_list = items[keep_cols].copy()
 

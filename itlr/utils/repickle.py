@@ -27,7 +27,6 @@ from itlr.core import rerank as _rerank
 from itlr.chatbot import knowledge_base as _kb
 from itlr.chatbot import query_understanding as _qu
 
-# Tên module CŨ (trước tái cấu trúc) -> module MỚI, để pickle cũ phân giải được.
 _ALIASES = {
     "recommender_utils": _recommender,
     "bm25_utils": _bm25,

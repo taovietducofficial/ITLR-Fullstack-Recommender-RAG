@@ -22,14 +22,8 @@ from itlr.core.recommender import (
 )
 
 
-# Cổng off-topic riêng cho CHATBOT — đặt CHẶT hơn tab Tìm kiếm (ABS_RELEVANCE_GATE=0.48)
-# theo yêu cầu: thà chặn nhầm vài câu CNTT mơ hồ còn hơn để lọt câu lạc đề. Truy vấn có
-# điểm tương đồng cao nhất với catalog < ngưỡng này -> coi là ngoài lĩnh vực -> từ chối.
-# (Có thể chỉnh số này để nới/siết độ chặt; off-topic đo được ~0.46-0.48, câu IT >= 0.51.)
 CHATBOT_OFFTOPIC_GATE = 0.55
 
-# Thông báo từ chối RÕ RÀNG cho câu ngoài lĩnh vực — KHÔNG kèm tài nguyên/gợi ý lạc đề,
-# chỉ nhắc lại phạm vi hỗ trợ + vài ví dụ câu hỏi CNTT hợp lệ để hướng người dùng quay lại.
 OFF_TOPIC_MESSAGE = (
     "Xin lỗi, mình là **trợ lý học tập CNTT** nên chỉ trả lời các câu hỏi trong lĩnh vực "
     "công nghệ thông tin (lập trình, web, AI/ML, dữ liệu, cloud, DevOps, an ninh mạng, "
@@ -52,16 +46,10 @@ SUGGESTED_PROMPTS = [
 ]
 
 
-# Intent BẮT BUỘC tham chiếu một thực thể IT trong KB (vai trò/career/khái niệm) -> CHẮC CHẮN
-# thuộc CNTT -> bỏ qua cổng off-topic (không chặn nhầm vai trò ít liên quan catalog như SysAdmin).
-# CỐ Ý loại admin_stat/time_estimate/next_skill: chúng khớp mẫu chung ("bao nhiêu", "bao lâu",
-# "học gì tiếp") không cần thực thể IT -> để cổng off-topic lọc; câu IT thật vẫn qua cổng nhờ
-# whitelist khái niệm ("Python mất bao lâu", "bao nhiêu khóa học AI").
 _IT_SAFE_INTENTS = {
     "career_path", "interview", "salary", "skill_gap", "definition", "career_guidance",
 }
 
-# Chào hỏi / hỏi về chính trợ lý -> trả lời lời chào (KHÔNG coi là off-topic, KHÔNG truy hồi).
 _GREETING_RE = re.compile(
     r"^\s*(xin chao|chao ban|chao buoi|hello|helo|halo|alo|hey)\b|"
     r"\bban la ai\b|ban ten (la )?gi|gioi thieu (ve )?(ban|minh|chatbot)|"
@@ -83,13 +71,11 @@ def detect_item_type(message):
 
 def detect_response_mode(message):
     """Soft classification for response structure — not routing."""
-    norm = strip_accents(message)   # bỏ dấu để khớp mẫu (vd "lộ trình" -> "lo trinh")
-    # "tu dau"/"tu con so 0" = học từ con số không -> cũng là tín hiệu lộ trình (cạnh "tu zero").
+    norm = strip_accents(message)
     if re.search(r"lo trinh|roadmap|bat dau|co ban|nang cao|tu zero|tu dau|tu con so 0|learning path", norm):
         return "learning_path"
     if re.search(r"so sanh|compare|khac nhau|difference", norm):
         return "compare"
-    # "co ... nao" = "có khóa học/tài liệu nào (về) ..." -> ý liệt kê/tìm kiếm tài nguyên.
     if re.search(r"tim|search|tra cuu|co gi ve|\bco\b .*\bnao\b|liet ke|list|show", norm):
         return "search"
     if re.search(r"goi y|recommend|nen hoc|tu van|phu hop|tuong tu", norm):
@@ -97,7 +83,65 @@ def detect_response_mode(message):
     return "answer"
 
 
-# Từ khóa (đã bỏ dấu) để xếp độ khó cho lộ trình học.
+_FOLLOWUP_CUE_RE = re.compile(
+    r"\b(thieu|con|them|nua|tiep|sao (khong|chua)|chua (co|thay|du)|quen|dau roi)\b"
+)
+
+
+def _resolve_followup(display_query, history):
+    """Câu tiếp nối cụt ("nó dùng để làm gì?", "còn cái đó thì sao?") -> nối 1-2 câu user
+    gần nhất (enrich_query_with_history) để routing/off-topic/concept có ngữ cảnh.
+
+    CHỈ kích hoạt khi câu NGẮN (<=8 từ) VÀ (không chứa thực thể IT nào, HOẶC có từ hiệu
+    chỉnh sửa/tiếp nối như "thiếu X rồi") -> câu đơn đầy đủ đi qua NGUYÊN VẸN, regex intent
+    không bị lượt trước làm nhiễu.
+    Giới hạn hiện tại: "cái thứ hai" (tham chiếu theo THỨ TỰ) chưa giải được — enrich chỉ nối
+    nguyên văn lượt trước; nâng cấp = lưu clause list của lượt trước vào history metadata rồi
+    chọn theo số.
+    """
+    if not history or len(display_query.split()) > 8:
+        return display_query
+    has_entity = kb.find_concepts(display_query) or kb.find_career(display_query)[0] \
+        or kb.extract_skills(display_query)
+    if has_entity and not _FOLLOWUP_CUE_RE.search(strip_accents(display_query.lower())):
+        return display_query
+    return enrich_query_with_history(display_query, history)
+
+
+_CLAUSE_SEP = re.compile(r"[?;,]|\s+(?:và|va)\s+", re.IGNORECASE)
+
+
+def _route_multi(query, max_intents=3):
+    """Tách câu đa ý thành mệnh đề rồi route TỪNG mệnh đề qua route_intent.
+
+    Trả list [(intent, slots, clause)] khi có >=2 ý KHÁC NHAU thật sự; ngược lại trả []
+    (giữ nguyên hành vi đơn-intent cũ). Mệnh đề mất chủ ngữ ("so sánh với Java") được
+    mượn khái niệm của mệnh đề trước để route lại.
+    """
+    clauses = [c.strip(" ,.") for c in _CLAUSE_SEP.split(query) if c and c.strip(" ,.")]
+    if len(clauses) < 2:
+        return []
+    out, seen, prev_concept = [], set(), None
+    for cl in clauses[: max_intents + 2]:
+        it, sl = route_intent(cl)
+        if not it and prev_concept:
+            retry = f"{kb.CONCEPTS[prev_concept]['name']} {cl}"
+            it, sl = route_intent(retry)
+            if it:
+                cl = retry
+        cs = kb.find_concepts(cl)
+        if cs:
+            prev_concept = cs[0]
+        if it:
+            key = (it, str(sorted(sl.items())))
+            if key not in seen:
+                seen.add(key)
+                out.append((it, sl, cl))
+        if len(out) >= max_intents:
+            break
+    return out if len(out) >= 2 else []
+
+
 _BEGINNER_KW = ["co ban", "nhap mon", "can ban", "beginner", "fundamental",
                 "introduction", "bat dau", "zero", "101", "basic", "lam quen"]
 _ADVANCED_KW = ["nang cao", "advanced", "chuyen sau", "master", "expert",
@@ -170,13 +214,12 @@ def matched_keywords(query, item, limit=5):
         f"{item.get('category', '')} {item.get('description', '')}"
     )
     words = [
-        w for w in dict.fromkeys(normalize_text(query).split())  # giữ thứ tự, bỏ trùng
+        w for w in dict.fromkeys(normalize_text(query).split())
         if len(w) > 2 and w not in QUERY_STOP_WORDS
     ]
     hay_tokens = hay.split()
     hits = []
     for w in words:
-        # khớp trực tiếp, hoặc khớp tiền tố 5 ký tự (bắt biến thể "learning"/"learn", số nhiều)
         if w in hay or (len(w) >= 5 and any(t.startswith(w[:5]) for t in hay_tokens)):
             hits.append(w)
     return hits[:limit]
@@ -250,7 +293,6 @@ def category_stage_items(item_list, category, level, exclude_ids, k, query=None,
         if item["item_id"] in exclude_ids or difficulty_rank(item) != level:
             continue
         pt = primary_topic(item)
-        # khớp công nghệ người dùng hỏi (theo chủ đề chính hoặc tiêu đề) -> ưu tiên cao
         hay = strip_accents(normalize_text(f"{item['title']} {item['topics']}"))
         matches_q = bool(q_terms) and (
             any(t in pt for t in q_terms if len(t) > 2)
@@ -258,7 +300,7 @@ def category_stage_items(item_list, category, level, exclude_ids, k, query=None,
         )
         candidates.append((0 if matches_q else 1, pt, item))
 
-    candidates.sort(key=lambda x: x[0])  # ổn định: mục khớp truy vấn lên trước
+    candidates.sort(key=lambda x: x[0])
 
     picked, seen_topic, leftover = [], set(), []
     for _, pt, item in candidates:
@@ -269,7 +311,7 @@ def category_stage_items(item_list, category, level, exclude_ids, k, query=None,
         picked.append(item)
         if len(picked) >= k:
             return picked
-    for item in leftover:  # chưa đủ chủ đề khác nhau -> bù phần còn lại
+    for item in leftover:
         if len(picked) >= k:
             break
         picked.append(item)
@@ -289,7 +331,7 @@ def format_item_detailed(item, idx=None, query=None):
 
     desc = str(item.get("description", "")).strip()
     if desc:
-        parts.append(f"> {desc}")  # mô tả đầy đủ, không cắt
+        parts.append(f"> {desc}")
 
     tl = topics_list(item)
     if tl:
@@ -347,7 +389,6 @@ def stage_overview(items):
     return "\n".join(lines)
 
 
-# Ngữ cảnh lĩnh vực — giúp câu trả lời "có kiến thức nền" như trợ lý thật, không chỉ liệt kê.
 CATEGORY_CONTEXT = {
     "An ninh mạng": "An ninh mạng (Cybersecurity) là việc bảo vệ hệ thống, mạng và dữ liệu khỏi tấn công. Bạn sẽ đi qua các mảng như bảo mật web, kiểm thử xâm nhập (pentest), mã hóa và phòng thủ hệ thống.",
     "Cơ sở dữ liệu": "Cơ sở dữ liệu là nền tảng lưu trữ và truy vấn dữ liệu của mọi ứng dụng. Lĩnh vực này bao trùm SQL/NoSQL, thiết kế schema, tối ưu truy vấn và quản trị dữ liệu.",
@@ -377,7 +418,6 @@ CATEGORY_CONTEXT = {
     "Điện toán lượng tử": "Điện toán lượng tử dùng quy luật cơ học lượng tử để tính toán vượt giới hạn máy tính cổ điển. Bạn sẽ tiếp cận qubit, cổng lượng tử, Qiskit và các thuật toán Shor/Grover.",
 }
 
-# Ngữ cảnh theo từ khóa (key đã bỏ dấu để khớp với strip_accents).
 TOPIC_CONTEXT = {
     "machine learning": "Machine Learning dạy máy tự rút quy luật từ dữ liệu thay vì lập trình thủ công từng luật.",
     "deep learning": "Deep Learning dùng mạng nơ-ron nhiều lớp, đặc biệt mạnh với ảnh, ngôn ngữ và dữ liệu phi cấu trúc.",
@@ -388,14 +428,13 @@ TOPIC_CONTEXT = {
     "javascript": "JavaScript là ngôn ngữ của web, chạy được cả ở trình duyệt lẫn máy chủ (Node.js).",
     "sql": "SQL là ngôn ngữ chuẩn để truy vấn và thao tác dữ liệu quan hệ.",
     "owasp": "OWASP tổng hợp các lỗ hổng bảo mật web phổ biến nhất mà lập trình viên cần phòng tránh.",
-    "llm": "LLM (mô hình ngôn ngữ lớn) là nền tảng của các trợ lý AI hiện đại như ChatGPT, Claude.",
+    "llm": "LLM (mô hình ngôn ngữ lớn) là nền tảng của các trợ lý AI hiện đại như ChatGPT.",
     "spark": "Apache Spark xử lý dữ liệu lớn song song, nhanh hơn nhiều so với MapReduce truyền thống.",
     "kafka": "Apache Kafka là nền tảng truyền dữ liệu theo luồng (streaming) thời gian thực.",
     "tcp": "TCP/IP là bộ giao thức nền tảng giúp các máy tính giao tiếp qua mạng.",
     "neural network": "Mạng nơ-ron mô phỏng cách não bộ liên kết tín hiệu để học các mẫu phức tạp.",
 }
 
-# Mở đầu thân thiện, xoay vòng theo độ dài câu hỏi để tránh máy móc.
 _INTROS = [
     "Câu hỏi rất hay! ",
     "Rất vui được đồng hành cùng bạn. ",
@@ -476,7 +515,6 @@ def concept_overview_block(query, items, category):
     "Đa khía cạnh" = gắn định nghĩa từ khóa với bức tranh lĩnh vực + các khái niệm liên quan.
     Trả về chuỗi markdown kết thúc bằng '---' (ngăn cách phần sau), hoặc "" nếu không có gì.
     """
-    # Quét TẤT CẢ từ khóa CNTT trong câu (không chỉ 1) -> nêu khái niệm cho từng cái.
     keys = kb.safe_concepts(query, limit=4)
     key = keys[0] if keys else None
     parts, title = [], None
@@ -486,7 +524,6 @@ def concept_overview_block(query, items, category):
         title = c["name"]
         if c.get("def"):
             parts.append(c["def"])
-        # Đa khía cạnh: đặt khái niệm vào bức tranh lĩnh vực CNTT rộng hơn.
         cat = c.get("category")
         if cat and cat in CATEGORY_CONTEXT and CATEGORY_CONTEXT[cat] not in parts:
             parts.append(CATEGORY_CONTEXT[cat])
@@ -495,8 +532,6 @@ def concept_overview_block(query, items, category):
         rel = [kb.CONCEPTS[r]["name"] for r in c.get("related", []) if r in kb.CONCEPTS]
         if rel:
             parts.append("🔗 **Khái niệm liên quan:** " + ", ".join(f"*{r}*" for r in rel))
-        # CÁC TỪ KHÓA KHÁC trong câu: nêu định nghĩa NGẮN (1 câu) cho mỗi từ -> người dùng
-        # hiểu rõ mọi thuật ngữ mình hỏi, không chỉ từ khóa chính.
         extra_lines = []
         for k in keys[1:]:
             ce = kb.CONCEPTS[k]
@@ -506,13 +541,12 @@ def concept_overview_block(query, items, category):
         if extra_lines:
             parts.append("📌 **Các từ khóa khác trong câu hỏi:**\n" + "\n".join(extra_lines))
     else:
-        # Không khớp khái niệm cụ thể -> dùng ngữ cảnh lĩnh vực / chủ đề làm khái niệm chung.
         if category and category in CATEGORY_CONTEXT:
             title = category
             parts.append(CATEGORY_CONTEXT[category])
         parts.extend(topic_context_snippets(query, items, limit=2))
 
-    parts = list(dict.fromkeys(p for p in parts if p))  # bỏ trùng, giữ thứ tự
+    parts = list(dict.fromkeys(p for p in parts if p))
     if not parts:
         return ""
     head = f"## 📖 Khái niệm: {title}\n\n" if title else "## 📖 Khái niệm\n\n"
@@ -563,7 +597,6 @@ def synthesize_answer(query, sources, recommendations, mode, category=None, item
     tips_block = f"\n\n### 🎯 Lời khuyên cho bạn\n{tips}" if tips else ""
 
     if mode == "learning_path":
-        # Xếp theo độ khó (nền tảng -> nâng cao), giữ thứ tự liên quan trong mỗi bậc.
         staged = sorted(enumerate(all_items), key=lambda x: (difficulty_rank(x[1]), x[0]))
         ordered = [it for _, it in staged]
         used = []
@@ -584,9 +617,6 @@ def synthesize_answer(query, sources, recommendations, mode, category=None, item
         mids = take(lambda it: difficulty_rank(it) == 1, 4)
         adv = take(lambda it: difficulty_rank(it) == 2, 3)
 
-        # Bổ sung mục đúng cấp độ + đa dạng ngôn ngữ TỪ chuyên mục trong catalog,
-        # để mỗi giai đoạn đủ mục và phủ nhiều ngôn ngữ (Python, Java, JS...),
-        # tránh tình trạng "lập trình cơ bản" mà thiếu mục nền tảng / thiếu Python.
         if item_list is not None and category:
             used_ids = {it["item_id"] for it in used}
 
@@ -605,7 +635,6 @@ def synthesize_answer(query, sources, recommendations, mode, category=None, item
             mids = backfill(mids, 1, 4)
             adv = backfill(adv, 2, 3)
 
-        # Bảo hiểm cuối: nếu vẫn rỗng (không phát hiện chuyên mục), lấy tạm theo độ liên quan.
         basics = basics or take(lambda it: True, 3)
         mids = mids or take(lambda it: True, 4)
 
@@ -707,7 +736,6 @@ def synthesize_answer(query, sources, recommendations, mode, category=None, item
         out += tips_block
         return out + foot
 
-    # Mặc định: trả lời trực tiếp + giải thích khái niệm tổng hợp từ catalog
     out = f"## 💬 Trả lời\n\n{intro}{overview}\n\n"
     out += (
         f"Đi vào câu hỏi *\"{query}\"*: nội dung sát nhất trong catalog là "
@@ -728,42 +756,15 @@ def synthesize_answer(query, sources, recommendations, mode, category=None, item
 
 
 def try_llm_response(system_prompt, user_message, history=None):
-    """Sinh câu trả lời bằng LLM: ưu tiên Claude (mới nhất) → OpenAI → Ollama.
+    """Sinh câu trả lời bằng LLM: ưu tiên OpenAI → Ollama.
 
     Tất cả đều chịu lỗi: thiếu key/lỗi mạng -> trả None để rơi về bộ tổng hợp cục bộ.
     """
-    # Lịch sử hội thoại dạng chung (Claude dùng riêng system, không nằm trong messages).
     history_msgs = []
     if history:
         for msg in history[-6:]:
             if msg["role"] in ("user", "assistant"):
                 history_msgs.append({"role": msg["role"], "content": msg["content"]})
-
-    # 1) Claude (Anthropic) — LLM hàng đầu hiện nay; mặc định claude-opus-4-8.
-    anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
-    if anthropic_key:
-        try:
-            import anthropic
-
-            client = anthropic.Anthropic(api_key=anthropic_key)
-            response = client.messages.create(
-                model=os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-8"),
-                max_tokens=2000,
-                # Prompt caching: ngữ cảnh catalog (lớn, ổn định trong phiên) được cache
-                # -> các lượt sau trong 5 phút rẻ & nhanh hơn nhiều.
-                system=[{
-                    "type": "text",
-                    "text": system_prompt,
-                    "cache_control": {"type": "ephemeral"},
-                }],
-                messages=history_msgs + [{"role": "user", "content": user_message}],
-            )
-            if response.stop_reason == "refusal":
-                return None
-            text = "".join(b.text for b in response.content if b.type == "text").strip()
-            return text or None
-        except Exception:
-            return None
 
     messages = [{"role": "system", "content": system_prompt}] + history_msgs
     messages.append({"role": "user", "content": user_message})
@@ -778,26 +779,19 @@ def try_llm_response(system_prompt, user_message, history=None):
                 model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
                 messages=messages,
                 temperature=0.3,
-                max_tokens=1200,
+                max_tokens=2000,
             )
             return response.choices[0].message.content.strip()
         except Exception:
             return None
 
     ollama_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    ollama_model = _ollama_model()   # OLLAMA_MODEL nếu có sẵn, ngược lại tự chọn model đã pull
+    ollama_model = _ollama_model()
     try:
-        # num_predict: đủ dài cho lộ trình/giải thích (đổi qua OLLAMA_NUM_PREDICT); để nhanh hơn
-        # trên CPU có thể dùng model nhỏ hơn (OLLAMA_MODEL=qwen2.5:1.5b) hoặc giảm num_predict.
-        # num_predict 384: đủ cho lộ trình/giải thích mà KHÔNG quá lâu trên CPU; timeout 240 nới
-        # biên rộng để câu dài KHÔNG chạm timeout rồi âm thầm rơi về template. Đổi qua env nếu cần.
         num_predict = int(os.environ.get("OLLAMA_NUM_PREDICT", "384"))
-        # 210s < timeout web gọi chat (240s) -> recommender luôn trả (câu LLM hoặc fallback template)
-        # TRƯỚC khi web bỏ cuộc, tránh 502 "không kết nối". CPU chậm: nên dùng qwen2.5:1.5b cho kịp.
         timeout_s = int(os.environ.get("OLLAMA_TIMEOUT", "210"))
         payload = json.dumps(
             {"model": ollama_model, "messages": messages, "stream": False,
-             # keep_alive: giữ model trong RAM 2 giờ -> không cold-start giữa phiên demo.
              "keep_alive": "2h", "options": {"num_predict": num_predict, "temperature": 0.5}}
         ).encode()
         req = urllib.request.Request(
@@ -840,7 +834,7 @@ def _stream_ollama(messages):
         headers={"Content-Type": "application/json"},
     )
     with urllib.request.urlopen(req, timeout=timeout_s) as resp:
-        for raw in resp:  # Ollama trả NDJSON: mỗi dòng 1 JSON {message:{content}, done}
+        for raw in resp:
             raw = raw.strip()
             if not raw:
                 continue
@@ -856,40 +850,15 @@ def _stream_ollama(messages):
 
 
 def try_llm_response_stream(system_prompt, user_message, history=None):
-    """Bản STREAMING của try_llm_response: yield từng mảnh văn bản (Claude → OpenAI → Ollama).
+    """Bản STREAMING của try_llm_response: yield từng mảnh văn bản (OpenAI → Ollama).
 
     Chịu lỗi: nếu lỗi TRƯỚC khi sinh được mảnh nào -> generator rỗng -> caller rơi về template.
     Nếu lỗi GIỮA chừng -> dừng (người dùng đã có phần đã stream)."""
     history_msgs = _history_msgs(history)
 
-    # 1) Claude (Anthropic) — streaming text deltas.
-    anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
-    if anthropic_key:
-        try:
-            import anthropic
-
-            client = anthropic.Anthropic(api_key=anthropic_key)
-            with client.messages.stream(
-                model=os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-8"),
-                max_tokens=2000,
-                system=[{
-                    "type": "text",
-                    "text": system_prompt,
-                    "cache_control": {"type": "ephemeral"},
-                }],
-                messages=history_msgs + [{"role": "user", "content": user_message}],
-            ) as stream:
-                for text in stream.text_stream:
-                    if text:
-                        yield text
-        except Exception:
-            return
-        return
-
     messages = [{"role": "system", "content": system_prompt}] + history_msgs
     messages.append({"role": "user", "content": user_message})
 
-    # 2) OpenAI — streaming deltas.
     openai_key = os.environ.get("OPENAI_API_KEY")
     if openai_key:
         try:
@@ -900,7 +869,7 @@ def try_llm_response_stream(system_prompt, user_message, history=None):
                 model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
                 messages=messages,
                 temperature=0.3,
-                max_tokens=1200,
+                max_tokens=2000,
                 stream=True,
             )
             for chunk in stream:
@@ -911,16 +880,12 @@ def try_llm_response_stream(system_prompt, user_message, history=None):
             return
         return
 
-    # 3) Ollama (local) — streaming NDJSON.
     try:
         yield from _stream_ollama(messages)
     except Exception:
         return
 
 
-# Câu SUY LUẬN / HỘI THOẠI MỞ -> đáng gọi LLM (giải thích, vì sao, nên chọn gì...).
-# Câu định nghĩa / gợi ý khóa-tài liệu / lộ trình KHÔNG khớp -> dùng template nhanh (grounded,
-# ~1s) thay vì LLM chậm (~90s). Giữ demo nhanh mà vẫn có hội thoại AI cho câu mở.
 _REASONING_RE = re.compile(
     r"\btai sao\b|\bvi sao\b|khi nao|hoat dong|nhu the nao|the nao|ra sao|nen dung|co nen|"
     r"nen hoc|lam sao|lam the nao|loi ich|uu diem|nhuoc diem|uu nhuoc|quan trong|so voi|"
@@ -933,18 +898,12 @@ def _is_reasoning_query(text):
     return bool(_REASONING_RE.search(strip_accents(str(text).lower())))
 
 
-# Câu GIẢI THÍCH thuần: người dùng muốn HIỂU chủ đề (lý do / cách thức / định nghĩa / công dụng
-# / lợi ích) — chỉ cần CÂU TRẢ LỜI TRỌNG TÂM, KHÔNG phải cả lộ trình nhiều giai đoạn. Bộ mẫu này
-# BÁM theo nhóm "definition/giải thích" mà intent_router.route_intent nhận diện, để hành vi NHẤT
-# QUÁN dù khái niệm có được nhận ra hay không, và dù có/không có LLM (khi LLM lỗi -> rơi về đây).
-# CỐ Ý KHÔNG gồm nhóm KHUYÊN/CHỌN ("tư vấn", "nên học", "nên chọn", "lời khuyên") và SO SÁNH —
-# các nhóm đó vẫn hợp lý khi sinh lộ trình / gợi ý / so sánh, không ép về trả lời ngắn.
 _EXPLAIN_RE = re.compile(
-    r"\bvi sao\b|\btai sao\b|\bsao lai\b|"                                  # vì sao / tại sao
-    r"nhu the nao|\bthe nao\b|ra sao|hoat dong|van hanh|\bco che\b|"        # như thế nào / hoạt động
-    r"\bla gi\b|\bdinh nghia\b|nghia la|y nghia|khai niem|giai thich|tim hieu ve|"  # là gì / định nghĩa / giải thích
-    r"khi nao (nen )?dung|\bde lam gi\b|dung de lam gi|"                    # khi nào dùng / để làm gì
-    r"loi ich|uu diem|nhuoc diem|uu nhuoc|ban chat"                        # lợi ích / ưu nhược điểm / bản chất
+    r"\bvi sao\b|\btai sao\b|\bsao lai\b|"
+    r"nhu the nao|\bthe nao\b|ra sao|hoat dong|van hanh|\bco che\b|"
+    r"\bla gi\b|\bdinh nghia\b|nghia la|y nghia|khai niem|giai thich|tim hieu ve|"
+    r"khi nao (nen )?dung|\bde lam gi\b|dung de lam gi|"
+    r"loi ich|uu diem|nhuoc diem|uu nhuoc|ban chat"
 )
 
 
@@ -954,7 +913,7 @@ def _is_explanation_query(text):
     return bool(_EXPLAIN_RE.search(strip_accents(str(text).lower())))
 
 
-_OLLAMA_CACHE = {}  # {"t": <thời điểm probe>, "v": <reachable?>, "models": [<tên model đã pull>]}
+_OLLAMA_CACHE = {}
 
 
 def _ollama_reachable():
@@ -983,7 +942,7 @@ def _ollama_model():
     """Chọn model Ollama: OLLAMA_MODEL nếu đặt VÀ có sẵn; nếu không, tự lấy model đã `pull` (ưu
     tiên qwen2.5). Tránh mặc định cũ 'llama3.2' (thường CHƯA pull) -> request hỏng -> rơi template."""
     env_model = os.environ.get("OLLAMA_MODEL")
-    _ollama_reachable()  # đảm bảo danh sách model đã được cache
+    _ollama_reachable()
     models = _OLLAMA_CACHE.get("models", [])
     if env_model and (not models or env_model in models):
         return env_model
@@ -996,13 +955,13 @@ def _ollama_model():
 
 
 def _llm_available():
-    """Có LLM dùng được không: có API key (Claude/OpenAI) HOẶC Ollama đang chạy (TỰ PHÁT HIỆN).
+    """Có LLM dùng được không: có API key (OpenAI) HOẶC Ollama đang chạy (TỰ PHÁT HIỆN).
 
     Nhờ tự phát hiện, chạy recommender NGOÀI Docker (Ollama ở localhost:11434) là LLM tự bật,
     không cần đặt cờ; trong Docker không tới được host -> trả False -> dùng template nhanh (không
     treo). Đặt USE_OLLAMA=0/false để TẮT hẳn nhánh Ollama nếu muốn ép dùng template.
     """
-    if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY"):
+    if os.environ.get("OPENAI_API_KEY"):
         return True
     if str(os.environ.get("USE_OLLAMA", "")).lower() in ("0", "false", "no"):
         return False
@@ -1032,7 +991,9 @@ QUY TẮC:
    thích tổng quan rõ ràng (kiểu tóm tắt kiến thức trên web): nếu hỏi "vì sao / lợi ích / khi nào
    / khác gì" thì nêu các LÝ DO, PHÂN TÍCH cụ thể, có VÍ DỤ thực tế; trình bày CÓ CẤU TRÚC (đoạn
    ngắn hoặc gạch đầu dòng). CHỈ nhắc tới khóa học/tài liệu khi người dùng hỏi gợi ý — và khi nhắc
-   thì chỉ trích từ catalog được cung cấp. Tuyệt đối KHÔNG né câu hỏi bằng cách liệt kê khóa học."""
+   thì chỉ trích từ catalog được cung cấp. Tuyệt đối KHÔNG né câu hỏi bằng cách liệt kê khóa học.
+9. Nếu câu hỏi gồm NHIỀU Ý/nhiều câu hỏi con, trả lời ĐẦY ĐỦ TỪNG Ý theo đúng thứ tự,
+   mỗi ý một mục riêng (##); không được bỏ sót ý nào."""
 
     WELCOME_MESSAGE = (
         "Xin chào! Tôi là **IT Learning Assistant** — trợ lý học tập CNTT thông minh.\n\n"
@@ -1049,18 +1010,11 @@ QUY TẮC:
         self.item_list = item_list
         self.retrieval_model = retrieval_model
         self.rag = EducationalRAG(item_list, retrieval_model)
-        # Kênh truy hồi NGỮ NGHĨA (embeddings) — cùng engine với tab Tìm kiếm,
-        # chất lượng cao hơn nhiều BM25/TF-IDF. Tùy chọn để vẫn chạy nếu thiếu artifacts.
         self.search_index = search_index
         self.embed_model = embed_model
-        # Công nghệ truy hồi hiện đại (đều tùy chọn, fallback an toàn nếu thiếu):
-        #  - query_prefix: tiền tố model embedding yêu cầu (vd "query: " cho E5)
-        #  - ann:          chỉ mục FAISS để truy hồi nhanh
-        #  - reranker:     cross-encoder xếp lại top kết quả (tầng 2)
         self.query_prefix = query_prefix
         self.ann = ann
         self.reranker = reranker
-        # Vốn từ CNTT để sửa lỗi chính tả / mở rộng viết tắt cho lớp hiểu truy vấn.
         self.vocab = build_query_vocab(retrieval_model, item_list)
 
     def _is_off_topic(self, query, raw=None):
@@ -1074,14 +1028,6 @@ QUY TẮC:
         Nếu embeddings chưa nạp -> không chấm được điểm ngữ nghĩa -> trả False (không chặn)
         để tránh chặn oan; lúc đó nhánh BM25 vẫn xử lý như cũ.
         """
-        # WHITELIST: câu hỏi khớp KHÁI NIỆM trong glossary CNTT (vd "CNTT là gì",
-        # "Docker là gì", "BA, SE") luôn TRONG lĩnh vực -> không chặn. Câu meta/định nghĩa
-        # khớp catalog khóa-học kém về ngữ nghĩa nên hay bị cổng chặn oan.
-        #  - Alias >= 3 ký tự: khớp thường (token cho từ đơn, chuỗi con cho cụm).
-        #  - Alias 1-2 ký tự (viết tắt nghề BA/SE/QA/BI/ML/AI): CHỈ nhận khi xuất hiện dạng
-        #    CHỮ HOA trong câu gốc -> phân biệt với từ tiếng Việt thường ("ba"=bố, "se"=sẽ,
-        #    "ai"=ai) để câu lạc đề không lọt.
-        # Chữ HOA lấy từ CÂU GỐC (raw) — search_text đã bị viết thường nên mất tín hiệu này.
         _upper = set(re.findall(r"[A-Z]{2,}", str(raw if raw is not None else query)))
         _pre = str(query).lower().replace("c++", "cpp").replace("c#", "csharp")
         _qn = kb._key(_pre)
@@ -1094,7 +1040,7 @@ QUY TẮC:
                 if len(ka) >= 3:
                     if (ka in _qn) if " " in ka else (ka in _qn_tokens):
                         return False
-                elif ka.upper() in _upper:   # viết tắt ngắn -> chỉ nhận khi câu gốc viết HOA
+                elif ka.upper() in _upper:
                     return False
         if self.embed_model is None or not self.search_index:
             return False
@@ -1116,8 +1062,6 @@ QUY TẮC:
         """
         if self.embed_model is None or not self.search_index:
             return None
-        # RAG-Fusion: nhiều biến thể truy vấn (gốc / nối lịch sử / mở rộng từ đồng nghĩa)
-        # -> truy hồi độc lập rồi hợp nhất RRF + rerank + MMR. Bền với cách diễn đạt khác nhau.
         enriched = enrich_query_with_history(query, history)
         expanded = expand_query(enriched, self.rag.categories)
         variants = [query, enriched, expanded]
@@ -1131,7 +1075,7 @@ QUY TẮC:
             ann=self.ann,
             reranker=self.reranker,
             top_k=top_k,
-            gate_query=enriched,   # cổng off-topic theo truy vấn tự nhiên (không phải biến thể mở rộng)
+            gate_query=enriched,
         )
         sources = []
         for r in results[:top_k]:
@@ -1150,7 +1094,6 @@ QUY TẮC:
         kind, p = self._prepare(message, history or [])
         if kind == "final":
             return p
-        # Cần LLM -> gọi 1 lần, lỗi/None thì rơi về template (synthesize_answer).
         llm_response = try_llm_response(p["sys_prompt"], p["llm_message"], history=p["history"])
         body = self._assemble_body(llm_response, p)
         return {
@@ -1197,7 +1140,6 @@ QUY TẮC:
                 produced += len(chunk)
                 yield ("text", chunk)
         if produced == 0:
-            # LLM không trả mảnh nào (tắt/lỗi/timeout sớm) -> template đầy đủ.
             yield ("text", synthesize_answer(
                 p["display_query"], p["sources"], p["recommendations"], p["mode"],
                 category=p["category"], item_list=self.item_list,
@@ -1220,33 +1162,22 @@ QUY TẮC:
         """
         history = history or []
 
-        # 0) HIỂU TRUY VẤN: sửa lỗi chính tả, mở rộng viết tắt, suy luận ý người dùng.
-        #    Văn bản đã chuẩn hóa (search_text) được dùng cho MỌI bước phát hiện ý định
-        #    lẫn truy hồi -> chịu được "machne lerning", "lap trnh web", "k8s"...
         understanding = understand_query(message, self.vocab)
         search_text = understanding["corrected"]
         display_query = understanding["display"]
 
-        # 0) CHÀO HỎI / hỏi về trợ lý ("xin chào", "bạn là ai", "bạn làm được gì") -> lời chào,
-        #    KHÔNG để cổng off-topic chặn (trước đây "xin chào bạn là ai" bị coi là lạc đề).
         if _is_greeting(message):
             return "final", {
                 "response": self.WELCOME_MESSAGE, "intent": "greeting",
                 "sources": [], "recommendations": [],
             }
 
-        # 0a) ĐỊNH TUYẾN INTENT ĐỊNH HƯỚNG (CHẠY TRƯỚC cổng off-topic): định nghĩa, so sánh,
-        #     lộ trình/phỏng vấn/lương/tư vấn nghề, kỹ năng thiếu, học gì tiếp, thời gian, thống kê.
-        #     Dùng DISPLAY (đã sửa lỗi chính tả nhưng CHƯA nối mở rộng viết tắt) để nhận diện
-        #     khái niệm/nghề chính xác — tránh "sql"->"co so du lieu" làm lệch khái niệm.
-        intent, slots = route_intent(display_query)
+        routed_query = _resolve_followup(display_query, history)
+        intent, slots = route_intent(routed_query)
 
-        # 0b) CỔNG OFF-TOPIC: chặn câu NGOÀI lĩnh vực CNTT TRƯỚC truy hồi. CHỈ áp khi route_intent
-        #     KHÔNG nhận ra intent IT có giá trị — các intent định hướng (lộ trình/phỏng vấn/lương/
-        #     tư vấn/định nghĩa khái niệm/thống kê) đã CHẮC CHẮN là IT (grounded trong KB), nên bỏ
-        #     qua cổng để KHÔNG chặn nhầm vai trò ít liên quan catalog (vd "lộ trình SysAdmin").
-        #     Câu lạc đề thật (route_intent=None) vẫn bị cổng chặn như cũ.
-        if intent not in _IT_SAFE_INTENTS and self._is_off_topic(search_text, raw=message):
+        if intent not in _IT_SAFE_INTENTS and self._is_off_topic(search_text, raw=message) \
+                and (routed_query == display_query
+                     or self._is_off_topic(routed_query, raw=message)):
             return "final", {
                 "response": OFF_TOPIC_MESSAGE,
                 "intent": "off_topic",
@@ -1254,14 +1185,13 @@ QUY TẮC:
                 "recommendations": [],
             }
 
-        # Khi có LLM (Ollama/Claude): MỌI câu ĐỊNH NGHĨA/GIẢI THÍCH ("X là gì", "giải thích X",
-        # "vì sao X", "X hoạt động thế nào"...) đều để LLM trả lời TỰ NHIÊN & ĐI SÂU thay vì in
-        # template định nghĩa tĩnh (vốn chỉ in 1 đoạn nghĩa từ glossary -> nông & dễ bị coi là
-        # "không trả lời"). Định nghĩa chuẩn của glossary VẪN được chèn ở đầu câu trả lời qua
-        # concept_overview_block làm điểm tựa chính xác. KHÔNG có LLM -> giữ template nhanh & grounded.
+        multi = _route_multi(message)
+
         if _llm_available() and intent == "definition":
             intent = None
-        handler = {
+        if multi and _llm_available():
+            intent = None
+        handlers = {
             "definition": self._answer_definition,
             "comparison": self._answer_comparison,
             "career_path": self._answer_career_path,
@@ -1272,52 +1202,61 @@ QUY TẮC:
             "interview": self._answer_interview,
             "salary": self._answer_salary,
             "career_guidance": self._answer_career_guidance,
-        }.get(intent)
+        }
+        if multi and not _llm_available():
+            parts, srcs, recs = [], [], []
+            for it, sl, cl in multi:
+                h = handlers.get(it)
+                r = h(sl, cl, cl, history) if h else None
+                if r:
+                    parts.append(r["response"])
+                    srcs += r.get("sources", [])
+                    recs += r.get("recommendations", [])
+            if len(parts) >= 2:
+                note0 = intent_note(understanding)
+                return "final", {
+                    "response": (note0 or "") + "\n\n---\n\n".join(parts),
+                    "intent": "multi",
+                    "sources": dedupe_items(srcs),
+                    "recommendations": dedupe_items(recs)[:6],
+                }
+        kb_block = None
+        kb_items = []
+        handler = handlers.get(intent)
         if handler:
             result = handler(slots, display_query, message, history)
             if result:
-                note0 = intent_note(understanding)
-                if note0:
-                    result["response"] = note0 + result["response"]
-                return "final", result
+                if _llm_available() and intent != "admin_stat":
+                    kb_block = result["response"]
+                    kb_items = dedupe_items(
+                        (result.get("sources") or []) + (result.get("recommendations") or [])
+                    )
+                else:
+                    note0 = intent_note(understanding)
+                    if note0:
+                        result["response"] = note0 + result["response"]
+                    return "final", result
 
         item_type = detect_item_type(search_text)
         mode = detect_response_mode(search_text)
-        # Hỏi "vì sao / như thế nào / hoạt động ra sao": người dùng chỉ muốn câu trả lời
-        # TRỌNG TÂM, không phải cả lộ trình. Ép về chế độ "answer" (ngắn, có khái niệm + 1
-        # tài nguyên sát nhất) dù câu có chứa "bắt đầu/cơ bản" làm detect_response_mode hiểu
-        # nhầm thành lộ trình. (Khi có LLM, câu suy luận đã đi nhánh LLM nên override này vô hại.)
         if _is_explanation_query(message):
             mode = "answer"
         category = self.rag.detect_category(search_text)
 
-        # 1) Ưu tiên truy hồi NGỮ NGHĨA (embeddings) — khớp ý nghĩa, chịu lỗi chính tả,
-        #    tự chặn câu hỏi ngoài lĩnh vực IT. 2) Dự phòng bằng RAG (BM25/TF-IDF) nếu cần.
         sources = self._semantic_retrieve(
             search_text, top_k=8, item_type=item_type, history=history
         )
-        # CRAG (Corrective RAG): nếu bộ lọc loại làm rỗng kết quả, tự nới bỏ lọc rồi
-        # thử lại trước khi kết luận -> ít khi "không tìm thấy" oan.
         if sources is not None and not sources and item_type:
             sources = self._semantic_retrieve(
                 search_text, top_k=8, item_type=None, history=history
             )
         if sources is None:
-            # Embeddings KHÔNG khả dụng -> dùng RAG (BM25/TF-IDF) dự phòng.
             context, sources = self.rag.build_context(
                 search_text, top_k=8, item_type=item_type, history=history
             )
         else:
-            # Embeddings ĐÃ chạy: rỗng nghĩa là ngoài lĩnh vực (cổng off-topic) ->
-            # KHÔNG rơi xuống BM25 (vốn không có cổng chặn) -> trả lời "ngoài lĩnh vực".
-            context = "\n\n---\n\n".join(
-                f"[Nguồn {i} — độ phù hợp {s['relevance']:.0f}%]\n{s['document']}"
-                for i, s in enumerate(sources, 1)
-            )
+            pass
 
-        # Chuyên mục SUY TỪ chính kết quả truy hồi ngữ nghĩa (đáng tin hơn đoán theo
-        # từ khóa): nếu nguồn toàn mục ML thì chuyên mục là "Trí tuệ nhân tạo" — tránh
-        # nhận nhầm "khóa học ..." thành "Khoa học dữ liệu". Lexical chỉ là dự phòng.
         src_cat = dominant_category(sources)
         if src_cat:
             category = src_cat
@@ -1329,38 +1268,27 @@ QUY TẮC:
             recommendations = self.rag.get_recommendations(
                 seed_id, top_n=5, exclude_ids=seen_ids, query=search_text
             )
-            # Chuẩn hóa % gợi ý về cùng dải tin cậy (90-100%) như nguồn truy hồi.
             rmax = max((r.get("score", 0.0) for r in recommendations), default=0.0) or 1.0
             for r in recommendations:
                 if "score" in r:
                     r["score"] = round(calibrate_confidence(r["score"] / rmax) * 100, 1)
 
-        # (Đã bỏ khối chèn filter_by_category(...).head(3) ở 95%: nó nhét đại 3 mục
-        #  ĐẦU TIÊN của chuyên mục lên đầu nguồn bất kể có liên quan truy vấn hay không
-        #  -> kéo theo mục lạc đề ở 95%. Lộ trình trong synthesize_answer đã tự lấp đầy
-        #  từng giai đoạn bằng category_stage_items: đúng cấp độ + ưu tiên bám truy vấn.)
 
-        # PREFIX = (note sửa lỗi) + (khái niệm chung). Chèn TRƯỚC thân câu trả lời — giữ ĐÚNG
-        # thứ tự bản gốc (note, rồi concept, rồi body). Tách ra đây để chat_stream() phát prefix
-        # NGAY trước khi stream token LLM (người dùng thấy khái niệm tức thì, không chờ LLM).
         prefix = ""
         if sources:
             all_items0 = dedupe_items([s["item"] for s in sources] + recommendations)
-            concept = concept_overview_block(display_query, all_items0, category)
+            concept = concept_overview_block(routed_query, all_items0, category)
             if concept:
                 prefix = concept + prefix
         note = intent_note(understanding)
         if note:
             prefix = note + prefix
 
-        all_recs = dedupe_items([s["item"] for s in sources] + recommendations)[:6]
+        all_recs = dedupe_items(kb_items + [s["item"] for s in sources] + recommendations)[:6]
 
-        # Trả lời bằng LLM cho câu HỘI THOẠI/ĐỊNH HƯỚNG (suy luận, lộ trình, gợi ý, trả lời chung)
-        # -> mỗi câu được trả lời RIÊNG, bám ngữ cảnh, thay vì cùng một template lặp lại. Câu
-        # TÌM/LIỆT KÊ thuần (mode "search") giữ template (nhanh + liệt kê chính xác từ catalog).
-        # use_llm TỰ PHÁT HIỆN Ollama -> không treo khi Ollama không chạy (fail nhanh -> template).
         use_llm = _llm_available()
-        want_llm = use_llm and (mode != "search" or _is_reasoning_query(message))
+        want_llm = use_llm and (mode != "search" or _is_reasoning_query(message)
+                                or bool(multi) or bool(kb_block))
 
         ctx = {
             "display_query": display_query, "sources": sources, "recommendations": recommendations,
@@ -1369,7 +1297,6 @@ QUY TẮC:
         }
 
         if not want_llm:
-            # Câu tìm/liệt kê thuần (hoặc không có LLM) -> dựng câu trả lời template NGAY.
             body = synthesize_answer(
                 display_query, sources, recommendations, mode,
                 category=category, item_list=self.item_list,
@@ -1379,21 +1306,14 @@ QUY TẮC:
                 "sources": [s["item"] for s in sources], "recommendations": all_recs,
             }
 
-        # Cần LLM -> dựng system prompt (catalog + gợi ý định dạng theo ý định) để caller sinh.
-        # Cấp cho LLM cả câu hỏi gốc lẫn ý đã hiểu để bám sát + chịu lỗi chính tả.
         llm_message = display_query if understanding["corrections"] else message
-        # Câu LỘ TRÌNH cần nhiều mục hơn để LLM gắn khóa thật vào từng giai đoạn; câu khác vài mục.
         n_ctx = 8 if mode == "learning_path" else 5
         ctx_lines = "\n".join(
             f"- {s['item'].get('title','')} | {s['item'].get('category','')}"
             f" | {s['item'].get('level','') or 'N/A'}"
             for s in (sources or [])[:n_ctx]
         )
-        # Gợi ý ĐỊNH DẠNG theo ý định -> trả lời đúng kiểu câu hỏi (lộ trình/gợi ý/so sánh).
         mode_hint = {
-            # LỘ TRÌNH: cho LLM DỰNG lộ trình kiến thức THẬT bằng hiểu biết của model (không bị bó
-            # vào vài khóa truy hồi được -> hết "thiếu/sai thứ tự"), rồi GẮN khóa catalog vào giai
-            # đoạn phù hợp. Giai đoạn chưa có khóa khớp thì vẫn nêu kiến thức cần học (không bỏ).
             "learning_path": "Người dùng muốn LỘ TRÌNH HỌC. Hãy DỰNG lộ trình kiến thức THẬT theo cấp "
                              "độ cơ bản -> nâng cao bằng hiểu biết của bạn: 3-4 giai đoạn, mỗi giai đoạn "
                              "nêu ngắn các chủ đề/kỹ năng cần học và VÌ SAO theo thứ tự đó. Khi có khóa "
@@ -1403,25 +1323,31 @@ QUY TẮC:
             "recommend": "Người dùng muốn GỢI Ý. Chọn 2-3 khóa phù hợp nhất từ catalog và giải thích "
                          "ngắn gọn vì sao chọn (bỏ khóa lạc chủ đề).",
             "compare": "Người dùng muốn SO SÁNH. Nêu khác biệt chính giữa các lựa chọn liên quan.",
-            # answer = câu GIẢI THÍCH/PHÂN TÍCH (vì sao/lợi ích/khi nào/là gì...). Ưu tiên trả lời
-            # thực chất kiểu "tổng quan trên web", KHÔNG chuyển sang liệt kê khóa học.
             "answer": "Người dùng hỏi một câu cần GIẢI THÍCH/PHÂN TÍCH. Hãy TRẢ LỜI TRỰC TIẾP, đầy "
                       "đủ, có cấu trúc bằng kiến thức của bạn (nêu lý do/phân tích/ví dụ thực tế), "
                       "như một đoạn giải thích tổng quan rõ ràng. KHÔNG chuyển sang liệt kê khóa học; "
                       "phần tài nguyên đã có sẵn ở cuối.",
         }.get(mode, "")
+        if len(multi) >= 2:
+            mode_hint = ("Câu hỏi gồm NHIỀU Ý: "
+                         + "; ".join(cl for _, _, cl in multi)
+                         + ". Trả lời đầy đủ TỪNG Ý theo đúng thứ tự, mỗi ý một mục riêng (##).")
+        if kb_block:
+            mode_hint = ("Bên dưới có DỮ LIỆU NỘI BỘ ĐÃ KIỂM CHỨNG cho câu hỏi này. Hãy VIẾT LẠI "
+                         "thành bài trả lời tự nhiên, mạch lạc, có cấu trúc: GIỮ NGUYÊN mọi SỐ LIỆU "
+                         "(mức lương, thời lượng, tên khóa học, giai đoạn) từ dữ liệu — KHÔNG bịa số "
+                         "mới; bổ sung phân tích/ví dụ bằng hiểu biết của bạn để bài sâu hơn.")
         sys_prompt = self.SYSTEM_PROMPT
         if ctx_lines:
             sys_prompt += f"\n\n## Khóa học liên quan trong catalog (CHỈ trích từ đây khi gợi ý cụ thể):\n{ctx_lines}"
+        if kb_block:
+            sys_prompt += f"\n\n## Dữ liệu nội bộ ĐÃ KIỂM CHỨNG (nguồn sự thật cho số liệu):\n{kb_block}"
         if mode_hint:
             sys_prompt += f"\n\n## Yêu cầu cho câu trả lời:\n{mode_hint}"
 
         ctx.update({"sys_prompt": sys_prompt, "llm_message": llm_message})
         return "generate", ctx
 
-    # ══════════════════ HANDLER INTENT ĐỊNH HƯỚNG ══════════════════
-    # Mỗi handler trả dict {response, intent, sources, recommendations} hoặc None để
-    # rơi về pipeline tìm tài nguyên. Tài nguyên luôn kéo từ catalog thật (_quick_resources).
 
     def _quick_resources(self, text, k=3, item_type=None, filters=None, require_overlap=False):
         """Tra cứu tài nguyên NHANH (1 truy vấn embedding, KHÔNG cross-encoder) cho các
@@ -1503,13 +1429,13 @@ QUY TẮC:
         ents = slots.get("entities") or []
         if len(concs) >= 2:
             sides = [(kb.CONCEPTS[c]["name"], kb.CONCEPTS[c]["def"], " ".join(kb.CONCEPTS[c]["topics"]))
-                     for c in concs[:2]]
+                     for c in concs[:3]]
         elif len(ents) == 2:
             sides = [(e.title(), None, e) for e in ents]
         else:
             return None
-        verdict = kb.comparison_verdict(sides[0][0], sides[1][0])
-        resp = f"## ⚖️ So sánh {sides[0][0]} vs {sides[1][0]}\n"
+        verdict = kb.comparison_verdict(sides[0][0], sides[1][0]) if len(sides) == 2 else None
+        resp = "## ⚖️ So sánh " + " vs ".join(s[0] for s in sides) + "\n"
         if verdict:
             resp += f"\n{verdict}\n"
         items = []
@@ -1529,7 +1455,7 @@ QUY TẮC:
     def _answer_career_path(self, slots, display_query, message, history):
         key = slots["career"]
         career = kb.CAREERS[key]
-        roadmap = kb.role_roadmap(key)        # [{stage, duration, skills}] để hiển thị thời lượng
+        roadmap = kb.role_roadmap(key)
         desc = kb.role_description(key)
         known = {kb._key(s) for s in slots.get("known", [])}
         filters = detect_filters(message)
@@ -1577,7 +1503,6 @@ QUY TẮC:
         if role.get("description"):
             resp += f"{role['description']}\n\n"
         resp += "\n".join(f"{i}. {q}" for i, q in enumerate(qs, 1))
-        # Tài nguyên ôn tập: tìm theo kỹ năng GIAI ĐOẠN ĐẦU của vai trò (sát phần cần ôn nhất).
         seed = " ".join(role.get("roadmap", [{}])[0].get("skills", [])) or role.get("name", "")
         items = dedupe_items(self._quick_resources(seed, k=3, require_overlap=True))
         if items:

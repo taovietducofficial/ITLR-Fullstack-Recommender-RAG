@@ -9,8 +9,6 @@ from __future__ import annotations
 
 from scripts.scrape.base import BaseScraper
 
-# Dùng feed "trending" thay vì "newest": feed newest công khai của Viblo hiện bị spam (rao bán
-# tài khoản, vay crypto...) tràn ngập; trending là bài kỹ thuật được tương tác thật -> chất lượng cao.
 API = "https://viblo.asia/api/posts/trending"
 
 
@@ -24,7 +22,7 @@ def _first_nonempty(d: dict, keys: list[str]) -> str:
 
 def _extract_tags(post: dict) -> list[str]:
     tags = post.get("tags")
-    if isinstance(tags, dict):  # kiểu {"data": [...]}
+    if isinstance(tags, dict):
         tags = tags.get("data", [])
     out = []
     for t in tags or []:

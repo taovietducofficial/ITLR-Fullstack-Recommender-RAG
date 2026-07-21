@@ -44,7 +44,7 @@ def build_ann(embeddings, artifacts_dir="artifacts"):
 
     faiss = _try_import_faiss()
     if faiss is not None:
-        index = faiss.IndexFlatIP(d)   # inner product = cosine vì vector đã chuẩn hóa
+        index = faiss.IndexFlatIP(d)
         index.add(embeddings)
         faiss.write_index(index, os.path.join(artifacts_dir, "ann_index.faiss"))
         pickle.dump({"backend": "faiss", "n": n, "dim": d},
@@ -107,11 +107,11 @@ def ann_search(ann, query_vec, top_n=200):
     q = np.ascontiguousarray(query_vec.astype(np.float32).reshape(1, -1))
     try:
         if ann["backend"] == "faiss":
-            scores, idx = ann["index"].search(q, top_n)  # IP = cosine
+            scores, idx = ann["index"].search(q, top_n)
             return idx[0], scores[0]
         if ann["backend"] == "hnswlib":
             labels, distances = ann["index"].knn_query(q, k=top_n)
-            return labels[0].astype(np.int64), (1.0 - distances[0])  # cosine = 1 - dist
+            return labels[0].astype(np.int64), (1.0 - distances[0])
     except Exception:
         return None
     return None

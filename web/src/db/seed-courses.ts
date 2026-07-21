@@ -4,10 +4,6 @@ import { pipeline } from "node:stream/promises";
 import { from as copyFrom } from "pg-copy-streams";
 import { pool } from "./pool";
 
-// Nạp catalog từ data/it_learning_items.csv vào bảng courses bằng COPY (nhanh, ~50k dòng).
-// Thứ tự cột CSV trùng bảng courses: item_id,title,type,level,description,category,topics,instructor,platform,link
-// Chạy: npm run seed   (đã có dữ liệu -> bỏ qua; nạp lại: npm run seed -- --force)
-// Đường dẫn CSV: ưu tiên ITEMS_CSV (dùng trong Docker), mặc định theo layout repo.
 const CSV = process.env.ITEMS_CSV || join(__dirname, "..", "..", "..", "data", "it_learning_items.csv");
 
 async function seed() {
@@ -22,7 +18,7 @@ async function seed() {
       return;
     }
     if (n > 0) {
-      await client.query("TRUNCATE courses CASCADE"); // CASCADE: xóa cả enrollments tham chiếu
+      await client.query("TRUNCATE courses CASCADE");
       console.log("[seed] Đã TRUNCATE courses (force).");
     }
 
