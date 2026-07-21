@@ -4,7 +4,7 @@
 # Model embedding/reranker tải từ HuggingFace ở lần chạy đầu (cần internet) và được
 # cache vào volume hf-cache.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
