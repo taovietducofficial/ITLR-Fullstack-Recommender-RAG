@@ -28,7 +28,7 @@ ydata-profiling==4.1.2
 connectorx==0.3.1
 google-api-python-client==2.84.0
 google-auth-httplib2==0.1.0
-google-auth-oauthlib==1.0.0
+google-auth-oauthlib==1.4.0
 streamlit
 streamlit-pandas-profiling
 streamlit-elements
