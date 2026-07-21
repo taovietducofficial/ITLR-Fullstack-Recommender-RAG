@@ -351,7 +351,7 @@ ${rows || '<p style="text-align:center;color:var(--muted)">Chưa có tin nhắn 
 <footer>Bản sao lưu cá nhân do bạn tải về từ Nền tảng học tập CNTT.</footer>
 </div></body></html>`;
 
-  const fname = `lich-su-tro-chuyen-${otherName}-${Date.now()}.html`.replace(/[^\w.\-]+/g, "_");
+  const fname = `lich-su-tro-chuyen-${otherName}-${Date.now()}.html`.replace(/[^\w.-]+/g, "_");
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${encodeURIComponent(fname)}`);
   res.send(html);
