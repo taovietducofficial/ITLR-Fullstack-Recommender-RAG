@@ -8,7 +8,7 @@ dagster-aws==0.21.9
 # dagster-dbt==0.21.3
 dagster-spark==0.21.9
 pandas==1.5.3
-polars==0.16.16
+polars==1.43.0
 pyspark==3.3.2
 SQLAlchemy==1.4.46
 pymysql==1.0.2
