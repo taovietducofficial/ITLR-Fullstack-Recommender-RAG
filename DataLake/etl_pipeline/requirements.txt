@@ -1,4 +1,4 @@
-dagit==1.5.9
+dagit==1.13.14
 dagster==1.5.9
 dagster-postgres==0.21.9
 dagstermill==0.21.9
