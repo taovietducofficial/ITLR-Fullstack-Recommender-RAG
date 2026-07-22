@@ -35,10 +35,7 @@ def _try_import_hnswlib():
 
 
 def build_ann(embeddings, artifacts_dir="artifacts"):
-    """Xây chỉ mục từ ma trận embeddings (n x d, đã chuẩn hóa L2). Trả về backend đã dùng.
-
-    Ưu tiên FAISS IndexFlatIP -> hnswlib (cosine) -> None nếu không có thư viện nào.
-    """
+    """Xây chỉ mục từ ma trận embeddings (n x d, đã chuẩn hóa L2). Ưu tiên FAISS -> hnswlib -> None."""
     embeddings = np.ascontiguousarray(embeddings.astype(np.float32))
     n, d = embeddings.shape
 

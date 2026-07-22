@@ -23,7 +23,6 @@ N_DEMO_USERS = 40
 
 
 def top_k_per_row(sim, k):
-    """Giữ lại k giá trị lớn nhất mỗi hàng của ma trận CSR."""
     sim = sim.tocsr()
     data, indices, indptr = [], [], [0]
     for r in range(sim.shape[0]):

@@ -1,12 +1,10 @@
 """Hiểu & chuẩn hóa truy vấn người dùng TRƯỚC khi phát hiện ý định và truy hồi.
 
-Mục tiêu: dù người dùng gõ sai ("machne lerning", "lap trnh web", "docke"),
-thiếu dấu, hay dùng viết tắt (ml, k8s, db), hệ thống vẫn hiểu đúng lĩnh vực,
-loại tài nguyên và kiểu câu hỏi -> câu trả lời bám sát ý người dùng hơn.
-
-Lớp này bổ trợ (không thay thế) kênh truy hồi ngữ nghĩa: embeddings/char n-gram
-vốn đã chịu lỗi chính tả, nhưng các bộ phát hiện theo luật (mode/category/type)
-lại khớp chính xác -> dễ trượt khi gõ sai. Chuẩn hóa ở đây sửa đúng phần đó.
+Sửa lỗi gõ sai ("machne lerning", "docke"), thiếu dấu, và viết tắt (ml, k8s, db) để hệ
+thống hiểu đúng lĩnh vực/loại tài nguyên/kiểu câu hỏi. Bổ trợ (không thay thế) truy hồi
+ngữ nghĩa: embeddings/char n-gram vốn đã chịu lỗi chính tả, nhưng các bộ phát hiện theo
+luật (mode/category/type) khớp chính xác nên dễ trượt khi gõ sai — chuẩn hóa ở đây sửa
+đúng phần đó.
 """
 
 import difflib
@@ -97,10 +95,8 @@ _SEED_VOCAB = {
 
 
 def build_query_vocab(retrieval_model=None, item_list=None):
-    """Dựng vốn từ chuẩn (bỏ dấu) làm đích sửa lỗi chính tả.
-
-    Gộp: seed vocab + tên chuyên mục + khóa trong topic_index của catalog.
-    Chỉ giữ token độ dài >= 3 để fuzzy không sửa nhầm từ ngắn.
+    """Vốn từ chuẩn (bỏ dấu) làm đích sửa lỗi chính tả: seed vocab + chuyên mục + topic_index
+    của catalog. Chỉ giữ token độ dài >= 3 để fuzzy không sửa nhầm từ ngắn.
     """
     vocab = set(_SEED_VOCAB)
 
@@ -148,14 +144,9 @@ def _correct_token(tok, vocab):
 
 
 def understand_query(query, vocab):
-    """Phân tích & chuẩn hóa truy vấn.
-
-    Trả về dict:
-      - original:    chuỗi gốc người dùng nhập
-      - corrected:   chuỗi đã sửa lỗi + nối phần mở rộng viết tắt (cho retrieval/detection)
-      - display:     chuỗi đã sửa (KHÔNG kèm mở rộng) để hiển thị lại cho người dùng
-      - corrections: list (từ_sai, từ_đúng) đã sửa
-      - expansions:  list cụm mở rộng từ viết tắt
+    """Phân tích & chuẩn hóa truy vấn. Trả dict: original (gốc), corrected (đã sửa + mở rộng
+    viết tắt, dùng cho retrieval/detection), display (đã sửa, không mở rộng, để hiển thị lại
+    cho người dùng), corrections (list từ_sai/từ_đúng), expansions (cụm mở rộng viết tắt).
     """
     query = re.sub(r"(?i)c\+\+", "cpp", str(query))
     query = re.sub(r"(?i)c#", "csharp", query)
@@ -212,15 +203,14 @@ _ABBR_READABLE = {
 
 
 def _as_sentence(text):
-    """Chuẩn hóa chuỗi đã sửa thành 'câu hoàn chỉnh' để hiển thị: viết hoa chữ đầu."""
+    """Viết hoa chữ đầu để hiển thị như một câu hoàn chỉnh."""
     text = str(text).strip()
     return text[:1].upper() + text[1:] if text else text
 
 
 def intent_note(understanding):
-    """Dòng minh bạch hóa ĐẶT TRƯỚC câu trả lời: xác nhận lại Ý HIỂU khi có sửa lỗi chính tả
-    HOẶC nhận diện viết tắt. Viết lại thành CÂU HOÀN CHỈNH (viết hoa) cho người dùng, kèm chi
-    tiết đã sửa. Trả "" nếu truy vấn đã rõ ràng -> không làm rối.
+    """Dòng đặt TRƯỚC câu trả lời xác nhận lại ý hiểu khi có sửa chính tả hoặc nhận diện viết
+    tắt. Trả "" nếu truy vấn đã rõ ràng, để không làm rối.
     """
     corr = understanding.get("corrections") or []
     pairs = understanding.get("expansion_pairs") or []

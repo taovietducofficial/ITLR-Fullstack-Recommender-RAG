@@ -1,14 +1,9 @@
 """Tri thức CNTT cấp sản phẩm cho chatbot — chạy OFFLINE, không cần LLM.
 
-Gồm 4 phần, tất cả tiếng Việt:
-  - CONCEPTS : giải thích khái niệm ("X là gì?") + chủ đề catalog để lấy tài nguyên.
-  - CAREERS  : lộ trình nghề (milestones kỹ năng theo thứ tự) — Backend, AI, Data...
-  - NEXT_SKILL: đồ thị "đã học X -> nên học tiếp" để gợi ý cá nhân hóa.
-  - Hàm trợ giúp: nhận diện khái niệm/nghề/kỹ năng trong câu, tính kỹ năng còn thiếu,
-    gợi ý kỹ năng tiếp theo, ước lượng thời gian học.
-
-Phần "tài nguyên" luôn được kéo từ catalog thật (qua chatbot), KB chỉ cung cấp
-phần định hướng/khái niệm mà dữ liệu khóa học không tự có.
+Gồm CONCEPTS (định nghĩa + chủ đề catalog), CAREERS (lộ trình nghề theo milestone kỹ
+năng), NEXT_SKILL (đồ thị "đã học X -> nên học tiếp"), và các hàm nhận diện khái
+niệm/nghề/kỹ năng trong câu. Phần "tài nguyên" luôn kéo từ catalog thật qua chatbot —
+KB chỉ cung cấp phần định hướng/khái niệm mà dữ liệu khóa học không tự có.
 """
 
 import json
@@ -127,10 +122,8 @@ def comparison_verdict(a_text, b_text):
 
 
 def find_concepts(query):
-    """Trả về list khái niệm (key CONCEPTS) được nhắc trong câu.
-
-    Xếp hạng theo độ dài alias KHỚP DÀI NHẤT (đặc trưng hơn) -> 'sql injection' thắng
-    'sql', để handler 'X là gì?' chọn đúng khái niệm cụ thể nhất.
+    """List khái niệm (key CONCEPTS) được nhắc trong câu, xếp hạng theo alias khớp DÀI NHẤT
+    (đặc trưng hơn) -> 'sql injection' thắng 'sql', để handler 'X là gì?' chọn đúng khái niệm.
     """
     pre = str(query).lower().replace("c++", "cpp").replace("c#", "csharp")
     q = _key(pre)
@@ -150,12 +143,10 @@ def find_concepts(query):
 
 
 def safe_concepts(query, limit=4):
-    """MỌI khái niệm khớp truy vấn một cách AN TOÀN (cùng quy tắc safe_concept_match nhưng
-    trả NHIỀU key, theo thứ tự alias khớp dài nhất). Dùng để nêu khái niệm cho TẤT CẢ từ khóa
-    CNTT trong câu (viết tắt/viết thường/viết hoa đều bắt được vì so khớp đã bỏ dấu + thường).
+    """Mọi khái niệm khớp truy vấn AN TOÀN (nhiều key, theo alias khớp dài nhất).
 
-    Token đơn chỉ được tin khi alias >= 3 ký tự HOẶC truy vấn đúng MỘT từ -> tránh 'be'/'ai'
-    trong câu nhiều từ bị nhận nhầm. Trả list key (có thể rỗng)."""
+    Token đơn chỉ được tin khi alias >= 3 ký tự hoặc truy vấn đúng một từ, để tránh
+    'be'/'ai' trong câu nhiều từ bị nhận nhầm."""
     pre = str(query).lower().replace("c++", "cpp").replace("c#", "csharp")
     qn = strip_accents(normalize_text(pre))
     toks = qn.split()
@@ -198,10 +189,10 @@ FIELD_TO_CAREER = {key: r.get("field_aliases", []) for key, r in ROLES.items()}
 
 
 def find_roadmap_field(query):
-    """Khớp LĨNH VỰC trần (AI/web/data...) -> career_key scaffold gần nhất; None nếu không khớp.
+    """Khớp lĩnh vực trần (AI/web/data...) -> career_key scaffold gần nhất; None nếu không khớp.
 
-    Khớp theo TỪ (token) cho alias 1 từ để 'ai' không dính 'training'/'email'; cụm nhiều từ khớp
-    chuỗi con. Ưu tiên alias dài hơn (đặc trưng hơn). Chỉ nên gọi cho câu đã xác định là LỘ TRÌNH.
+    Khớp theo TỪ cho alias 1 từ để 'ai' không dính 'training'/'email'; cụm nhiều từ khớp chuỗi
+    con, ưu tiên alias dài hơn. Chỉ nên gọi cho câu đã xác định là LỘ TRÌNH.
     """
     q = strip_accents(normalize_text(query))
     tok_list = q.split()
@@ -225,8 +216,8 @@ def find_roadmap_field(query):
 
 
 def find_role_key(query):
-    """Vai trò được nhắc trong câu (cho intent phỏng vấn/lương): ưu tiên tên nghề (find_career,
-    khớp chuỗi con), rồi tới field alias (find_roadmap_field, khớp theo từ). None nếu không có."""
+    """Vai trò được nhắc trong câu, cho intent phỏng vấn/lương: ưu tiên find_career (khớp
+    chuỗi con), rồi find_roadmap_field (khớp theo từ)."""
     key, _ = find_career(query)
     return key or find_roadmap_field(query)
 
@@ -282,8 +273,8 @@ def extract_skills(text):
 
 
 def clean_known(known, career_key=None):
-    """Bỏ khỏi danh sách 'đã học' những từ thực ra là TÊN NGHỀ (vd 'Backend' trong
-    'trở thành Backend Developer') để không đánh dấu nhầm là kỹ năng đã có."""
+    """Bỏ khỏi danh sách 'đã học' những từ thực ra là tên nghề (vd 'Backend' trong 'trở
+    thành Backend Developer') để không đánh dấu nhầm là kỹ năng đã có."""
     if not career_key:
         return list(dict.fromkeys(known))
     bad = set()

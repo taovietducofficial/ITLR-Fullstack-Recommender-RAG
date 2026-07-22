@@ -282,6 +282,9 @@ services:
       - "4000"
     networks:
       - data_network
+    # cần cho Linux Docker Engine (Docker Desktop có host.docker.internal sẵn)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   trino:
     image: trinodb/trino:468

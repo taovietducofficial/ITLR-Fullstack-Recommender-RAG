@@ -1,10 +1,10 @@
 """Định tuyến intent cho chatbot — phân loại câu hỏi + trích 'slot' (nghề, khái niệm,
 kỹ năng đã học...) để gọi handler chuyên biệt.
 
-Chạy SAU lớp hiểu truy vấn (sửa lỗi chính tả/viết tắt) và TRƯỚC truy hồi ngữ nghĩa:
-nếu khớp một intent có giá trị cao (định nghĩa, so sánh, lộ trình nghề, kỹ năng còn
-thiếu, học gì tiếp, ước lượng thời gian, thống kê), trả intent đó để chatbot soạn câu
-trả lời định hướng; nếu không, trả (None, {}) để rơi về pipeline tìm tài nguyên hiện có.
+Chạy SAU lớp hiểu truy vấn (sửa lỗi chính tả/viết tắt) và TRƯỚC truy hồi ngữ nghĩa: nếu
+khớp một intent có giá trị cao (định nghĩa, so sánh, lộ trình nghề, kỹ năng còn thiếu...),
+trả intent đó để chatbot soạn câu trả lời định hướng; nếu không, trả (None, {}) để rơi
+về pipeline tìm tài nguyên hiện có.
 """
 
 import re

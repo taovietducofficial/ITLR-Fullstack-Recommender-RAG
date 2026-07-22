@@ -16,10 +16,8 @@ INTERACTIONS_CSV = Path(os.environ.get("ITLR_INTERACTIONS_CSV", DATA_DIR / "inte
 
 
 def artifact(name: str) -> str:
-    """Đường dẫn tuyệt đối tới một file trong var/artifacts/."""
     return str(ARTIFACTS_DIR / name)
 
 
 def data_file(name: str) -> str:
-    """Đường dẫn tuyệt đối tới một file trong var/data/."""
     return str(DATA_DIR / name)

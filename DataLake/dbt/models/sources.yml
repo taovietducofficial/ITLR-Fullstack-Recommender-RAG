@@ -8,3 +8,4 @@ sources:
       - name: fact_table
       - name: dim_product
       - name: dim_date
+      - name: itlr_fact_interaction

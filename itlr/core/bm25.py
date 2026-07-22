@@ -19,7 +19,6 @@ class BM25Index:
         self.n_docs = 0
 
     def fit(self, documents):
-        """Build BM25 statistics from raw text documents."""
         self.n_docs = len(documents)
         self.doc_freqs = []
         df_counter = Counter()
@@ -40,7 +39,6 @@ class BM25Index:
         return self
 
     def score_query(self, query):
-        """Return BM25 scores for all documents given a query string."""
         query_tokens = tokenize(query)
         if not query_tokens:
             return [0.0] * self.n_docs

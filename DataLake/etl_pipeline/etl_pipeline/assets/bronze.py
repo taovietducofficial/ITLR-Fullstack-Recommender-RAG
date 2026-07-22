@@ -22,18 +22,21 @@ BRONZE_TABLES = {
 }
 
 
-def _bronze_asset(name: str, group: str, table: str):
+def _bronze_asset(name: str, group: str, table: str, *,
+                   resource_key: str = "mysql_io_manager", group_name: str = LAYER):
     @asset(
         name=name,
-        description=f"Extract MySQL table '{table}' into the Bronze layer",
+        description=f"Extract source table '{table}' into the Bronze layer",
         io_manager_key="minio_io_manager",
-        required_resource_keys={"mysql_io_manager"},
+        required_resource_keys={resource_key},
         key_prefix=[LAYER, group],
         compute_kind=COMPUTE_KIND,
-        group_name=LAYER,
+        group_name=group_name,
     )
     def _asset(context) -> Output[pl.DataFrame]:
-        df = context.resources.mysql_io_manager.extract_data(f"SELECT * FROM {table};")
+        io_manager = getattr(context.resources, resource_key)
+        # không có ";" cuối câu -- connectorx backend Postgres lỗi cú pháp với nó
+        df = io_manager.extract_data(f"SELECT * FROM {table}")
         context.log.info(f"Extracted '{table}' with shape {df.shape}")
         return Output(
             value=df,

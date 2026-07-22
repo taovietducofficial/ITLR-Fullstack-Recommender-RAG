@@ -1,7 +1,7 @@
 from dagster import AssetCheckResult, AssetKey, asset_check
 from pyspark.sql import functions as F
 
-from .quality_rules import customer_dim_is_unique, fact_table_is_valid
+from .quality_rules import customer_dim_is_unique, fact_table_is_valid, itlr_fact_interaction_is_valid
 
 
 @asset_check(
@@ -33,4 +33,18 @@ def dim_customer_unique(dim_customer) -> AssetCheckResult:
     return AssetCheckResult(
         passed=customer_dim_is_unique(total, distinct),
         metadata={"rows": total, "duplicate_or_null": total - distinct},
+    )
+
+
+@asset_check(
+    asset=AssetKey(["gold", "itlr", "gold_itlr_fact_interaction"]),
+    description="user_id and item_id are never null in the itlr interaction fact",
+)
+def itlr_fact_interaction_valid(gold_itlr_fact_interaction) -> AssetCheckResult:
+    null_keys = gold_itlr_fact_interaction.filter(
+        F.col("user_id").isNull() | F.col("item_id").isNull()
+    ).count()
+    return AssetCheckResult(
+        passed=itlr_fact_interaction_is_valid(null_keys),
+        metadata={"null_keys": null_keys},
     )

@@ -12,11 +12,12 @@ _spec.loader.exec_module(_settings)
 
 MYSQL_VARS = ["MYSQL_HOST", "MYSQL_PORT", "MYSQL_DATABASES", "MYSQL_ROOT_USER", "MYSQL_ROOT_PASSWORD"]
 MINIO_VARS = ["MINIO_ENDPOINT", "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "DATALAKE_BUCKET"]
+ITLR_PG_VARS = ["ITLR_PG_HOST", "ITLR_PG_PORT", "ITLR_PG_DATABASE", "ITLR_PG_USER", "ITLR_PG_PASSWORD"]
 
 
 @pytest.fixture
 def clean_env(monkeypatch):
-    for name in MYSQL_VARS + MINIO_VARS + ["SPARK_MASTER_URL"]:
+    for name in MYSQL_VARS + MINIO_VARS + ITLR_PG_VARS + ["SPARK_MASTER_URL"]:
         monkeypatch.delenv(name, raising=False)
     return monkeypatch
 
@@ -42,6 +43,24 @@ def test_mysql_config_builds_when_present(clean_env):
 def test_minio_config_raises_when_missing(clean_env):
     with pytest.raises(_settings.MissingEnvVar):
         _settings.minio_config_from_env()
+
+
+def test_itlr_postgres_config_raises_when_missing(clean_env):
+    with pytest.raises(_settings.MissingEnvVar):
+        _settings.itlr_postgres_config_from_env()
+
+
+def test_itlr_postgres_config_builds_when_present(clean_env):
+    for name, value in zip(ITLR_PG_VARS, ["host.docker.internal", "5433", "it_learning", "postgres", "postgres"]):
+        clean_env.setenv(name, value)
+    config = _settings.itlr_postgres_config_from_env()
+    assert config == {
+        "host": "host.docker.internal",
+        "port": "5433",
+        "database": "it_learning",
+        "user": "postgres",
+        "password": "postgres",
+    }
 
 
 def test_spark_config_defaults_master_when_unset(clean_env):

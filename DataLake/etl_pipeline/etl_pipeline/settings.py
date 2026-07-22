@@ -23,6 +23,14 @@ class MySQLConfig(TypedDict):
     password: str
 
 
+class ITLRPostgresConfig(TypedDict):
+    host: str
+    port: str
+    database: str
+    user: str
+    password: str
+
+
 class MinIOConfig(TypedDict):
     endpoint_url: str
     minio_access_key: str
@@ -44,6 +52,17 @@ def mysql_config_from_env() -> MySQLConfig:
         "database": _require("MYSQL_DATABASES"),
         "user": _require("MYSQL_ROOT_USER"),
         "password": _require("MYSQL_ROOT_PASSWORD"),
+    }
+
+
+def itlr_postgres_config_from_env() -> ITLRPostgresConfig:
+    # ITLR_PG_* riêng, không trùng POSTGRES_* (đó là Postgres nội bộ của Dagster, de_psql)
+    return {
+        "host": _require("ITLR_PG_HOST"),
+        "port": _require("ITLR_PG_PORT"),
+        "database": _require("ITLR_PG_DATABASE"),
+        "user": _require("ITLR_PG_USER"),
+        "password": _require("ITLR_PG_PASSWORD"),
     }
 
 

@@ -83,10 +83,8 @@ def serendipity(
 
 
 def gini_index(recommended_lists: Sequence[Sequence[int]], n_items: int) -> float:
-    """Hệ số Gini của phân bố tần suất gợi ý (0 = công bằng tuyệt đối, 1 = tập trung).
-
-    Cao = vài item chiếm hầu hết lượt phơi bày (thiên lệch phổ biến); thấp = công bằng.
-    """
+    """Hệ số Gini của phân bố tần suất gợi ý (0 = công bằng tuyệt đối, 1 = tập trung
+    vào vài item — thiên lệch phổ biến)."""
     counts = np.zeros(n_items, dtype="float64")
     for lst in recommended_lists:
         for i in lst:

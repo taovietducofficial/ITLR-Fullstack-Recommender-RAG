@@ -14,3 +14,17 @@ models:
         tests:
           - not_null
           - unique
+  - name: course_popularity
+    description: Real interaction volume per course category (domain itlr).
+    columns:
+      - name: category
+        tests:
+          - not_null
+          - unique
+  - name: course_completion_funnel
+    description: Interaction event counts by type (in_progress / completed / lesson_completed).
+    columns:
+      - name: event_type
+        tests:
+          - not_null
+          - unique

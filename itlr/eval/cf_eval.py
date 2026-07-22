@@ -162,11 +162,9 @@ def temporal_split(
     ks: Sequence[int] = (1, 5, 10),
     max_users: int | None = None,
 ) -> Dict[str, float]:
-    """Temporal split: giữ `1 − test_ratio` đầu lịch sử (quá khứ) để train, phần cuối
-    (tương lai) làm test. Thứ tự vị trí trong history đóng vai proxy thời gian.
-
-    Đo Recall@K / NDCG@K / MAP trên tập item tương lai (có thể nhiều item -> graded binary).
-    """
+    """Temporal split trên `cf_model` có sẵn (không train lại item_sim trên riêng phần
+    train — xem `temporal_split_clean` cho bản không rò rỉ). Giữ `1 − test_ratio` đầu
+    history làm train, phần cuối làm test."""
     uids = list(histories.keys())
     if max_users:
         uids = uids[:max_users]

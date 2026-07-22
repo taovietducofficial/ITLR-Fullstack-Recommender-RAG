@@ -1,17 +1,6 @@
-"""Web API (FastAPI) cho hệ thống gợi ý + chatbot — THAY Streamlit, không cần streamlit.
+"""Web API (FastAPI) cho hệ thống gợi ý + chatbot — thay Streamlit, không cần streamlit.
 
-Chạy:
-    uvicorn itlr.api.server:app --host 0.0.0.0 --port 8000
-    # hoặc tiện hơn:
-    python -m itlr.api
-
-Phơi bày 3 năng lực như tab Streamlit cũ (mọi logic lõi giữ nguyên):
-    POST /api/search     — tìm kiếm ngữ nghĩa
-    POST /api/chat       — hỏi đáp chatbot (off-topic gate + khái niệm-trước)
-    GET  /api/personas   — danh sách hồ sơ mô phỏng (Dành cho bạn)
-    POST /api/for-you    — gợi ý Collaborative Filtering theo persona
-    GET  /api/suggested  — câu gợi ý + lời chào của chatbot
-    GET  /               — trang web HTML 3 tab (gọi các API trên)
+Chạy: uvicorn itlr.api.server:app --host 0.0.0.0 --port 8000  (hoặc python -m itlr.api)
 """
 
 import os
@@ -46,7 +35,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 def _log(msg):
-    """In log an toàn — không bao giờ để lỗi mã hóa console làm chết app startup."""
+    """Log an toàn — không để lỗi mã hóa console làm chết app startup."""
     try:
         print(msg)
     except Exception:
@@ -58,12 +47,9 @@ def _log(msg):
 
 
 def _prewarm_ollama():
-    """Nạp sẵn model Ollama vào RAM (chạy NỀN) -> câu hỏi chatbot ĐẦU TIÊN không bị
-    cold-start ~90s (nguyên nhân hay gây timeout/'báo lỗi' ở câu đầu).
-
-    Warm khi Ollama LÀ backend đang dùng: bỏ qua nếu đã có API key (OpenAI) hoặc
-    USE_OLLAMA bị tắt tường minh. Không cần BẮT BUỘC đặt USE_OLLAMA nữa (khớp _llm_available
-    vốn tự phát hiện Ollama)."""
+    """Nạp sẵn model Ollama vào RAM (chạy nền) để câu hỏi chatbot đầu tiên không bị cold-start
+    ~90s (nguyên nhân hay gây timeout ở câu đầu). Bỏ qua nếu đã có API key OpenAI hoặc
+    USE_OLLAMA bị tắt tường minh — khớp cách _llm_available tự phát hiện Ollama."""
     if os.environ.get("OPENAI_API_KEY"):
         return
     if str(os.environ.get("USE_OLLAMA", "")).lower() in ("0", "false", "no"):
@@ -90,7 +76,7 @@ def _prewarm_ollama():
 
 @asynccontextmanager
 async def lifespan(_app):
-    """Nạp artifacts ngay khi khởi động để lỗi (thiếu artifacts) lộ sớm, request đầu nhanh."""
+    """Nạp artifacts ngay khi khởi động để lỗi thiếu artifacts lộ sớm, request đầu nhanh."""
     try:
         load_engine()
         _log("[OK] Engine sẵn sàng — API tại http://localhost:8000")
@@ -207,11 +193,10 @@ def api_chat(req: ChatReq):
 
 @app.post("/api/chat/stream")
 def api_chat_stream(req: ChatReq):
-    """Trả lời chatbot dạng STREAMING (SSE). Mỗi frame là 1 dòng `data: {json}` rồi dòng trống.
+    """Trả lời chatbot dạng SSE — mỗi frame là 1 dòng `data: {json}` rồi dòng trống.
 
-    Vì sao stream: model local (Ollama) chậm ~30-135s/câu -> nếu chờ cả câu, người dùng thấy
-    "treo" và proxy/Heroku (timeout 30s) trả 503 -> frontend báo lỗi. Stream đẩy chữ ngay khi
-    sinh (byte chảy sớm) nên không treo & không chạm hard-timeout."""
+    Model local (Ollama) chậm ~30-135s/câu; nếu chờ cả câu, proxy/Heroku (timeout 30s) trả
+    503 trước khi xong. Stream đẩy chữ ngay khi sinh nên không chạm hard-timeout."""
     eng = load_engine()
     history = [{"role": m.role, "content": m.content} for m in req.history]
 
@@ -240,10 +225,8 @@ def api_chat_stream(req: ChatReq):
 
 @app.post("/admin/reload")
 def admin_reload():
-    """Nạp lại artifacts NGAY mà KHÔNG cần tắt/mở lại tiến trình.
-
-    Sau khi pipeline cập nhật dữ liệu (scripts/update_data.py) ghi artifacts mới, gọi endpoint này
-    để chatbot/tìm kiếm dùng dữ liệu mới: xóa cache load_engine() rồi nạp lại từ artifacts/*.pkl.
+    """Nạp lại artifacts mà không cần tắt/mở lại tiến trình — gọi sau khi
+    scripts/update_data.py ghi artifacts mới, để chatbot/tìm kiếm dùng dữ liệu mới ngay.
     Dùng bởi `scripts/update_data.py --restart`.
     """
     load_engine.cache_clear()

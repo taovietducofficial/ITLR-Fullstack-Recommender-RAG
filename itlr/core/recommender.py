@@ -180,7 +180,6 @@ def repeat(items, times):
 
 
 def build_field_corpus(items, field):
-    """Build corpus for a specific field with tuned weighting."""
     corpus = []
     for _, row in items.iterrows():
         if field == "title":

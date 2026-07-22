@@ -2,6 +2,9 @@
 #    itlr/chatbot/data/ — đó là glossary nguồn cần commit)
 /var/
 
+# ── Báo cáo/kết quả chạy eval (sinh lại được, chỉ giữ local) ──
+/reports/
+
 # ── Python ──
 __pycache__/
 *.py[cod]
@@ -24,6 +27,10 @@ env/
 # ── Log & rác công cụ (transient, không commit) ──
 *.log
 .playwright-mcp/
+
+# ── Secrets thật (mật khẩu DB, JWT_SECRET...) — chỉ dùng file .example làm mẫu ──
+.env
+web/.env
 
 # ── Override compose CỤC BỘ (cấu hình theo máy, có thể chứa API key) — giữ local ──
 docker-compose.override.yml

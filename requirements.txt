@@ -21,6 +21,9 @@ sentence-transformers
 requests
 beautifulsoup4
 
+# Đọc gold.itlr_fact_interaction từ DataLake lakehouse qua Trino (scripts/data/sync_interactions_from_datalake.py)
+trino
+
 # LLM cho Chatbot (tùy chọn — chỉ cần khi cấu hình API key tương ứng)
 openai
 
