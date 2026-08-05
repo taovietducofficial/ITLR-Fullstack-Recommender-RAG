@@ -36,7 +36,7 @@ dagster-docker
 pydantic == 1.10.10
 # pendulum<3.0
 scikit-learn==1.0.2
-mlflow==2.6.0
+mlflow==3.14.0
 nltk
 nbconvert
 # dagster-webserver[notebook]
